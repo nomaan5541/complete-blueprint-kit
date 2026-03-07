@@ -49,7 +49,7 @@ export default function Schools() {
   const fetchSchools = async () => {
     setLoading(true);
     let query = supabase.from("schools").select("*").order("created_at", { ascending: false });
-    if (statusFilter !== "all") query = query.eq("status", statusFilter);
+    if (statusFilter !== "all") query = query.eq("status", statusFilter as any);
     if (search) query = query.ilike("name", `%${search}%`);
     const { data, error } = await query;
     if (error) toast.error(error.message);

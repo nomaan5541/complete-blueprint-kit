@@ -38,7 +38,7 @@ export default function SchoolDetail() {
   }, [id]);
 
   const updateStatus = async (status: string) => {
-    const { error } = await supabase.from("schools").update({ status }).eq("id", id);
+    const { error } = await supabase.from("schools").update({ status: status as any }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success(`School ${status}`); setSchool((p: any) => ({ ...p, status })); }
   };

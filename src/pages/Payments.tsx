@@ -20,7 +20,7 @@ export default function Payments() {
         .from("payment_history")
         .select("*, schools(name)")
         .order("payment_date", { ascending: false });
-      if (statusFilter !== "all") query = query.eq("status", statusFilter);
+      if (statusFilter !== "all") query = query.eq("status", statusFilter as any);
       const { data } = await query;
       let result = data || [];
       if (search) {

@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School, Upload, X } from "lucide-react";
+import { Loader2, Save, School, Upload, X, MessageSquare } from "lucide-react";
 
 export default function SchoolSettings() {
   const { schoolId } = useSchool();
@@ -24,6 +24,8 @@ export default function SchoolSettings() {
     school_start_time: "09:00", school_end_time: "16:00",
     registration_number: "", receipt_prefix: "RCPT",
   });
+  const [smsForm, setSmsForm] = useState({ msg91_auth_key: "", msg91_sender_id: "", msg91_whatsapp_template_id: "" });
+  const [savingSms, setSavingSms] = useState(false);
   const [grades, setGrades] = useState<any[]>([]);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function SchoolSettings() {
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
       ]);
-      const s = sRes.data;
+      const s = sRes.data as any;
       if (s) {
         setForm({
           name: s.name || "",
@@ -48,7 +50,12 @@ export default function SchoolSettings() {
           school_start_time: s.school_start_time || "09:00",
           school_end_time: s.school_end_time || "16:00",
           registration_number: s.registration_number || "",
-          receipt_prefix: (s as any).receipt_prefix || "RCPT",
+          receipt_prefix: s.receipt_prefix || "RCPT",
+        });
+        setSmsForm({
+          msg91_auth_key: s.msg91_auth_key || "",
+          msg91_sender_id: s.msg91_sender_id || "",
+          msg91_whatsapp_template_id: s.msg91_whatsapp_template_id || "",
         });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);
@@ -112,6 +119,19 @@ export default function SchoolSettings() {
     setSaving(false);
   };
 
+  const saveSmsSettings = async () => {
+    if (!schoolId) return;
+    setSavingSms(true);
+    const { error } = await supabase.from("schools").update({
+      msg91_auth_key: smsForm.msg91_auth_key || null,
+      msg91_sender_id: smsForm.msg91_sender_id || null,
+      msg91_whatsapp_template_id: smsForm.msg91_whatsapp_template_id || null,
+    } as any).eq("id", schoolId);
+    if (error) toast.error(error.message);
+    else toast.success("SMS settings saved");
+    setSavingSms(false);
+  };
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
 
   return (
@@ -125,6 +145,7 @@ export default function SchoolSettings() {
         <TabsList>
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
+          <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -215,6 +236,59 @@ export default function SchoolSettings() {
                   </TableBody>
                 </Table>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sms">
+          <Card>
+            <CardHeader>
+              <CardTitle>SMS & WhatsApp Settings</CardTitle>
+              <CardDescription>Configure MSG91 credentials to send notifications via SMS and WhatsApp to parents and teachers</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                <p className="font-medium mb-1">How to get MSG91 credentials:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Sign up at <span className="font-mono text-primary">msg91.com</span></li>
+                  <li>Go to Dashboard → Settings → Authkey to get your Auth Key</li>
+                  <li>Register a Sender ID (6 characters) under SMS → Sender ID</li>
+                  <li>For WhatsApp, create a template under WhatsApp → Templates</li>
+                </ol>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2 space-y-2">
+                  <Label>MSG91 Auth Key</Label>
+                  <Input
+                    type="password"
+                    value={smsForm.msg91_auth_key}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_auth_key: e.target.value }))}
+                    placeholder="Enter your MSG91 authentication key"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sender ID</Label>
+                  <Input
+                    value={smsForm.msg91_sender_id}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_sender_id: e.target.value.toUpperCase() }))}
+                    placeholder="e.g. SCHOOL"
+                    maxLength={6}
+                  />
+                  <p className="text-xs text-muted-foreground">6-character sender ID registered with MSG91</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>WhatsApp Template ID (optional)</Label>
+                  <Input
+                    value={smsForm.msg91_whatsapp_template_id}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_whatsapp_template_id: e.target.value }))}
+                    placeholder="Template ID from MSG91"
+                  />
+                </div>
+              </div>
+              <Button onClick={saveSmsSettings} disabled={savingSms}>
+                {savingSms ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save SMS Settings
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

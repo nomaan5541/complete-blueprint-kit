@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
+import { TeacherLayout } from "@/components/TeacherLayout";
 import { useSchool } from "@/hooks/useSchool";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -37,6 +38,13 @@ import Notifications from "./pages/school/Notifications";
 import SchoolReports from "./pages/school/SchoolReports";
 import StudentPortal from "./pages/school/StudentPortal";
 
+// Teacher pages
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import TeacherAttendance from "./pages/teacher/TeacherAttendance";
+import TeacherMarks from "./pages/teacher/TeacherMarks";
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherTimetable from "./pages/teacher/TeacherTimetable";
+
 const queryClient = new QueryClient();
 
 function SuperAdminRoutes() {
@@ -63,7 +71,6 @@ function SchoolAdminRoutesWrapper() {
   
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
   
-  // Redirect to setup wizard if not completed
   if (!setupCompleted) {
     return (
       <Routes>
@@ -97,6 +104,21 @@ function SchoolAdminRoutesWrapper() {
   );
 }
 
+function TeacherRoutesWrapper() {
+  return (
+    <TeacherLayout>
+      <Routes>
+        <Route path="/" element={<TeacherDashboard />} />
+        <Route path="/attendance" element={<TeacherAttendance />} />
+        <Route path="/marks" element={<TeacherMarks />} />
+        <Route path="/students" element={<TeacherStudents />} />
+        <Route path="/timetable" element={<TeacherTimetable />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </TeacherLayout>
+  );
+}
+
 function StudentPortalWrapper() {
   return (
     <SchoolAdminLayout>
@@ -118,6 +140,15 @@ function ProtectedRoutes() {
       <Routes>
         <Route path="/student/*" element={<StudentPortalWrapper />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
+      </Routes>
+    );
+  }
+
+  if (role === "teacher") {
+    return (
+      <Routes>
+        <Route path="/teacher/*" element={<TeacherRoutesWrapper />} />
+        <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>
     );
   }

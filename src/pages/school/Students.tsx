@@ -278,7 +278,7 @@ export default function Students() {
                   <TableCell><Badge variant="outline" className={statusColor[s.status] || ""}>{s.status}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setDetailOpen(true); }}><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
                       {!s.user_id && (
                         <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">

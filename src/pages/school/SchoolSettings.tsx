@@ -100,8 +100,9 @@ export default function SchoolSettings() {
       school_start_time: form.school_start_time || null,
       school_end_time: form.school_end_time || null,
       registration_number: form.registration_number || null,
+      receipt_prefix: form.receipt_prefix || "RCPT",
       logo_url: logoUrl,
-    }).eq("id", schoolId);
+    } as any).eq("id", schoolId);
     if (error) toast.error(error.message);
     else {
       toast.success("School settings updated");

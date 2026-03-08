@@ -116,7 +116,7 @@ export default function SchoolDetail() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/schools")}><ArrowLeft className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/schools")}><ArrowLeft className="h-4 w-4" /></Button>
           <div className="flex items-center gap-4">
             {school.logo_url ? (
               <img src={school.logo_url} alt="" className="h-12 w-12 rounded-xl object-cover border" />

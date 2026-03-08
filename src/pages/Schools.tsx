@@ -104,7 +104,7 @@ export default function Schools() {
           <h1 className="text-3xl font-bold">Schools</h1>
           <p className="text-muted-foreground">Manage all registered schools</p>
         </div>
-        <Button onClick={() => navigate("/schools/add")}>
+        <Button onClick={() => navigate("/admin/schools/add")}>
           <Plus className="mr-2 h-4 w-4" /> Add School
         </Button>
       </div>

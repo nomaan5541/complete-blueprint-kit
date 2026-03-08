@@ -270,13 +270,6 @@ export default function ExamManagement() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={examForm.academic_year_id} onValueChange={(v) => setExamForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><Label>Start Date</Label><Input type="date" value={examForm.start_date} onChange={(e) => setExamForm(p => ({ ...p, start_date: e.target.value }))} /></div>
               <div className="space-y-1"><Label>End Date</Label><Input type="date" value={examForm.end_date} onChange={(e) => setExamForm(p => ({ ...p, end_date: e.target.value }))} /></div>

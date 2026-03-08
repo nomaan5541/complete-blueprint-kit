@@ -76,20 +76,20 @@ export default function StudentTransfer() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Student Transfer / Leaving</h1>
-        <p className="text-muted-foreground">Manage student transfers, leaving, and status changes</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Student Transfer / Leaving</h1>
+        <p className="text-muted-foreground text-sm">Manage student transfers, leaving, and status changes</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{students.filter(s => s.status === "active").length}</p><p className="text-xs text-muted-foreground">Active</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-warning">{students.filter(s => s.status === "transferred").length}</p><p className="text-xs text-muted-foreground">Transferred</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-destructive">{students.filter(s => s.status === "left").length}</p><p className="text-xs text-muted-foreground">Left</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-primary">{students.filter(s => s.status === "completed").length}</p><p className="text-xs text-muted-foreground">Completed</p></CardContent></Card>
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+        <Card><CardContent className="pt-4 sm:pt-6 text-center"><p className="text-xl sm:text-2xl font-bold">{students.filter(s => s.status === "active").length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">Active</p></CardContent></Card>
+        <Card><CardContent className="pt-4 sm:pt-6 text-center"><p className="text-xl sm:text-2xl font-bold text-warning">{students.filter(s => s.status === "transferred").length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">Transferred</p></CardContent></Card>
+        <Card><CardContent className="pt-4 sm:pt-6 text-center"><p className="text-xl sm:text-2xl font-bold text-destructive">{students.filter(s => s.status === "left").length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">Left</p></CardContent></Card>
+        <Card><CardContent className="pt-4 sm:pt-6 text-center"><p className="text-xl sm:text-2xl font-bold text-primary">{students.filter(s => s.status === "completed").length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p></CardContent></Card>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Search by name or admission no..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
       </div>

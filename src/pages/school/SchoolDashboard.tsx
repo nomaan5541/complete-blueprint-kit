@@ -4,7 +4,8 @@ import { useSchool } from "@/hooks/useSchool";
 import { StatsCard } from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Users, Calendar, Layers, IndianRupee, ClipboardCheck } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { GraduationCap, Users, Calendar, Layers, IndianRupee, ClipboardCheck, AlertCircle, FileText } from "lucide-react";
 import { format } from "date-fns";
 
 export default function SchoolDashboard() {
@@ -13,6 +14,9 @@ export default function SchoolDashboard() {
   const [todayAttendance, setTodayAttendance] = useState({ present: 0, absent: 0, leave: 0 });
   const [feeStats, setFeeStats] = useState({ totalCollected: 0, thisMonth: 0 });
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
+  const [recentAdmissions, setRecentAdmissions] = useState<any[]>([]);
+  const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
+  const [pendingFeeStudents, setPendingFeeStudents] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +25,7 @@ export default function SchoolDashboard() {
       const today = format(new Date(), "yyyy-MM-dd");
       const monthStart = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd");
 
-      const [studentsRes, teachersRes, classesRes, yearsRes, attRes, feeRes, monthFeeRes, recentRes] = await Promise.all([
+      const [studentsRes, teachersRes, classesRes, yearsRes, attRes, feeRes, monthFeeRes, recentPayRes, recentAdmRes, examsRes] = await Promise.all([
         supabase.from("students").select("id", { count: "exact", head: true }).eq("school_id", schoolId!).eq("status", "active"),
         supabase.from("teachers").select("id", { count: "exact", head: true }).eq("school_id", schoolId!).eq("status", "active"),
         supabase.from("classes").select("id", { count: "exact", head: true }).eq("school_id", schoolId!),
@@ -30,10 +34,13 @@ export default function SchoolDashboard() {
         supabase.from("fee_payments").select("amount").eq("school_id", schoolId!),
         supabase.from("fee_payments").select("amount").eq("school_id", schoolId!).gte("payment_date", monthStart),
         supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name)").eq("school_id", schoolId!).order("payment_date", { ascending: false }).limit(5),
+        supabase.from("students").select("name, admission_number, classes(name), created_at").eq("school_id", schoolId!).eq("status", "active").order("created_at", { ascending: false }).limit(5),
+        supabase.from("exams").select("name, exam_type, start_date, academic_years(name)").eq("school_id", schoolId!).gte("start_date", today).order("start_date").limit(5),
       ]);
 
+      const totalStudents = studentsRes.count ?? 0;
       setStats({
-        students: studentsRes.count ?? 0,
+        students: totalStudents,
         teachers: teachersRes.count ?? 0,
         classes: classesRes.count ?? 0,
         academicYears: yearsRes.count ?? 0,
@@ -49,7 +56,15 @@ export default function SchoolDashboard() {
       const totalCollected = (feeRes.data || []).reduce((sum, p) => sum + Number(p.amount), 0);
       const thisMonth = (monthFeeRes.data || []).reduce((sum, p) => sum + Number(p.amount), 0);
       setFeeStats({ totalCollected, thisMonth });
-      setRecentPayments(recentRes.data || []);
+      setRecentPayments(recentPayRes.data || []);
+      setRecentAdmissions(recentAdmRes.data || []);
+      setUpcomingExams(examsRes.data || []);
+
+      // Students with 0 fee payments = pending (simplified)
+      const { data: paidStudents } = await supabase.from("fee_payments").select("student_id").eq("school_id", schoolId!);
+      const paidStudentIds = new Set((paidStudents || []).map(p => p.student_id));
+      setPendingFeeStudents(Math.max(0, totalStudents - paidStudentIds.size));
+
       setLoading(false);
     }
     fetch();
@@ -66,10 +81,11 @@ export default function SchoolDashboard() {
         <StatsCard title="Active Students" value={loading ? "..." : stats.students} icon={GraduationCap} />
         <StatsCard title="Active Teachers" value={loading ? "..." : stats.teachers} icon={Users} />
         <StatsCard title="Classes" value={loading ? "..." : stats.classes} icon={Layers} />
-        <StatsCard title="Academic Years" value={loading ? "..." : stats.academicYears} icon={Calendar} />
+        <StatsCard title="Pending Fees" value={loading ? "..." : pendingFeeStudents} icon={AlertCircle} description="Students with no payments" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Today's Attendance */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><ClipboardCheck className="h-4 w-4" /> Today's Attendance</CardTitle></CardHeader>
           <CardContent>
@@ -85,6 +101,7 @@ export default function SchoolDashboard() {
           </CardContent>
         </Card>
 
+        {/* Fee Collection */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Fee Collection</CardTitle></CardHeader>
           <CardContent className="space-y-1">
@@ -94,6 +111,28 @@ export default function SchoolDashboard() {
           </CardContent>
         </Card>
 
+        {/* Upcoming Exams */}
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4" /> Upcoming Exams</CardTitle></CardHeader>
+          <CardContent>
+            {upcomingExams.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No upcoming exams</p>
+            ) : (
+              <div className="space-y-2">
+                {upcomingExams.map((e, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="truncate font-medium">{e.name}</span>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{e.start_date}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Recent Payments */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Recent Payments</CardTitle></CardHeader>
           <CardContent>
@@ -102,9 +141,34 @@ export default function SchoolDashboard() {
             ) : (
               <div className="space-y-2">
                 {recentPayments.map(p => (
-                  <div key={p.id} className="flex justify-between text-sm">
-                    <span className="truncate">{p.students?.name}</span>
+                  <div key={p.id} className="flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-medium">{p.students?.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">({p.fee_types?.name})</span>
+                    </div>
                     <span className="font-medium text-primary">₹{Number(p.amount).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recently Admitted Students */}
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Recently Admitted</CardTitle></CardHeader>
+          <CardContent>
+            {recentAdmissions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No recent admissions</p>
+            ) : (
+              <div className="space-y-2">
+                {recentAdmissions.map((s, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-medium">{s.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{s.admission_number}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">{s.classes?.name || "—"}</Badge>
                   </div>
                 ))}
               </div>

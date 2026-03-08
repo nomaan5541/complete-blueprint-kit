@@ -24,7 +24,7 @@ export default function CredentialsTab({ schoolId }: Props) {
     setLoading(true);
     const { data, error } = await supabase
       .from("school_credentials" as any)
-      .select("*")
+      .select("id, school_id, account_type, person_name, email, created_at")
       .eq("school_id", schoolId)
       .order("created_at", { ascending: false });
     if (error) { toast.error("Failed to load credentials"); }

@@ -270,6 +270,10 @@ export default function ExamManagement() {
             <p className="text-center text-muted-foreground py-8">No results found for this selection</p>
           )}
         </TabsContent>
+
+        <TabsContent value="analytics">
+          <ExamAnalytics />
+        </TabsContent>
       </Tabs>
 
       {/* Dialogs */}

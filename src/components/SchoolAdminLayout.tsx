@@ -11,7 +11,7 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
   return (
     <AcademicYearProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full relative">
+        <div className="min-h-screen flex w-full relative overflow-x-hidden max-w-[100vw]">
           <div className="animated-bg" />
           <SchoolAdminSidebar />
           <div className="flex-1 flex flex-col">

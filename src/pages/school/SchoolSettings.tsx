@@ -24,6 +24,8 @@ export default function SchoolSettings() {
     school_start_time: "09:00", school_end_time: "16:00",
     registration_number: "", receipt_prefix: "RCPT",
   });
+  const [smsForm, setSmsForm] = useState({ msg91_auth_key: "", msg91_sender_id: "", msg91_whatsapp_template_id: "" });
+  const [savingSms, setSavingSms] = useState(false);
   const [grades, setGrades] = useState<any[]>([]);
 
   useEffect(() => {

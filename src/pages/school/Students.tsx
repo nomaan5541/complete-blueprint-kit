@@ -360,7 +360,7 @@ export default function Students() {
 
       {/* Add Student Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Add Student</DialogTitle></DialogHeader>
           <StudentFormTabs
             form={form} setForm={setForm}

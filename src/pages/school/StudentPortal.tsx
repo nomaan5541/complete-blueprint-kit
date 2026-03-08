@@ -52,6 +52,7 @@ export default function StudentPortal() {
         stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
         stud.class_id ? supabase.from("exams").select("*, subjects(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("student_exam_attempts" as any).select("*").eq("student_id", stud.id),
+        stud.class_id ? supabase.from("homework" as any).select("*, subjects(name), teachers(name)").eq("class_id", stud.class_id).eq("school_id", prof.school_id).eq("status", "active").order("due_date", { ascending: true }) : Promise.resolve({ data: [] }),
       ]);
 
       setAttendance((results[0] as any).data || []);

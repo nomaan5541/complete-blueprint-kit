@@ -63,6 +63,45 @@ export default function SchoolDetail() {
     else { toast.success(`School ${status}`); setSchool((p: any) => ({ ...p, status })); }
   };
 
+  const handleAssignSubscription = async () => {
+    if (!assignForm.plan_id || !id) return;
+    setSaving(true);
+    try {
+      const plan = plans.find((p: any) => p.id === assignForm.plan_id);
+      const months = parseInt(assignForm.duration_months) || 12;
+      const startDate = new Date();
+      const endDate = addMonths(startDate, months);
+
+      // Deactivate existing subscriptions
+      await supabase.from("subscriptions").update({ is_active: false }).eq("school_id", id).eq("is_active", true);
+
+      const { error } = await supabase.from("subscriptions").insert({
+        school_id: id,
+        plan_id: assignForm.plan_id,
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        payment_amount: parseFloat(assignForm.payment_amount) || plan?.price || 0,
+        payment_status: "paid",
+        is_active: true,
+      });
+      if (error) throw error;
+
+      // Set school status to active
+      await supabase.from("schools").update({ status: "active" as any }).eq("id", id);
+      setSchool((p: any) => ({ ...p, status: "active" }));
+
+      toast.success("Subscription assigned successfully!");
+      setAssignOpen(false);
+      // Refresh subscription data
+      const { data: subData } = await supabase.from("subscriptions").select("*, subscription_plans(*)").eq("school_id", id).eq("is_active", true).maybeSingle();
+      setSubscription(subData);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to assign subscription");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
   if (!school) return <div className="p-10 text-center text-muted-foreground">School not found</div>;
 

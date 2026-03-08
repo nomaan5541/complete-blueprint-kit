@@ -25,6 +25,7 @@ export default function StudentPortal() {
   const [loading, setLoading] = useState(true);
   const [onlineExams, setOnlineExams] = useState<any[]>([]);
   const [attempts, setAttempts] = useState<any[]>([]);
+  const [homeworkList, setHomeworkList] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;

@@ -961,21 +961,42 @@ export type Database = {
           address: string | null
           admission_date: string | null
           admission_number: string
+          alternate_contact: string | null
+          bio: string | null
           blood_group: string | null
+          caste_category: string | null
           city: string | null
           created_at: string
           date_of_birth: string | null
+          elective_subjects: string | null
+          family_annual_income: string | null
           father_name: string | null
+          father_occupation: string | null
           father_phone: string | null
           gender: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          guardian_relation: string | null
           id: string
+          joining_date: string | null
+          medium_of_instruction: string | null
           mother_name: string | null
+          mother_occupation: string | null
           name: string
+          parent_email: string | null
+          pen_number: string | null
+          phone: string | null
           photo_url: string | null
           pincode: string | null
+          previous_class_passed: string | null
+          previous_school: string | null
+          roll_number: string | null
+          scholarship_category: string | null
           school_id: string
+          second_language: string | null
           state: string | null
           status: string
+          tc_number: string | null
           updated_at: string
           user_id: string | null
         }
@@ -983,21 +1004,42 @@ export type Database = {
           address?: string | null
           admission_date?: string | null
           admission_number: string
+          alternate_contact?: string | null
+          bio?: string | null
           blood_group?: string | null
+          caste_category?: string | null
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          elective_subjects?: string | null
+          family_annual_income?: string | null
           father_name?: string | null
+          father_occupation?: string | null
           father_phone?: string | null
           gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relation?: string | null
           id?: string
+          joining_date?: string | null
+          medium_of_instruction?: string | null
           mother_name?: string | null
+          mother_occupation?: string | null
           name: string
+          parent_email?: string | null
+          pen_number?: string | null
+          phone?: string | null
           photo_url?: string | null
           pincode?: string | null
+          previous_class_passed?: string | null
+          previous_school?: string | null
+          roll_number?: string | null
+          scholarship_category?: string | null
           school_id: string
+          second_language?: string | null
           state?: string | null
           status?: string
+          tc_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1005,21 +1047,42 @@ export type Database = {
           address?: string | null
           admission_date?: string | null
           admission_number?: string
+          alternate_contact?: string | null
+          bio?: string | null
           blood_group?: string | null
+          caste_category?: string | null
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          elective_subjects?: string | null
+          family_annual_income?: string | null
           father_name?: string | null
+          father_occupation?: string | null
           father_phone?: string | null
           gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relation?: string | null
           id?: string
+          joining_date?: string | null
+          medium_of_instruction?: string | null
           mother_name?: string | null
+          mother_occupation?: string | null
           name?: string
+          parent_email?: string | null
+          pen_number?: string | null
+          phone?: string | null
           photo_url?: string | null
           pincode?: string | null
+          previous_class_passed?: string | null
+          previous_school?: string | null
+          roll_number?: string | null
+          scholarship_category?: string | null
           school_id?: string
+          second_language?: string | null
           state?: string | null
           status?: string
+          tc_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1039,24 +1102,45 @@ export type Database = {
           address: string | null
           admission_date: string | null
           admission_number: string
+          alternate_contact: string | null
+          bio: string | null
           blood_group: string | null
+          caste_category: string | null
           city: string | null
           class_id: string | null
           created_at: string
           date_of_birth: string | null
+          elective_subjects: string | null
+          family_annual_income: string | null
           father_name: string | null
+          father_occupation: string | null
           father_phone: string | null
           gender: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          guardian_relation: string | null
           id: string
+          joining_date: string | null
+          medium_of_instruction: string | null
           mother_name: string | null
+          mother_occupation: string | null
           name: string
+          parent_email: string | null
+          pen_number: string | null
+          phone: string | null
           photo_url: string | null
           pincode: string | null
+          previous_class_passed: string | null
+          previous_school: string | null
+          roll_number: string | null
+          scholarship_category: string | null
           school_id: string
+          second_language: string | null
           section_id: string | null
           state: string | null
           status: string
           student_master_id: string | null
+          tc_number: string | null
           updated_at: string
           user_id: string | null
         }
@@ -1065,24 +1149,45 @@ export type Database = {
           address?: string | null
           admission_date?: string | null
           admission_number: string
+          alternate_contact?: string | null
+          bio?: string | null
           blood_group?: string | null
+          caste_category?: string | null
           city?: string | null
           class_id?: string | null
           created_at?: string
           date_of_birth?: string | null
+          elective_subjects?: string | null
+          family_annual_income?: string | null
           father_name?: string | null
+          father_occupation?: string | null
           father_phone?: string | null
           gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relation?: string | null
           id?: string
+          joining_date?: string | null
+          medium_of_instruction?: string | null
           mother_name?: string | null
+          mother_occupation?: string | null
           name: string
+          parent_email?: string | null
+          pen_number?: string | null
+          phone?: string | null
           photo_url?: string | null
           pincode?: string | null
+          previous_class_passed?: string | null
+          previous_school?: string | null
+          roll_number?: string | null
+          scholarship_category?: string | null
           school_id: string
+          second_language?: string | null
           section_id?: string | null
           state?: string | null
           status?: string
           student_master_id?: string | null
+          tc_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1091,24 +1196,45 @@ export type Database = {
           address?: string | null
           admission_date?: string | null
           admission_number?: string
+          alternate_contact?: string | null
+          bio?: string | null
           blood_group?: string | null
+          caste_category?: string | null
           city?: string | null
           class_id?: string | null
           created_at?: string
           date_of_birth?: string | null
+          elective_subjects?: string | null
+          family_annual_income?: string | null
           father_name?: string | null
+          father_occupation?: string | null
           father_phone?: string | null
           gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relation?: string | null
           id?: string
+          joining_date?: string | null
+          medium_of_instruction?: string | null
           mother_name?: string | null
+          mother_occupation?: string | null
           name?: string
+          parent_email?: string | null
+          pen_number?: string | null
+          phone?: string | null
           photo_url?: string | null
           pincode?: string | null
+          previous_class_passed?: string | null
+          previous_school?: string | null
+          roll_number?: string | null
+          scholarship_category?: string | null
           school_id?: string
+          second_language?: string | null
           section_id?: string | null
           state?: string | null
           status?: string
           student_master_id?: string | null
+          tc_number?: string | null
           updated_at?: string
           user_id?: string | null
         }

@@ -1,0 +1,48 @@
+
+-- Add new fields to student_master
+ALTER TABLE public.student_master
+  ADD COLUMN IF NOT EXISTS roll_number text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS pen_number text,
+  ADD COLUMN IF NOT EXISTS bio text,
+  ADD COLUMN IF NOT EXISTS medium_of_instruction text,
+  ADD COLUMN IF NOT EXISTS second_language text,
+  ADD COLUMN IF NOT EXISTS previous_school text,
+  ADD COLUMN IF NOT EXISTS previous_class_passed text,
+  ADD COLUMN IF NOT EXISTS tc_number text,
+  ADD COLUMN IF NOT EXISTS joining_date date,
+  ADD COLUMN IF NOT EXISTS elective_subjects text,
+  ADD COLUMN IF NOT EXISTS scholarship_category text,
+  ADD COLUMN IF NOT EXISTS caste_category text,
+  ADD COLUMN IF NOT EXISTS father_occupation text,
+  ADD COLUMN IF NOT EXISTS mother_occupation text,
+  ADD COLUMN IF NOT EXISTS guardian_name text,
+  ADD COLUMN IF NOT EXISTS guardian_relation text,
+  ADD COLUMN IF NOT EXISTS guardian_phone text,
+  ADD COLUMN IF NOT EXISTS alternate_contact text,
+  ADD COLUMN IF NOT EXISTS family_annual_income text,
+  ADD COLUMN IF NOT EXISTS parent_email text;
+
+-- Add same fields to students (yearly record)
+ALTER TABLE public.students
+  ADD COLUMN IF NOT EXISTS roll_number text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS pen_number text,
+  ADD COLUMN IF NOT EXISTS bio text,
+  ADD COLUMN IF NOT EXISTS medium_of_instruction text,
+  ADD COLUMN IF NOT EXISTS second_language text,
+  ADD COLUMN IF NOT EXISTS previous_school text,
+  ADD COLUMN IF NOT EXISTS previous_class_passed text,
+  ADD COLUMN IF NOT EXISTS tc_number text,
+  ADD COLUMN IF NOT EXISTS joining_date date,
+  ADD COLUMN IF NOT EXISTS elective_subjects text,
+  ADD COLUMN IF NOT EXISTS scholarship_category text,
+  ADD COLUMN IF NOT EXISTS caste_category text,
+  ADD COLUMN IF NOT EXISTS father_occupation text,
+  ADD COLUMN IF NOT EXISTS mother_occupation text,
+  ADD COLUMN IF NOT EXISTS guardian_name text,
+  ADD COLUMN IF NOT EXISTS guardian_relation text,
+  ADD COLUMN IF NOT EXISTS guardian_phone text,
+  ADD COLUMN IF NOT EXISTS alternate_contact text,
+  ADD COLUMN IF NOT EXISTS family_annual_income text,
+  ADD COLUMN IF NOT EXISTS parent_email text;

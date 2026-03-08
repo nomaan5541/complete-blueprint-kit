@@ -198,10 +198,25 @@ export default function QuestionBuilder({ exam, open, onOpenChange }: Props) {
                   
                   <div className="space-y-1">
                     <Label className="text-xs flex items-center gap-1">
-                      <ImagePlus className="h-3 w-3" /> Question Image URL (optional)
+                      <ImagePlus className="h-3 w-3" /> Question Image
                     </Label>
-                    <Input placeholder="https://..." value={q.image_url} className="h-8 text-xs"
-                      onChange={e => updateQuestion(qIdx, "image_url", e.target.value)} />
+                    <div className="flex gap-2">
+                      <Input placeholder="URL or upload →" value={q.image_url} className="h-8 text-xs flex-1"
+                        onChange={e => updateQuestion(qIdx, "image_url", e.target.value)} />
+                      <label className="shrink-0 cursor-pointer inline-flex items-center gap-1 px-2 h-8 rounded-md border bg-muted text-xs hover:bg-muted/80">
+                        📷 Upload
+                        <input type="file" accept="image/png,image/jpg,image/jpeg" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const path = `questions/${exam.id}/${Date.now()}_${file.name}`;
+                          const { error } = await supabase.storage.from("exam-images").upload(path, file, { upsert: true });
+                          if (error) { toast.error("Upload failed"); return; }
+                          const { data: urlData } = supabase.storage.from("exam-images").getPublicUrl(path);
+                          updateQuestion(qIdx, "image_url", urlData.publicUrl);
+                          toast.success("Image uploaded");
+                        }} />
+                      </label>
+                    </div>
                   </div>
 
                   {q.image_url && (

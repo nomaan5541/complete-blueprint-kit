@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Trash2, PenLine, FileQuestion, Monitor, BookOpen, Eye } from "lucide-react";
+import { Plus, Trash2, PenLine, FileQuestion, Monitor, BookOpen, Eye, BarChart3 } from "lucide-react";
 import ExamCreateDialog from "@/components/exams/ExamCreateDialog";
 import QuestionBuilder from "@/components/exams/QuestionBuilder";
 import OfflineMarksEntry from "@/components/exams/OfflineMarksEntry";
+import ExamAnalytics from "@/components/exams/ExamAnalytics";
 
 export default function ExamManagement() {
   const { schoolId } = useSchool();

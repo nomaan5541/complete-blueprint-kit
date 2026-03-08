@@ -46,6 +46,7 @@ export default function ExamCreateDialog({ open, onOpenChange, schoolId, academi
       name: form.name.trim(),
       exam_type: form.exam_type,
       academic_year_id: academicYearId,
+      exam_date: form.start_date || null,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       exam_mode: form.exam_mode,

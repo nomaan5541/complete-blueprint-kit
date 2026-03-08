@@ -189,9 +189,21 @@ export default function ExamManagement() {
                           </>
                         )}
                         {mode === "offline" && (
-                          <Button size="sm" variant="outline" onClick={() => setMarksExam(exam)}>
-                            <PenLine className="mr-1 h-3 w-3" /> Enter Marks
-                          </Button>
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => setMarksExam(exam)}>
+                              <PenLine className="mr-1 h-3 w-3" /> Enter Marks
+                            </Button>
+                            {status === "draft" && (
+                              <Button size="sm" variant="default" onClick={() => updateExamStatus(exam.id, "published")}>
+                                Publish
+                              </Button>
+                            )}
+                            {status === "published" && (
+                              <Button size="sm" variant="secondary" onClick={() => updateExamStatus(exam.id, "completed")}>
+                                Complete
+                              </Button>
+                            )}
+                          </>
                         )}
                       </div>
                     </CardContent>

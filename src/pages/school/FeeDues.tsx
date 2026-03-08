@@ -101,13 +101,6 @@ export default function FeeDues() {
 
       <div className="flex gap-4">
         <div className="space-y-1">
-          <Label>Academic Year</Label>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>{academicYears.map(y => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
           <Label>Class</Label>
           <Select value={classFilter} onValueChange={setClassFilter}>
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>

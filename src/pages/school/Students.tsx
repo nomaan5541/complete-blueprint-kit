@@ -298,16 +298,16 @@ export default function Students() {
         </Select>
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="table-responsive rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Adm. No.</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Class</TableHead>
-              <TableHead>Section</TableHead>
-              <TableHead>Father</TableHead>
-              <TableHead>Account</TableHead>
+              <TableHead className="hidden md:table-cell">Class</TableHead>
+              <TableHead className="hidden lg:table-cell">Section</TableHead>
+              <TableHead className="hidden lg:table-cell">Father</TableHead>
+              <TableHead className="hidden sm:table-cell">Account</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -323,11 +323,14 @@ export default function Students() {
                 return (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono text-xs">{getMasterField(s, "admission_number")}</TableCell>
-                    <TableCell className="font-medium">{getMasterField(s, "name")}</TableCell>
-                    <TableCell>{s.classes?.name || "—"}</TableCell>
-                    <TableCell>{s.sections?.name || "—"}</TableCell>
-                    <TableCell>{getMasterField(s, "father_name") || "—"}</TableCell>
                     <TableCell>
+                      <div className="font-medium">{getMasterField(s, "name")}</div>
+                      <div className="text-xs text-muted-foreground md:hidden">{s.classes?.name || "—"}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{s.classes?.name || "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{s.sections?.name || "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{getMasterField(s, "father_name") || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {masterUserId ? (
                         <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
                       ) : (
@@ -340,7 +343,7 @@ export default function Students() {
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
                         {!masterUserId && (
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
+                          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
                             <UserPlus className="h-4 w-4" />
                           </Button>
                         )}

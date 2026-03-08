@@ -107,13 +107,13 @@ export default function SchoolDashboard() {
   }, [schoolId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">School Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your school — {format(new Date(), "dd MMM yyyy")}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">School Dashboard</h1>
+        <p className="text-muted-foreground text-sm">Overview of your school — {format(new Date(), "dd MMM yyyy")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Active Students" value={loading ? "..." : stats.students} icon={GraduationCap} />
         <StatsCard title="Active Teachers" value={loading ? "..." : stats.teachers} icon={Users} />
         <StatsCard title="Classes" value={loading ? "..." : stats.classes} icon={Layers} />

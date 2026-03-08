@@ -106,7 +106,8 @@ export default function StudentPortal() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="marks">Marks</TabsTrigger>
-          <TabsTrigger value="fees">Fees</TabsTrigger>
+          <TabsTrigger value="dues">Fee Dues</TabsTrigger>
+          <TabsTrigger value="fees">Payments</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
           <TabsTrigger value="notices">Notices</TabsTrigger>
         </TabsList>

@@ -122,6 +122,7 @@ export default function StudentPortal() {
           <TabsTrigger value="fees">Payments</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
           <TabsTrigger value="online-exams"><Monitor className="mr-1 h-3 w-3" /> Online Exams</TabsTrigger>
+          <TabsTrigger value="homework"><BookOpen className="mr-1 h-3 w-3" /> Homework</TabsTrigger>
           <TabsTrigger value="notices">Notices</TabsTrigger>
         </TabsList>
 

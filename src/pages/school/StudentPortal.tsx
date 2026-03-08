@@ -41,7 +41,7 @@ export default function StudentPortal() {
       if (!stud) { setLoading(false); return; }
 
       // Fetch all data
-      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes, feeStructRes] = await Promise.all([
+      const results = await Promise.all([
         supabase.from("attendance").select("*").eq("student_id", stud.id).order("date", { ascending: false }).limit(60),
         supabase.from("exam_marks").select("*, subjects(name), exams(name)").eq("student_id", stud.id),
         supabase.from("fee_payments").select("*, fee_types(name)").eq("student_id", stud.id).order("payment_date", { ascending: false }),
@@ -49,21 +49,19 @@ export default function StudentPortal() {
         stud.class_id ? supabase.from("timetable_entries").select("*, subjects(name), teachers(name), timetable_slots(name, start_time, end_time, slot_order, is_break)").eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("timetable_slots").select("*").eq("school_id", prof.school_id).order("slot_order"),
         stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
-        // Online exams for this student's class
         stud.class_id ? supabase.from("exams").select("*, subjects(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("exam_mode" as any, "online").in("status" as any, ["published"]) : Promise.resolve({ data: [] }),
-        // Student's exam attempts
         supabase.from("student_exam_attempts" as any).select("*").eq("student_id", stud.id),
       ]);
 
-      setAttendance(attRes.data || []);
-      setMarks(marksRes.data || []);
-      setFees(feesRes.data || []);
-      setNotifications(notifRes.data || []);
-      setTimetable(ttRes.data || []);
-      setSlots(slotsRes.data || []);
-      setFeeStructures(feeStructRes.data || []);
-      setOnlineExams((examRes as any).data || []);
-      setAttempts((attemptRes as any).data || []);
+      setAttendance((results[0] as any).data || []);
+      setMarks((results[1] as any).data || []);
+      setFees((results[2] as any).data || []);
+      setNotifications((results[3] as any).data || []);
+      setTimetable((results[4] as any).data || []);
+      setSlots((results[5] as any).data || []);
+      setFeeStructures((results[6] as any).data || []);
+      setOnlineExams((results[7] as any).data || []);
+      setAttempts((results[8] as any).data || []);
       setLoading(false);
     }
     fetch();

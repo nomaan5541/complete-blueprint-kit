@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SchoolAdminSidebar } from "@/components/SchoolAdminSidebar";
 import { AcademicYearProvider } from "@/hooks/useAcademicYear";
 import { AcademicYearSwitcher } from "@/components/AcademicYearSwitcher";
+import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 
 export function SchoolAdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
         <div className="min-h-screen flex w-full">
           <SchoolAdminSidebar />
           <div className="flex-1 flex flex-col">
+            <SubscriptionBanner />
             <header className="h-14 flex items-center border-b bg-card px-4 gap-4">
               <SidebarTrigger />
               <AcademicYearSwitcher />

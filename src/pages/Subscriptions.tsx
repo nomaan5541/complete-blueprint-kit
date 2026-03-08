@@ -59,14 +59,16 @@ export default function Subscriptions() {
     });
     if (error) toast.error(error.message);
     else {
-      // Also record payment
+      // Record payment
       await supabase.from("payment_history").insert({
         school_id: assignForm.school_id,
         amount,
         status: "paid",
         notes: `Subscription: ${plan?.name}`,
       });
-      toast.success("Subscription assigned");
+      // Activate school
+      await supabase.from("schools").update({ status: "active" as any }).eq("id", assignForm.school_id);
+      toast.success("Subscription assigned & school activated");
       setAssignOpen(false);
       setAssignForm({ school_id: "", plan_id: "", payment_amount: "" });
       fetchAll();
@@ -81,21 +83,30 @@ export default function Subscriptions() {
     const currentEnd = new Date(sub.end_date);
     const baseDate = isBefore(currentEnd, new Date()) ? new Date() : currentEnd;
     const newEnd = addMonths(baseDate, parseInt(renewMonths));
+    const newEndStr = format(newEnd, "yyyy-MM-dd");
 
     const { error } = await supabase.from("subscriptions").update({
-      end_date: format(newEnd, "yyyy-MM-dd"),
+      end_date: newEndStr,
       payment_status: "paid",
     }).eq("id", renewId);
 
     if (!error) {
+      // Record payment history
       await supabase.from("payment_history").insert({
         school_id: sub.school_id,
         subscription_id: renewId,
         amount: sub.payment_amount,
         status: "paid",
-        notes: `Renewal: +${renewMonths} months`,
+        notes: `Renewal: +${renewMonths} months. Old expiry: ${sub.end_date}. New expiry: ${newEndStr}`,
       });
-      toast.success("Subscription renewed");
+
+      // If school was expired/inactive, reactivate it
+      const isNowValid = new Date(newEndStr) > new Date();
+      if (isNowValid) {
+        await supabase.from("schools").update({ status: "active" as any }).eq("id", sub.school_id);
+      }
+
+      toast.success(`Subscription renewed until ${format(newEnd, "dd MMM yyyy")}`);
       setRenewId(null);
       fetchAll();
     } else toast.error(error.message);
@@ -151,28 +162,32 @@ export default function Subscriptions() {
             ) : subscriptions.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No subscriptions</TableCell></TableRow>
             ) : (
-              subscriptions.map((sub) => (
-                <TableRow key={sub.id}>
-                  <TableCell className="font-medium">{sub.schools?.name || "—"}</TableCell>
-                  <TableCell>{sub.subscription_plans?.name || "—"}</TableCell>
-                  <TableCell>{sub.start_date}</TableCell>
-                  <TableCell>
-                    {sub.end_date}
-                    {isExpiring(sub.end_date) && <Badge variant="outline" className="ml-2 bg-warning/10 text-warning text-xs">Expiring</Badge>}
-                  </TableCell>
-                  <TableCell>₹{Number(sub.payment_amount).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={sub.payment_status === "paid" ? "default" : "secondary"}>
-                      {sub.payment_status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => { setRenewId(sub.id); setRenewMonths("12"); }}>
-                      <RefreshCw className="mr-1 h-3 w-3" /> Renew
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              subscriptions.map((sub) => {
+                const isExpired = isBefore(new Date(sub.end_date), new Date());
+                return (
+                  <TableRow key={sub.id} className={isExpired ? "bg-destructive/5" : ""}>
+                    <TableCell className="font-medium">{sub.schools?.name || "—"}</TableCell>
+                    <TableCell>{sub.subscription_plans?.name || "—"}</TableCell>
+                    <TableCell>{sub.start_date}</TableCell>
+                    <TableCell>
+                      {sub.end_date}
+                      {isExpired && <Badge variant="destructive" className="ml-2 text-xs">Expired</Badge>}
+                      {!isExpired && isExpiring(sub.end_date) && <Badge variant="outline" className="ml-2 bg-warning/10 text-warning text-xs">Expiring Soon</Badge>}
+                    </TableCell>
+                    <TableCell>₹{Number(sub.payment_amount).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={isExpired ? "destructive" : sub.payment_status === "paid" ? "default" : "secondary"}>
+                        {isExpired ? "expired" : sub.payment_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant={isExpired ? "default" : "ghost"} size="sm" onClick={() => { setRenewId(sub.id); setRenewMonths("12"); }}>
+                        <RefreshCw className="mr-1 h-3 w-3" /> {isExpired ? "Renew Now" : "Renew"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -216,23 +231,40 @@ export default function Subscriptions() {
       <Dialog open={!!renewId} onOpenChange={() => setRenewId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Renew Subscription</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Extend by (months)</Label>
-              <Select value={renewMonths} onValueChange={setRenewMonths}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 months</SelectItem>
-                  <SelectItem value="6">6 months</SelectItem>
-                  <SelectItem value="12">12 months</SelectItem>
-                  <SelectItem value="24">24 months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {renewId && (() => {
+            const sub = subscriptions.find((s) => s.id === renewId);
+            const isExpired = sub ? isBefore(new Date(sub.end_date), new Date()) : false;
+            const baseDate = sub ? (isExpired ? new Date() : new Date(sub.end_date)) : new Date();
+            const newEnd = addMonths(baseDate, parseInt(renewMonths));
+            return (
+              <div className="space-y-4">
+                {sub && (
+                  <div className="rounded-lg border bg-muted/30 p-3 space-y-1 text-sm">
+                    <div><span className="text-muted-foreground">School: </span><span className="font-medium">{sub.schools?.name}</span></div>
+                    <div><span className="text-muted-foreground">Plan: </span><span className="font-medium">{sub.subscription_plans?.name}</span></div>
+                    <div><span className="text-muted-foreground">Current Expiry: </span><span className={`font-medium ${isExpired ? "text-destructive" : ""}`}>{sub.end_date} {isExpired && "(Expired)"}</span></div>
+                    <div><span className="text-muted-foreground">New Expiry: </span><span className="font-medium text-primary">{format(newEnd, "dd MMM yyyy")}</span></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label>Extend by</Label>
+                  <Select value={renewMonths} onValueChange={setRenewMonths}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 month</SelectItem>
+                      <SelectItem value="3">3 months</SelectItem>
+                      <SelectItem value="6">6 months</SelectItem>
+                      <SelectItem value="12">12 months (1 year)</SelectItem>
+                      <SelectItem value="24">24 months (2 years)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenewId(null)}>Cancel</Button>
-            <Button onClick={handleRenew} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Renew</Button>
+            <Button onClick={handleRenew} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Renew Subscription</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

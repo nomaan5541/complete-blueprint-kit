@@ -169,6 +169,14 @@ export default function SchoolSettings() {
                 <div className="space-y-2"><Label>Pincode</Label><Input value={form.pincode} onChange={(e) => setForm((p) => ({ ...p, pincode: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>School Start Time</Label><Input type="time" value={form.school_start_time} onChange={(e) => setForm((p) => ({ ...p, school_start_time: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>School End Time</Label><Input type="time" value={form.school_end_time} onChange={(e) => setForm((p) => ({ ...p, school_end_time: e.target.value }))} /></div>
+                <div className="sm:col-span-2 space-y-2">
+                  <Label>Receipt Number Prefix</Label>
+                  <div className="flex items-center gap-3">
+                    <Input value={form.receipt_prefix} onChange={(e) => setForm((p) => ({ ...p, receipt_prefix: e.target.value.toUpperCase() }))} className="w-40" maxLength={10} placeholder="RCPT" />
+                    <span className="text-sm text-muted-foreground">Preview: <Badge variant="outline" className="font-mono">{form.receipt_prefix || "RCPT"}-0001</Badge></span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Used in fee receipts. Counter auto-increments with each payment.</p>
+                </div>
               </div>
               <Button onClick={saveSchool} disabled={saving}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

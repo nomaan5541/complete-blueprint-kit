@@ -21,12 +21,11 @@ interface StudentDue {
 
 export default function FeeDues() {
   const { schoolId } = useSchool();
+  const { selectedYearId } = useAcademicYear();
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [feeStructures, setFeeStructures] = useState<any[]>([]);
   const [feePayments, setFeePayments] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
-  const [selectedYear, setSelectedYear] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 

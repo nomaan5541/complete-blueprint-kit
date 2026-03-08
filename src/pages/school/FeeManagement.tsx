@@ -153,7 +153,7 @@ export default function FeeManagement() {
 
         {/* History Tab */}
         <TabsContent value="history">
-          <div className="rounded-lg border bg-card">
+          <div className="table-responsive rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>

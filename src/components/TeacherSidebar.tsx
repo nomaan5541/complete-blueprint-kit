@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School,
+  LayoutDashboard, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { title: "Dashboard", url: "/teacher", icon: LayoutDashboard },
   { title: "Attendance", url: "/teacher/attendance", icon: ClipboardCheck },
-  { title: "Enter Marks", url: "/teacher/marks", icon: FileText },
+  { title: "My Exams", url: "/teacher/exams", icon: FileText },
+  { title: "Enter Marks", url: "/teacher/marks", icon: PenLine },
+  { title: "Homework", url: "/teacher/homework", icon: BookOpen },
   { title: "My Students", url: "/teacher/students", icon: GraduationCap },
   { title: "Timetable", url: "/teacher/timetable", icon: Clock },
 ];

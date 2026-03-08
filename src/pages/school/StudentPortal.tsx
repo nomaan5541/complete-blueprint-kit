@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle, Monitor, PlayCircle } from "lucide-react";
+import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle, Monitor, PlayCircle, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentPortal() {
@@ -25,6 +25,7 @@ export default function StudentPortal() {
   const [loading, setLoading] = useState(true);
   const [onlineExams, setOnlineExams] = useState<any[]>([]);
   const [attempts, setAttempts] = useState<any[]>([]);
+  const [homeworkList, setHomeworkList] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -51,6 +52,7 @@ export default function StudentPortal() {
         stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
         stud.class_id ? supabase.from("exams").select("*, subjects(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("student_exam_attempts" as any).select("*").eq("student_id", stud.id),
+        stud.class_id ? supabase.from("homework" as any).select("*, subjects(name), teachers(name)").eq("class_id", stud.class_id).eq("school_id", prof.school_id).eq("status", "active").order("due_date", { ascending: true }) : Promise.resolve({ data: [] }),
       ]);
 
       setAttendance((results[0] as any).data || []);
@@ -62,6 +64,7 @@ export default function StudentPortal() {
       setFeeStructures((results[6] as any).data || []);
       setOnlineExams((results[7] as any).data || []);
       setAttempts((results[8] as any).data || []);
+      setHomeworkList((results[9] as any).data || []);
       setLoading(false);
     }
     fetch();
@@ -119,6 +122,7 @@ export default function StudentPortal() {
           <TabsTrigger value="fees">Payments</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
           <TabsTrigger value="online-exams"><Monitor className="mr-1 h-3 w-3" /> Online Exams</TabsTrigger>
+          <TabsTrigger value="homework"><BookOpen className="mr-1 h-3 w-3" /> Homework</TabsTrigger>
           <TabsTrigger value="notices">Notices</TabsTrigger>
         </TabsList>
 
@@ -321,6 +325,38 @@ export default function StudentPortal() {
                             <PlayCircle className="mr-1 h-4 w-4" /> Take Exam
                           </Button>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="homework">
+          <Card>
+            <CardHeader><CardTitle>Homework & Assignments</CardTitle></CardHeader>
+            <CardContent>
+              {homeworkList.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No homework assigned</p>
+              ) : (
+                <div className="space-y-3">
+                  {homeworkList.map((hw: any) => {
+                    const isPast = new Date(hw.due_date) < new Date();
+                    return (
+                      <div key={hw.id} className="p-4 rounded-lg border">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium">{hw.title}</p>
+                            <p className="text-sm text-muted-foreground mt-0.5">{hw.subjects?.name} · by {hw.teachers?.name}</p>
+                            {hw.description && <p className="text-sm text-muted-foreground mt-1">{hw.description}</p>}
+                          </div>
+                          <Badge variant={isPast ? "destructive" : "outline"} className="text-xs shrink-0 ml-2">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {format(new Date(hw.due_date), "dd MMM yyyy")}
+                          </Badge>
+                        </div>
                       </div>
                     );
                   })}

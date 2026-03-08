@@ -57,6 +57,8 @@ import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherMarks from "./pages/teacher/TeacherMarks";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherTimetable from "./pages/teacher/TeacherTimetable";
+import TeacherHomework from "./pages/teacher/TeacherHomework";
+import TeacherExams from "./pages/teacher/TeacherExams";
 
 const queryClient = new QueryClient();
 
@@ -133,7 +135,9 @@ function TeacherRoutesWrapper() {
       <Routes>
         <Route path="/" element={<TeacherDashboard />} />
         <Route path="/attendance" element={<TeacherAttendance />} />
+        <Route path="/exams" element={<TeacherExams />} />
         <Route path="/marks" element={<TeacherMarks />} />
+        <Route path="/homework" element={<TeacherHomework />} />
         <Route path="/students" element={<TeacherStudents />} />
         <Route path="/timetable" element={<TeacherTimetable />} />
         <Route path="*" element={<NotFound />} />

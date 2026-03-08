@@ -5,9 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { Download } from "lucide-react";
+import { exportToCsv } from "@/lib/csvExport";
 
 const COLORS = ["hsl(217, 91%, 50%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)", "hsl(280, 70%, 50%)"];
 
@@ -133,6 +136,11 @@ export default function SchoolReports() {
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("students", students.map(s => ({ name: s.name, class: (s as any).classes?.name, status: s.status, admission_date: s.admission_date })))}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">{totalStudents}</p><p className="text-sm text-muted-foreground">Total Students</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">{activeStudents}</p><p className="text-sm text-muted-foreground">Active Students</p></CardContent></Card>
@@ -174,6 +182,11 @@ export default function SchoolReports() {
         </TabsContent>
 
         <TabsContent value="finance" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("fee-payments", feePayments.map(p => ({ amount: p.amount, date: p.payment_date, type: (p as any).fee_types?.name })))}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">₹{totalCollected.toLocaleString()}</p><p className="text-sm text-muted-foreground">Total Collected</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">₹{totalExpected.toLocaleString()}</p><p className="text-sm text-muted-foreground">Total Expected</p></CardContent></Card>
@@ -197,6 +210,11 @@ export default function SchoolReports() {
         </TabsContent>
 
         <TabsContent value="attendance" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("attendance-summary", [{ total: totalRecords, present: presentCount, absent: absentCount, leave: leaveCount, rate: attendanceRate + "%" }])}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">{attendanceRate}%</p><p className="text-sm text-muted-foreground">Overall Rate</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">{totalRecords}</p><p className="text-sm text-muted-foreground">Total Records</p></CardContent></Card>
@@ -262,7 +280,14 @@ export default function SchoolReports() {
 
         <TabsContent value="teachers" className="space-y-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">Teacher Workload</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Teacher Workload</CardTitle>
+                <Button variant="outline" size="sm" onClick={() => exportToCsv("teacher-workload", teacherWorkload)}>
+                  <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>

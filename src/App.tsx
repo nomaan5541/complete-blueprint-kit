@@ -175,7 +175,8 @@ function StudentPortalWrapper() {
         <Route path="/profile" element={<StudentProfilePage />} />
         <Route path="/attendance" element={<StudentAttendancePage />} />
         <Route path="/results" element={<StudentResultsPage />} />
-        <Route path="/exam" element={<StudentExamTake />} />
+        <Route path="/exam" element={<StudentOnlineExamsPage />} />
+        <Route path="/exam-take" element={<StudentExamTake />} />
         <Route path="/fees" element={<StudentFeesPage />} />
         <Route path="/timetable" element={<StudentTimetablePage />} />
         <Route path="/homework" element={<StudentHomeworkPage />} />

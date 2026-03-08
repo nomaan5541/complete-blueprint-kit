@@ -240,6 +240,7 @@ function AppRoutes() {
       <Route path="/" element={user ? <ProtectedRedirect /> : <LandingPage />} />
       <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/install" element={<InstallApp />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );

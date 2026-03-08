@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
+import { useSchool } from "@/hooks/useSchool";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
@@ -30,6 +31,11 @@ import FeeManagement from "./pages/school/FeeManagement";
 import Attendance from "./pages/school/Attendance";
 import ExamManagement from "./pages/school/ExamManagement";
 import StudentPromotion from "./pages/school/StudentPromotion";
+import SetupWizard from "./pages/school/SetupWizard";
+import Timetable from "./pages/school/Timetable";
+import Notifications from "./pages/school/Notifications";
+import SchoolReports from "./pages/school/SchoolReports";
+import StudentPortal from "./pages/school/StudentPortal";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +58,21 @@ function SuperAdminRoutes() {
   );
 }
 
-function SchoolAdminRoutes() {
+function SchoolAdminRoutesWrapper() {
+  const { setupCompleted, loading } = useSchool();
+  
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
+  
+  // Redirect to setup wizard if not completed
+  if (!setupCompleted) {
+    return (
+      <Routes>
+        <Route path="/setup" element={<SetupWizard />} />
+        <Route path="*" element={<Navigate to="/school/setup" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <SchoolAdminLayout>
       <Routes>
@@ -66,8 +86,23 @@ function SchoolAdminRoutes() {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/exams" element={<ExamManagement />} />
         <Route path="/fees" element={<FeeManagement />} />
+        <Route path="/timetable" element={<Timetable />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/reports" element={<SchoolReports />} />
         <Route path="/settings" element={<SchoolSettings />} />
+        <Route path="/setup" element={<SetupWizard />} />
         <Route path="*" element={<NotFound />} />
+      </Routes>
+    </SchoolAdminLayout>
+  );
+}
+
+function StudentPortalWrapper() {
+  return (
+    <SchoolAdminLayout>
+      <Routes>
+        <Route path="/" element={<StudentPortal />} />
+        <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </SchoolAdminLayout>
   );
@@ -78,15 +113,25 @@ function ProtectedRoutes() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
+  if (role === "student") {
+    return (
+      <Routes>
+        <Route path="/student/*" element={<StudentPortalWrapper />} />
+        <Route path="*" element={<Navigate to="/student" replace />} />
+      </Routes>
+    );
+  }
+
   if (role === "school_admin") {
     return (
       <Routes>
-        <Route path="/school/*" element={<SchoolAdminRoutes />} />
+        <Route path="/school/*" element={<SchoolAdminRoutesWrapper />} />
         <Route path="*" element={<Navigate to="/school" replace />} />
       </Routes>
     );
   }
 
+  // Default: super_admin
   return (
     <Routes>
       <Route path="/*" element={<SuperAdminRoutes />} />

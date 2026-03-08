@@ -490,6 +490,92 @@ export type Database = {
           },
         ]
       }
+      grade_systems: {
+        Row: {
+          created_at: string
+          grade: string
+          id: string
+          max_marks: number
+          min_marks: number
+          school_id: string
+        }
+        Insert: {
+          created_at?: string
+          grade: string
+          id?: string
+          max_marks: number
+          min_marks: number
+          school_id: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string
+          id?: string
+          max_marks?: number
+          min_marks?: number
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grade_systems_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          school_id: string
+          target_class_id: string | null
+          target_role: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          school_id: string
+          target_class_id?: string | null
+          target_role?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          school_id?: string
+          target_class_id?: string | null
+          target_role?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_target_class_id_fkey"
+            columns: ["target_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_history: {
         Row: {
           amount: number
@@ -597,10 +683,15 @@ export type Database = {
           name: string
           phone: string | null
           pincode: string | null
+          principal_name: string | null
           registration_number: string | null
+          school_end_time: string | null
+          school_start_time: string | null
+          setup_completed: boolean
           state: string | null
           status: Database["public"]["Enums"]["school_status"]
           updated_at: string
+          website: string | null
         }
         Insert: {
           address?: string | null
@@ -613,10 +704,15 @@ export type Database = {
           name: string
           phone?: string | null
           pincode?: string | null
+          principal_name?: string | null
           registration_number?: string | null
+          school_end_time?: string | null
+          school_start_time?: string | null
+          setup_completed?: boolean
           state?: string | null
           status?: Database["public"]["Enums"]["school_status"]
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address?: string | null
@@ -629,10 +725,15 @@ export type Database = {
           name?: string
           phone?: string | null
           pincode?: string | null
+          principal_name?: string | null
           registration_number?: string | null
+          school_end_time?: string | null
+          school_start_time?: string | null
+          setup_completed?: boolean
           state?: string | null
           status?: Database["public"]["Enums"]["school_status"]
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -699,6 +800,7 @@ export type Database = {
           state: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           academic_year_id: string
@@ -723,6 +825,7 @@ export type Database = {
           state?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           academic_year_id?: string
@@ -747,6 +850,7 @@ export type Database = {
           state?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1029,6 +1133,136 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teachers_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_entries: {
+        Row: {
+          academic_year_id: string
+          class_id: string
+          created_at: string
+          day_of_week: number
+          id: string
+          school_id: string
+          section_id: string | null
+          slot_id: string
+          subject_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          academic_year_id: string
+          class_id: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          school_id: string
+          section_id?: string | null
+          slot_id: string
+          subject_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          academic_year_id?: string
+          class_id?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          school_id?: string
+          section_id?: string | null
+          slot_id?: string
+          subject_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_entries_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_slots: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_break: boolean
+          name: string
+          school_id: string
+          slot_order: number
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_break?: boolean
+          name: string
+          school_id: string
+          slot_order?: number
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_break?: boolean
+          name?: string
+          school_id?: string
+          slot_order?: number
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slots_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"

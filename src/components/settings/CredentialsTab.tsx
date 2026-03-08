@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Search, Trash2, Loader2 } from "lucide-react";
+import { Search, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -16,9 +16,9 @@ interface Props {
 export default function CredentialsTab({ schoolId }: Props) {
   const [credentials, setCredentials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "teacher" | "student">("all");
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   const fetchCredentials = async () => {
     setLoading(true);
@@ -34,14 +34,14 @@ export default function CredentialsTab({ schoolId }: Props) {
 
   useEffect(() => { fetchCredentials(); }, [schoolId]);
 
-  const togglePassword = (id: string) => {
-    setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("school_credentials" as any).delete().eq("id", id);
-    if (error) toast.error("Failed to delete");
-    else { toast.success("Credential removed"); fetchCredentials(); }
+  const handlePasswordReset = async (email: string, id: string) => {
+    setResettingId(id);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) toast.error("Failed to send reset email: " + error.message);
+    else toast.success(`Password reset email sent to ${email}`);
+    setResettingId(null);
   };
 
   const filtered = credentials.filter((c: any) => {
@@ -56,9 +56,9 @@ export default function CredentialsTab({ schoolId }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Saved Login Credentials</CardTitle>
+        <CardTitle>User Accounts</CardTitle>
         <CardDescription>
-          View login credentials for teacher and student accounts created through the admin panel.
+          View accounts created through the admin panel. Use "Send Reset" to help users reset their password.
           Total: {credentials.length} ({teacherCount} teachers, {studentCount} students)
         </CardDescription>
       </CardHeader>
@@ -82,7 +82,6 @@ export default function CredentialsTab({ schoolId }: Props) {
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Password</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -90,14 +89,14 @@ export default function CredentialsTab({ schoolId }: Props) {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                    No saved credentials found
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                    No accounts found
                   </TableCell>
                 </TableRow>
               ) : (
@@ -110,22 +109,22 @@ export default function CredentialsTab({ schoolId }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{c.email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm">
-                          {visiblePasswords[c.id] ? c.password_plain : "••••••••"}
-                        </span>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePassword(c.id)}>
-                          {visiblePasswords[c.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        </Button>
-                      </div>
-                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(c.created_at), "dd MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive h-7 w-7" onClick={() => handleDelete(c.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePasswordReset(c.email, c.id)}
+                        disabled={resettingId === c.id}
+                      >
+                        {resettingId === c.id ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <KeyRound className="mr-1 h-3 w-3" />
+                        )}
+                        Send Reset
                       </Button>
                     </TableCell>
                   </TableRow>

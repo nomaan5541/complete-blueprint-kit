@@ -56,18 +56,18 @@ export default function ExamManagement() {
   useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   const handleCreateExam = async () => {
-    if (!examForm.name.trim() || !examForm.academic_year_id) { toast.error("Name and academic year are required"); return; }
+    if (!examForm.name.trim() || !selectedYearId) { toast.error("Name is required"); return; }
     setSaving(true);
     const { error } = await supabase.from("exams").insert({
       school_id: schoolId!,
       name: examForm.name.trim(),
       exam_type: examForm.exam_type,
-      academic_year_id: examForm.academic_year_id,
+      academic_year_id: selectedYearId,
       start_date: examForm.start_date || null,
       end_date: examForm.end_date || null,
     });
     if (error) toast.error(error.message);
-    else { toast.success("Exam created"); setExamOpen(false); setExamForm({ name: "", exam_type: "exam", academic_year_id: "", start_date: "", end_date: "" }); fetchAll(); }
+    else { toast.success("Exam created"); setExamOpen(false); setExamForm({ name: "", exam_type: "exam", start_date: "", end_date: "" }); fetchAll(); }
     setSaving(false);
   };
 

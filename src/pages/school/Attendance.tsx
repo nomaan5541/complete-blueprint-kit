@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAcademicYear } from "@/hooks/useAcademicYear";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,16 +26,15 @@ interface StudentAttendance {
 
 export default function Attendance() {
   const { schoolId } = useSchool();
+  const { selectedYearId } = useAcademicYear();
   const { user } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [studentAttendance, setStudentAttendance] = useState<StudentAttendance[]>([]);
   const [attendanceLoaded, setAttendanceLoaded] = useState(false);
@@ -42,15 +42,12 @@ export default function Attendance() {
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [cRes, sRes, yRes] = await Promise.all([
+      const [cRes, sRes] = await Promise.all([
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
         supabase.from("sections").select("*").eq("school_id", schoolId!),
-        supabase.from("academic_years").select("*").eq("school_id", schoolId!).eq("status", "active"),
       ]);
       setClasses(cRes.data || []);
       setSections(sRes.data || []);
-      setAcademicYears(yRes.data || []);
-      if (yRes.data && yRes.data.length > 0) setSelectedYear(yRes.data[0].id);
       setLoading(false);
     }
     fetch();
@@ -59,8 +56,8 @@ export default function Attendance() {
   const filteredSections = sections.filter((s) => s.class_id === selectedClass);
 
   const loadAttendance = async () => {
-    if (!selectedClass || !selectedYear || !selectedDate || !schoolId) {
-      toast.error("Select class, academic year, and date"); return;
+    if (!selectedClass || !selectedYearId || !selectedDate || !schoolId) {
+      toast.error("Select class and date"); return;
     }
     setAttendanceLoaded(false);
 
@@ -96,7 +93,7 @@ export default function Attendance() {
   };
 
   const saveAttendance = async () => {
-    if (!schoolId || !selectedClass || !selectedYear) return;
+    if (!schoolId || !selectedClass || !selectedYearId) return;
     setSaving(true);
 
     const toInsert = studentAttendance.filter((s) => !s.existingId).map((s) => ({
@@ -104,7 +101,7 @@ export default function Attendance() {
       student_id: s.studentId,
       class_id: selectedClass,
       section_id: selectedSection || null,
-      academic_year_id: selectedYear,
+      academic_year_id: selectedYearId,
       date: selectedDate,
       status: s.status,
       marked_by: user?.id,
@@ -148,13 +145,6 @@ export default function Attendance() {
             <div className="space-y-1">
               <Label>Date</Label>
               <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
-            </div>
-            <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-              </Select>
             </div>
             <div className="space-y-1">
               <Label>Class</Label>

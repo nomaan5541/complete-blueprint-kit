@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAcademicYear } from "@/hooks/useAcademicYear";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +16,11 @@ import { Plus, Loader2, Trash2, PenLine } from "lucide-react";
 
 export default function ExamManagement() {
   const { schoolId } = useSchool();
+  const { academicYears, selectedYearId } = useAcademicYear();
   const [exams, setExams] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [marks, setMarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,41 +35,39 @@ export default function ExamManagement() {
   const [resultExamId, setResultExamId] = useState("");
   const [resultClassId, setResultClassId] = useState("");
 
-  const [examForm, setExamForm] = useState({ name: "", exam_type: "exam", academic_year_id: "", start_date: "", end_date: "" });
+  const [examForm, setExamForm] = useState({ name: "", exam_type: "exam", start_date: "", end_date: "" });
 
   const fetchAll = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !selectedYearId) return;
     setLoading(true);
-    const [eRes, cRes, sRes, stRes, yRes] = await Promise.all([
-      supabase.from("exams").select("*, academic_years(name)").eq("school_id", schoolId).order("created_at", { ascending: false }),
+    const [eRes, cRes, sRes, stRes] = await Promise.all([
+      supabase.from("exams").select("*, academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("created_at", { ascending: false }),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("subjects").select("*").eq("school_id", schoolId).order("name"),
-      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("status", "active").order("name"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
+      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setExams(eRes.data || []);
     setClasses(cRes.data || []);
     setSubjects(sRes.data || []);
     setStudents(stRes.data || []);
-    setAcademicYears(yRes.data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [schoolId]);
+  useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   const handleCreateExam = async () => {
-    if (!examForm.name.trim() || !examForm.academic_year_id) { toast.error("Name and academic year are required"); return; }
+    if (!examForm.name.trim() || !selectedYearId) { toast.error("Name is required"); return; }
     setSaving(true);
     const { error } = await supabase.from("exams").insert({
       school_id: schoolId!,
       name: examForm.name.trim(),
       exam_type: examForm.exam_type,
-      academic_year_id: examForm.academic_year_id,
+      academic_year_id: selectedYearId,
       start_date: examForm.start_date || null,
       end_date: examForm.end_date || null,
     });
     if (error) toast.error(error.message);
-    else { toast.success("Exam created"); setExamOpen(false); setExamForm({ name: "", exam_type: "exam", academic_year_id: "", start_date: "", end_date: "" }); fetchAll(); }
+    else { toast.success("Exam created"); setExamOpen(false); setExamForm({ name: "", exam_type: "exam", start_date: "", end_date: "" }); fetchAll(); }
     setSaving(false);
   };
 
@@ -269,13 +268,6 @@ export default function ExamManagement() {
                   <SelectItem value="final">Final Exam</SelectItem>
                   <SelectItem value="exam">Exam</SelectItem>
                 </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={examForm.academic_year_id} onValueChange={(v) => setExamForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">

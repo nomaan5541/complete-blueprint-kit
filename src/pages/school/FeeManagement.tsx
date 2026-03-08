@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAcademicYear } from "@/hooks/useAcademicYear";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,11 +17,11 @@ import { format } from "date-fns";
 
 export default function FeeManagement() {
   const { schoolId } = useSchool();
+  const { academicYears, selectedYearId } = useAcademicYear();
   const [feeTypes, setFeeTypes] = useState<any[]>([]);
   const [structures, setStructures] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,30 +36,28 @@ export default function FeeManagement() {
   // Forms
   const [feeTypeName, setFeeTypeName] = useState("");
   const [feeTypeDesc, setFeeTypeDesc] = useState("");
-  const [structForm, setStructForm] = useState({ academic_year_id: "", class_id: "", fee_type_id: "", amount: "" });
-  const [collectForm, setCollectForm] = useState({ student_id: "", academic_year_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
+  const [structForm, setStructForm] = useState({ class_id: "", fee_type_id: "", amount: "" });
+  const [collectForm, setCollectForm] = useState({ student_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
 
   const fetchAll = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !selectedYearId) return;
     setLoading(true);
-    const [ftRes, fsRes, fpRes, cRes, yRes, sRes] = await Promise.all([
+    const [ftRes, fsRes, fpRes, cRes, sRes] = await Promise.all([
       supabase.from("fee_types").select("*").eq("school_id", schoolId).order("name"),
-      supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId),
-      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).order("payment_date", { ascending: false }).limit(100),
+      supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
+      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
-      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("status", "active").order("name"),
+      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setFeeTypes(ftRes.data || []);
     setStructures(fsRes.data || []);
     setPayments(fpRes.data || []);
     setClasses(cRes.data || []);
-    setAcademicYears(yRes.data || []);
     setStudents(sRes.data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [schoolId]);
+  useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   const handleAddFeeType = async () => {
     if (!feeTypeName.trim()) { toast.error("Name is required"); return; }
@@ -70,24 +69,24 @@ export default function FeeManagement() {
   };
 
   const handleAddStructure = async () => {
-    if (!structForm.academic_year_id || !structForm.class_id || !structForm.fee_type_id || !structForm.amount) {
+    if (!selectedYearId || !structForm.class_id || !structForm.fee_type_id || !structForm.amount) {
       toast.error("All fields are required"); return;
     }
     setSaving(true);
     const { error } = await supabase.from("fee_structures").insert({
       school_id: schoolId!,
-      academic_year_id: structForm.academic_year_id,
+      academic_year_id: selectedYearId,
       class_id: structForm.class_id,
       fee_type_id: structForm.fee_type_id,
       amount: parseFloat(structForm.amount),
     });
     if (error) toast.error(error.message);
-    else { toast.success("Fee structure added"); setStructureOpen(false); setStructForm({ academic_year_id: "", class_id: "", fee_type_id: "", amount: "" }); fetchAll(); }
+    else { toast.success("Fee structure added"); setStructureOpen(false); setStructForm({ class_id: "", fee_type_id: "", amount: "" }); fetchAll(); }
     setSaving(false);
   };
 
   const handleCollect = async () => {
-    if (!collectForm.student_id || !collectForm.academic_year_id || !collectForm.fee_type_id || !collectForm.amount) {
+    if (!collectForm.student_id || !selectedYearId || !collectForm.fee_type_id || !collectForm.amount) {
       toast.error("All fields are required"); return;
     }
     setSaving(true);
@@ -95,7 +94,7 @@ export default function FeeManagement() {
     const { data, error } = await supabase.from("fee_payments").insert({
       school_id: schoolId!,
       student_id: collectForm.student_id,
-      academic_year_id: collectForm.academic_year_id,
+      academic_year_id: selectedYearId,
       fee_type_id: collectForm.fee_type_id,
       amount: parseFloat(collectForm.amount),
       payment_mode: collectForm.payment_mode,
@@ -106,7 +105,7 @@ export default function FeeManagement() {
     else {
       toast.success("Payment collected");
       setCollectOpen(false);
-      setCollectForm({ student_id: "", academic_year_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
+      setCollectForm({ student_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
       setSelectedPayment(data);
       setReceiptOpen(true);
       fetchAll();
@@ -262,13 +261,6 @@ export default function FeeManagement() {
           <DialogHeader><DialogTitle>Add Fee Structure</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={structForm.academic_year_id} onValueChange={(v) => setStructForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
               <Label>Class</Label>
               <Select value={structForm.class_id} onValueChange={(v) => setStructForm(p => ({ ...p, class_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
@@ -301,13 +293,6 @@ export default function FeeManagement() {
               <Select value={collectForm.student_id} onValueChange={(v) => setCollectForm(p => ({ ...p, student_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select student" /></SelectTrigger>
                 <SelectContent>{students.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.admission_number})</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={collectForm.academic_year_id} onValueChange={(v) => setCollectForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-1">

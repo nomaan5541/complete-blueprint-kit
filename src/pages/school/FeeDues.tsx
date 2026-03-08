@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAcademicYear } from "@/hooks/useAcademicYear";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -20,42 +21,38 @@ interface StudentDue {
 
 export default function FeeDues() {
   const { schoolId } = useSchool();
+  const { selectedYearId } = useAcademicYear();
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [feeStructures, setFeeStructures] = useState<any[]>([]);
   const [feePayments, setFeePayments] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
-  const [selectedYear, setSelectedYear] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, cRes, yRes] = await Promise.all([
+      const [sRes, cRes] = await Promise.all([
         supabase.from("students").select("id, name, admission_number, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
-        supabase.from("academic_years").select("*").eq("school_id", schoolId!).eq("status", "active"),
       ]);
       setStudents(sRes.data || []);
       setClasses(cRes.data || []);
-      setAcademicYears(yRes.data || []);
-      if (yRes.data?.[0]) setSelectedYear(yRes.data[0].id);
       setLoading(false);
     }
     fetch();
   }, [schoolId]);
 
   useEffect(() => {
-    if (!schoolId || !selectedYear) return;
+    if (!schoolId || !selectedYearId) return;
     Promise.all([
-      supabase.from("fee_structures").select("*").eq("school_id", schoolId).eq("academic_year_id", selectedYear),
-      supabase.from("fee_payments").select("student_id, amount").eq("school_id", schoolId).eq("academic_year_id", selectedYear),
+      supabase.from("fee_structures").select("*").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
+      supabase.from("fee_payments").select("student_id, amount").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
     ]).then(([fsRes, fpRes]) => {
       setFeeStructures(fsRes.data || []);
       setFeePayments(fpRes.data || []);
     });
-  }, [schoolId, selectedYear]);
+  }, [schoolId, selectedYearId]);
 
   // Calculate dues per student
   const studentDues: StudentDue[] = students.map(s => {
@@ -103,13 +100,6 @@ export default function FeeDues() {
       </div>
 
       <div className="flex gap-4">
-        <div className="space-y-1">
-          <Label>Academic Year</Label>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>{academicYears.map(y => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
         <div className="space-y-1">
           <Label>Class</Label>
           <Select value={classFilter} onValueChange={setClassFilter}>

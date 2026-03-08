@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAcademicYear } from "@/hooks/useAcademicYear";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,19 +18,18 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 
 export default function Timetable() {
   const { schoolId } = useSchool();
+  const { selectedYearId } = useAcademicYear();
   const [slots, setSlots] = useState<any[]>([]);
   const [entries, setEntries] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
   const [slotOpen, setSlotOpen] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
   const [slotForm, setSlotForm] = useState({ name: "", start_time: "", end_time: "", is_break: false });
@@ -38,36 +38,33 @@ export default function Timetable() {
   const fetchAll = async () => {
     if (!schoolId) return;
     setLoading(true);
-    const [slotsRes, cRes, secRes, subRes, tRes, yRes] = await Promise.all([
+    const [slotsRes, cRes, secRes, subRes, tRes] = await Promise.all([
       supabase.from("timetable_slots").select("*").eq("school_id", schoolId).order("slot_order"),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("sections").select("*").eq("school_id", schoolId),
       supabase.from("subjects").select("*").eq("school_id", schoolId).order("name"),
       supabase.from("teachers").select("*").eq("school_id", schoolId).eq("status", "active").order("name"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).eq("status", "active"),
     ]);
     setSlots(slotsRes.data || []);
     setClasses(cRes.data || []);
     setSections(secRes.data || []);
     setSubjects(subRes.data || []);
     setTeachers(tRes.data || []);
-    setAcademicYears(yRes.data || []);
-    if (yRes.data && yRes.data.length > 0) setSelectedYear(yRes.data[0].id);
     setLoading(false);
   };
 
   useEffect(() => { fetchAll(); }, [schoolId]);
 
   const loadEntries = async () => {
-    if (!selectedClass || !selectedYear || !schoolId) return;
+    if (!selectedClass || !selectedYearId || !schoolId) return;
     let query = supabase.from("timetable_entries").select("*, subjects(name), teachers(name)")
-      .eq("school_id", schoolId).eq("class_id", selectedClass).eq("academic_year_id", selectedYear);
+      .eq("school_id", schoolId).eq("class_id", selectedClass).eq("academic_year_id", selectedYearId);
     if (selectedSection) query = query.eq("section_id", selectedSection);
     const { data } = await query;
     setEntries(data || []);
   };
 
-  useEffect(() => { if (selectedClass && selectedYear) loadEntries(); }, [selectedClass, selectedSection, selectedYear]);
+  useEffect(() => { if (selectedClass && selectedYearId) loadEntries(); }, [selectedClass, selectedSection, selectedYearId]);
 
   const handleAddSlot = async () => {
     if (!slotForm.name || !slotForm.start_time || !slotForm.end_time) { toast.error("All fields required"); return; }
@@ -86,11 +83,11 @@ export default function Timetable() {
   };
 
   const handleAddEntry = async () => {
-    if (!entryForm.slot_id || !selectedClass || !selectedYear) { toast.error("Select class and fill all fields"); return; }
+    if (!entryForm.slot_id || !selectedClass || !selectedYearId) { toast.error("Select class and fill all fields"); return; }
     setSaving(true);
     const { error } = await supabase.from("timetable_entries").insert({
       school_id: schoolId!,
-      academic_year_id: selectedYear,
+      academic_year_id: selectedYearId,
       class_id: selectedClass,
       section_id: selectedSection || null,
       slot_id: entryForm.slot_id,

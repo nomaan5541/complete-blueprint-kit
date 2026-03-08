@@ -9,6 +9,7 @@ import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import { TeacherLayout } from "@/components/TeacherLayout";
 import { useSchool } from "@/hooks/useSchool";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
 import AddSchool from "./pages/AddSchool";
@@ -176,6 +177,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );

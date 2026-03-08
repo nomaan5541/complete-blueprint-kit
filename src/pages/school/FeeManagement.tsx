@@ -91,7 +91,12 @@ export default function FeeManagement() {
       toast.error("All fields are required"); return;
     }
     setSaving(true);
-    const receiptNum = `RCP-${Date.now().toString().slice(-8)}`;
+
+    // Generate receipt number using DB function (atomic increment)
+    const { data: rpcData, error: rpcError } = await supabase.rpc("generate_receipt_number", { p_school_id: schoolId! });
+    if (rpcError) { toast.error("Failed to generate receipt number"); setSaving(false); return; }
+    const receiptNum = rpcData as string;
+
     const { data, error } = await supabase.from("fee_payments").insert({
       school_id: schoolId!,
       student_id: collectForm.student_id,

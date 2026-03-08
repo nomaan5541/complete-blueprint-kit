@@ -9,19 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, ArrowLeft, Check, GraduationCap } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Check, GraduationCap, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const TELANGANA_SUBJECTS = [
-  "Telugu", "Hindi", "English", "Mathematics", "General Science",
-  "Social Studies", "Computer", "Physical Education", "Drawing",
-];
-
-const DEFAULT_CLASSES = [
-  "Nursery", "LKG", "UKG",
-  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
-];
 
 const DEFAULT_GRADES = [
   { min: 90, max: 100, grade: "A+" },
@@ -32,13 +21,6 @@ const DEFAULT_GRADES = [
   { min: 40, max: 49, grade: "D" },
   { min: 0, max: 39, grade: "F" },
 ];
-
-interface ClassConfig {
-  name: string;
-  sections: string;
-  subjects: Set<string>;
-  customSubjects: string[];
-}
 
 export default function SetupWizard() {
   const { schoolId } = useSchool();
@@ -56,17 +38,14 @@ export default function SetupWizard() {
   // Step 2: Academic Year
   const [yearInfo, setYearInfo] = useState({ name: "2025-2026", start_date: "2025-06-01", end_date: "2026-04-30" });
 
-  // Step 3: Classes selection
-  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
+  // Step 3: Configure sections per auto-seeded class
+  const [autoClasses, setAutoClasses] = useState<any[]>([]);
+  const [classSections, setClassSections] = useState<Record<string, string>>({});
 
-  // Step 4: Per-class sections & subjects
-  const [classConfigs, setClassConfigs] = useState<Record<string, ClassConfig>>({});
-  const [customSubjectInput, setCustomSubjectInput] = useState<Record<string, string>>({});
-
-  // Step 5: Grade System
+  // Step 4: Grade System
   const [grades, setGrades] = useState(DEFAULT_GRADES);
 
-  // Step 6: Fee Structure (optional)
+  // Step 5: Fee Structure (optional)
   const [setupFees, setSetupFees] = useState(false);
   const [defaultFeeTypes, setDefaultFeeTypes] = useState([
     { name: "Admission Fee", amount: "" },
@@ -75,89 +54,37 @@ export default function SetupWizard() {
     { name: "Exam Fee", amount: "" },
   ]);
 
-  // Load school info
+  // Auto-seeded data info
+  const [autoSubjects, setAutoSubjects] = useState<any[]>([]);
+  const [autoRoles, setAutoRoles] = useState<any[]>([]);
+
+  // Load school info + auto-seeded data
   useEffect(() => {
     if (!schoolId) return;
-    supabase.from("schools").select("*").eq("id", schoolId).single().then(({ data }) => {
-      if (data) {
+    Promise.all([
+      supabase.from("schools").select("*").eq("id", schoolId).single(),
+      supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
+      supabase.from("subjects").select("*").eq("school_id", schoolId),
+      supabase.from("school_roles").select("*").eq("school_id", schoolId),
+    ]).then(([schoolRes, classRes, subRes, roleRes]) => {
+      if (schoolRes.data) {
         setSchoolInfo({
-          name: data.name || "",
-          principal_name: data.principal_name || "",
-          website: data.website || "",
-          school_start_time: data.school_start_time || "09:00",
-          school_end_time: data.school_end_time || "16:00",
+          name: schoolRes.data.name || "",
+          principal_name: schoolRes.data.principal_name || "",
+          website: schoolRes.data.website || "",
+          school_start_time: schoolRes.data.school_start_time || "09:00",
+          school_end_time: schoolRes.data.school_end_time || "16:00",
         });
       }
+      const classes = classRes.data || [];
+      setAutoClasses(classes);
+      const sectionMap: Record<string, string> = {};
+      classes.forEach((c: any) => { sectionMap[c.id] = "1"; });
+      setClassSections(sectionMap);
+      setAutoSubjects(subRes.data || []);
+      setAutoRoles(roleRes.data || []);
     });
   }, [schoolId]);
-
-  // When classes are selected, initialize configs
-  useEffect(() => {
-    setClassConfigs((prev) => {
-      const next = { ...prev };
-      for (const cls of Array.from(selectedClasses)) {
-        if (!next[cls]) {
-          next[cls] = {
-            name: cls,
-            sections: "1",
-            subjects: new Set(TELANGANA_SUBJECTS.slice(0, 6)),
-            customSubjects: [],
-          };
-        }
-      }
-      // Remove unselected
-      for (const key of Object.keys(next)) {
-        if (!selectedClasses.has(key)) delete next[key];
-      }
-      return next;
-    });
-  }, [selectedClasses]);
-
-  const toggleClass = (name: string) => {
-    setSelectedClasses((prev) => {
-      const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
-      return next;
-    });
-  };
-
-  const toggleSubjectForClass = (cls: string, subject: string) => {
-    setClassConfigs((prev) => {
-      const config = { ...prev[cls] };
-      const subjects = new Set(config.subjects);
-      subjects.has(subject) ? subjects.delete(subject) : subjects.add(subject);
-      config.subjects = subjects;
-      return { ...prev, [cls]: config };
-    });
-  };
-
-  const setSectionsForClass = (cls: string, sections: string) => {
-    setClassConfigs((prev) => ({
-      ...prev,
-      [cls]: { ...prev[cls], sections },
-    }));
-  };
-
-  const addCustomSubjectForClass = (cls: string) => {
-    const input = customSubjectInput[cls]?.trim();
-    if (!input) return;
-    setClassConfigs((prev) => {
-      const config = { ...prev[cls] };
-      config.customSubjects = [...config.customSubjects, input];
-      config.subjects = new Set([...config.subjects, input]);
-      return { ...prev, [cls]: config };
-    });
-    setCustomSubjectInput((prev) => ({ ...prev, [cls]: "" }));
-  };
-
-  const [activeClassTab, setActiveClassTab] = useState<string>("");
-
-  useEffect(() => {
-    const classes = Array.from(selectedClasses);
-    if (classes.length > 0 && !selectedClasses.has(activeClassTab)) {
-      setActiveClassTab(classes[0]);
-    }
-  }, [selectedClasses]);
 
   const handleFinish = async () => {
     if (!schoolId) return;
@@ -182,58 +109,29 @@ export default function SetupWizard() {
         status: "active",
       });
 
-      // 3. Collect all unique subjects
-      const allSubjects = new Set<string>();
-      Object.values(classConfigs).forEach((config) => {
-        config.subjects.forEach((s) => allSubjects.add(s));
-      });
+      // 3. Create sections for each auto-seeded class
+      for (const cls of autoClasses) {
+        const sectionCount = parseInt(classSections[cls.id]) || 1;
+        for (let s = 0; s < sectionCount; s++) {
+          const sectionName = String.fromCharCode(65 + s);
+          await supabase.from("sections").insert({
+            class_id: cls.id,
+            school_id: schoolId,
+            name: sectionName,
+          });
+        }
 
-      // 4. Create subjects
-      const subjectIdMap: Record<string, string> = {};
-      for (const subName of Array.from(allSubjects)) {
-        const { data: sub } = await supabase.from("subjects").insert({
-          school_id: schoolId,
-          name: subName,
-        }).select().single();
-        if (sub) subjectIdMap[subName] = sub.id;
-      }
-
-      // 5. Create classes with sections and map subjects
-      const classNames = Array.from(selectedClasses);
-      for (let i = 0; i < classNames.length; i++) {
-        const config = classConfigs[classNames[i]];
-        const { data: cls } = await supabase.from("classes").insert({
-          school_id: schoolId,
-          name: classNames[i],
-          display_order: i,
-        }).select().single();
-        
-        if (cls) {
-          // Create sections (A, B, C...)
-          const sectionCount = parseInt(config.sections) || 1;
-          for (let s = 0; s < sectionCount; s++) {
-            const sectionName = String.fromCharCode(65 + s); // A, B, C...
-            await supabase.from("sections").insert({
-              class_id: cls.id,
-              school_id: schoolId,
-              name: sectionName,
-            });
-          }
-
-          // Map subjects to this class
-          for (const subName of Array.from(config.subjects)) {
-            if (subjectIdMap[subName]) {
-              await supabase.from("class_subjects").insert({
-                school_id: schoolId,
-                class_id: cls.id,
-                subject_id: subjectIdMap[subName],
-              });
-            }
-          }
+        // Map all subjects to each class
+        for (const sub of autoSubjects) {
+          await supabase.from("class_subjects").insert({
+            school_id: schoolId,
+            class_id: cls.id,
+            subject_id: sub.id,
+          });
         }
       }
 
-      // 6. Create grade system
+      // 4. Create grade system
       for (const g of grades) {
         await supabase.from("grade_systems").insert({
           school_id: schoolId,
@@ -243,7 +141,7 @@ export default function SetupWizard() {
         });
       }
 
-      // 7. Create default timetable slots
+      // 5. Create default timetable slots
       const defaultSlots = [
         { name: "Period 1", start_time: "09:00", end_time: "09:45", slot_order: 0, is_break: false },
         { name: "Period 2", start_time: "09:45", end_time: "10:30", slot_order: 1, is_break: false },
@@ -259,7 +157,7 @@ export default function SetupWizard() {
         await supabase.from("timetable_slots").insert({ school_id: schoolId, ...slot });
       }
 
-      // 8. Create fee types if opted
+      // 6. Create fee types if opted
       if (setupFees) {
         for (const ft of defaultFeeTypes) {
           if (ft.name.trim()) {
@@ -280,7 +178,7 @@ export default function SetupWizard() {
     setSaving(false);
   };
 
-  const totalSteps = 7;
+  const totalSteps = 6;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -293,7 +191,7 @@ export default function SetupWizard() {
           <CardDescription>Step {step} of {totalSteps} — Configure your school</CardDescription>
           <div className="flex gap-1 justify-center mt-3">
             {Array.from({ length: totalSteps }, (_, i) => (
-              <div key={i} className={`h-2 w-12 rounded-full ${i < step ? "bg-primary" : "bg-muted"}`} />
+              <div key={i} className={`h-2 w-12 rounded-full transition-colors ${i < step ? "bg-primary" : "bg-muted"}`} />
             ))}
           </div>
         </CardHeader>
@@ -303,6 +201,29 @@ export default function SetupWizard() {
             <div className="space-y-4">
               <h3 className="font-semibold">School Information</h3>
               <p className="text-sm text-muted-foreground">Pre-filled from Super Admin. You can update details.</p>
+
+              {/* Auto-seeded summary */}
+              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
+                <div className="flex items-center gap-2 text-primary font-medium">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Auto-configured for your school
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground text-xs">Classes</p>
+                    <p className="font-medium">{autoClasses.length} classes created</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Subjects</p>
+                    <p className="font-medium">{autoSubjects.length} subjects added</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Roles</p>
+                    <p className="font-medium">{autoRoles.length} roles defined</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2 space-y-1"><Label>School Name</Label><Input value={schoolInfo.name} onChange={(e) => setSchoolInfo(p => ({ ...p, name: e.target.value }))} /></div>
                 <div className="space-y-1"><Label>Principal Name</Label><Input value={schoolInfo.principal_name} onChange={(e) => setSchoolInfo(p => ({ ...p, principal_name: e.target.value }))} /></div>
@@ -326,88 +247,42 @@ export default function SetupWizard() {
             </div>
           )}
 
-          {/* Step 3: Classes */}
+          {/* Step 3: Configure Sections per Class */}
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="font-semibold">Select Classes</h3>
-              <p className="text-sm text-muted-foreground">Choose the classes your school offers.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {DEFAULT_CLASSES.map((cls) => (
-                  <label key={cls} className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${selectedClasses.has(cls) ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}>
-                    <Checkbox checked={selectedClasses.has(cls)} onCheckedChange={() => toggleClass(cls)} />
-                    <span className="text-sm font-medium">{cls}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">{selectedClasses.size} classes selected</p>
-            </div>
-          )}
-
-          {/* Step 4: Per-class Sections & Subjects */}
-          {step === 4 && (
-            <div className="space-y-4">
-              <h3 className="font-semibold">Configure Sections & Subjects per Class</h3>
-              <p className="text-sm text-muted-foreground">Set section count and select subjects for each class (Telangana SSC curriculum).</p>
-              
-              {/* Class tabs */}
-              <div className="flex flex-wrap gap-2 border-b pb-2">
-                {Array.from(selectedClasses).map((cls) => (
-                  <button key={cls} onClick={() => setActiveClassTab(cls)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activeClassTab === cls ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}>
-                    {cls}
-                  </button>
-                ))}
-              </div>
-
-              {activeClassTab && classConfigs[activeClassTab] && (
-                <div className="space-y-4">
-                  {/* Sections */}
-                  <div className="flex items-center gap-3">
-                    <Label className="shrink-0">Number of Sections:</Label>
-                    <Input type="number" min="1" max="10" className="w-20 h-8"
-                      value={classConfigs[activeClassTab].sections}
-                      onChange={(e) => setSectionsForClass(activeClassTab, e.target.value)} />
-                    <span className="text-xs text-muted-foreground">
-                      ({Array.from({ length: parseInt(classConfigs[activeClassTab].sections) || 1 }, (_, i) => String.fromCharCode(65 + i)).join(", ")})
-                    </span>
-                  </div>
-
-                  {/* Subjects */}
-                  <div>
-                    <Label className="mb-2 block">Subjects for {activeClassTab}</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {TELANGANA_SUBJECTS.map((sub) => (
-                        <label key={sub} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-sm ${classConfigs[activeClassTab].subjects.has(sub) ? "border-primary/50 bg-primary/5" : "hover:bg-muted/50"}`}>
-                          <Checkbox checked={classConfigs[activeClassTab].subjects.has(sub)} onCheckedChange={() => toggleSubjectForClass(activeClassTab, sub)} />
-                          {sub}
-                        </label>
-                      ))}
-                      {classConfigs[activeClassTab].customSubjects.map((sub) => (
-                        <label key={sub} className="flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-sm border-primary/50 bg-primary/5">
-                          <Checkbox checked={classConfigs[activeClassTab].subjects.has(sub)} onCheckedChange={() => toggleSubjectForClass(activeClassTab, sub)} />
-                          {sub}
-                          <Badge variant="secondary" className="text-xs ml-auto">Custom</Badge>
-                        </label>
-                      ))}
-                    </div>
-                    <div className="flex gap-2 mt-3">
+              <h3 className="font-semibold">Configure Sections</h3>
+              <p className="text-sm text-muted-foreground">
+                Classes and subjects were auto-created. Set the number of sections for each class.
+              </p>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {autoClasses.map((cls) => (
+                  <div key={cls.id} className="flex items-center justify-between p-3 rounded-lg border">
+                    <span className="font-medium text-sm">{cls.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground">Sections:</Label>
                       <Input
-                        value={customSubjectInput[activeClassTab] || ""}
-                        onChange={(e) => setCustomSubjectInput(p => ({ ...p, [activeClassTab]: e.target.value }))}
-                        placeholder="Add custom subject"
-                        className="h-8"
-                        onKeyDown={(e) => e.key === "Enter" && addCustomSubjectForClass(activeClassTab)} />
-                      <Button variant="outline" size="sm" onClick={() => addCustomSubjectForClass(activeClassTab)}>Add</Button>
+                        type="number" min="1" max="10" className="w-16 h-8"
+                        value={classSections[cls.id] || "1"}
+                        onChange={(e) => setClassSections(p => ({ ...p, [cls.id]: e.target.value }))}
+                      />
+                      <span className="text-xs text-muted-foreground w-24">
+                        ({Array.from({ length: parseInt(classSections[cls.id]) || 1 }, (_, i) => String.fromCharCode(65 + i)).join(", ")})
+                      </span>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{classConfigs[activeClassTab].subjects.size} subjects selected for {activeClassTab}</p>
+                ))}
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50 text-sm">
+                <p className="text-muted-foreground">Auto-seeded subjects:</p>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {autoSubjects.map((s) => <Badge key={s.id} variant="secondary" className="text-xs">{s.name}</Badge>)}
                 </div>
-              )}
+              </div>
             </div>
           )}
 
-          {/* Step 5: Grade System */}
-          {step === 5 && (
+          {/* Step 4: Grade System */}
+          {step === 4 && (
             <div className="space-y-4">
               <h3 className="font-semibold">Grade System</h3>
               <p className="text-sm text-muted-foreground">Define grading scale for report cards.</p>
@@ -425,8 +300,8 @@ export default function SetupWizard() {
             </div>
           )}
 
-          {/* Step 6: Fee Structure (Optional) */}
-          {step === 6 && (
+          {/* Step 5: Fee Structure (Optional) */}
+          {step === 5 && (
             <div className="space-y-4">
               <h3 className="font-semibold">Fee Structure Setup (Optional)</h3>
               <p className="text-sm text-muted-foreground">Create default fee types now or skip and configure later.</p>
@@ -453,8 +328,8 @@ export default function SetupWizard() {
             </div>
           )}
 
-          {/* Step 7: Confirmation */}
-          {step === 7 && (
+          {/* Step 6: Confirmation */}
+          {step === 6 && (
             <div className="space-y-4">
               <h3 className="font-semibold">Review & Finish</h3>
               <div className="space-y-3 text-sm max-h-[400px] overflow-y-auto">
@@ -469,19 +344,22 @@ export default function SetupWizard() {
                   <p className="font-medium">{yearInfo.name}</p>
                   <p>{yearInfo.start_date} → {yearInfo.end_date}</p>
                 </div>
-                {Array.from(selectedClasses).map((cls) => {
-                  const config = classConfigs[cls];
-                  if (!config) return null;
-                  return (
-                    <div key={cls} className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-muted-foreground">{cls}</p>
-                      <p className="text-xs">Sections: {Array.from({ length: parseInt(config.sections) || 1 }, (_, i) => String.fromCharCode(65 + i)).join(", ")}</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {Array.from(config.subjects).map((s) => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground">Classes & Sections</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {autoClasses.map((cls) => (
+                      <Badge key={cls.id} variant="secondary" className="text-xs">
+                        {cls.name} ({Array.from({ length: parseInt(classSections[cls.id]) || 1 }, (_, i) => String.fromCharCode(65 + i)).join(",")})
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground">Subjects (auto-seeded)</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {autoSubjects.map((s) => <Badge key={s.id} variant="outline" className="text-xs">{s.name}</Badge>)}
+                  </div>
+                </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground">Grades</p>
                   <div className="flex flex-wrap gap-1 mt-1">{grades.map((g) => <Badge key={g.grade} variant="outline">{g.grade} ({g.min}-{g.max})</Badge>)}</div>

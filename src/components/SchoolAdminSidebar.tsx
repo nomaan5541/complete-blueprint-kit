@@ -29,6 +29,7 @@ const navItems = [
   { title: "Exams & Results", url: "/school/exams", icon: FileText },
   { title: "Report Card", url: "/school/report-card", icon: FileText },
   { title: "Fee Management", url: "/school/fees", icon: IndianRupee },
+  { title: "Fee Dues", url: "/school/fees/dues", icon: IndianRupee },
   { title: "Timetable", url: "/school/timetable", icon: Clock },
   { title: "Notifications", url: "/school/notifications", icon: Bell },
   { title: "Reports", url: "/school/reports", icon: BarChart3 },

@@ -37,6 +37,9 @@ export default function SchoolSettings() {
   // Renewal request state
   const [renewalMessage, setRenewalMessage] = useState("");
   const [sendingRenewal, setSendingRenewal] = useState(false);
+  const [backupFormat, setBackupFormat] = useState<ExportFormat>("csv");
+  const [backupRunning, setBackupRunning] = useState(false);
+  const [backupProgress, setBackupProgress] = useState<BackupProgress | null>(null);
   const [renewalSent, setRenewalSent] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
 

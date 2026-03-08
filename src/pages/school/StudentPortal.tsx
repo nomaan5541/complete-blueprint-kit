@@ -23,6 +23,8 @@ export default function StudentPortal() {
   const [timetable, setTimetable] = useState<any[]>([]);
   const [slots, setSlots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [onlineExams, setOnlineExams] = useState<any[]>([]);
+  const [attempts, setAttempts] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;

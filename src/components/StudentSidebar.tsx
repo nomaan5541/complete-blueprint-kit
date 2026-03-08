@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, BookOpen, LogOut, GraduationCap, Monitor,
+  LayoutDashboard, User, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, BookOpen, LogOut, GraduationCap, Monitor, IdCard, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -12,8 +12,17 @@ import {
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { title: "My Portal", url: "/student", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/student", icon: LayoutDashboard },
+  { title: "My Profile", url: "/student/profile", icon: User },
+  { title: "Attendance", url: "/student/attendance", icon: ClipboardCheck },
+  { title: "Exam Results", url: "/student/results", icon: FileText },
   { title: "Online Exams", url: "/student/exam", icon: Monitor },
+  { title: "Fees", url: "/student/fees", icon: IndianRupee },
+  { title: "Timetable", url: "/student/timetable", icon: Calendar },
+  { title: "Homework", url: "/student/homework", icon: BookOpen },
+  { title: "Notifications", url: "/student/notifications", icon: Bell },
+  { title: "Study Materials", url: "/student/materials", icon: FolderOpen },
+  { title: "ID Card", url: "/student/id-card", icon: IdCard },
 ];
 
 export function StudentSidebar() {
@@ -32,7 +41,7 @@ export function StudentSidebar() {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight">EDUPRIMEX</span>
-              <span className="text-[11px] text-sidebar-foreground/50 font-medium">Student</span>
+              <span className="text-[11px] text-sidebar-foreground/50 font-medium">Student Portal</span>
             </div>
           )}
         </div>

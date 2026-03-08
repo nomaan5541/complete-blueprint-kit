@@ -59,6 +59,10 @@ import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherTimetable from "./pages/teacher/TeacherTimetable";
 import TeacherHomework from "./pages/teacher/TeacherHomework";
 import TeacherExams from "./pages/teacher/TeacherExams";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
+import TeacherNotifications from "./pages/teacher/TeacherNotifications";
+import TeacherAnalytics from "./pages/teacher/TeacherAnalytics";
+import TeacherExamMonitor from "./pages/teacher/TeacherExamMonitor";
 
 // Student pages
 import StudentDashboardPage from "./pages/student/StudentDashboard";

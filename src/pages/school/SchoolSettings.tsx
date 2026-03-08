@@ -185,6 +185,7 @@ export default function SchoolSettings() {
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
           <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
+          <TabsTrigger value="backup"><HardDrive className="mr-2 h-4 w-4" />Data Backup</TabsTrigger>
           <TabsTrigger value="subscription" className={subscriptionExpired ? "text-destructive" : ""}>
             <CreditCard className="mr-2 h-4 w-4" />
             Subscription

@@ -325,58 +325,7 @@ export default function FeeManagement() {
       </Dialog>
 
       {/* Receipt Dialog */}
-      <ReceiptDialog open={receiptOpen} onOpenChange={setReceiptOpen} payment={selectedPayment} schoolId={schoolId} />
+      <FeeReceipt open={receiptOpen} onOpenChange={setReceiptOpen} payment={selectedPayment} schoolId={schoolId} />
     </div>
-  );
-}
-
-function ReceiptDialog({ open, onOpenChange, payment, schoolId }: { open: boolean; onOpenChange: (v: boolean) => void; payment: any; schoolId: string | null }) {
-  const [school, setSchool] = useState<any>(null);
-
-  useEffect(() => {
-    if (!schoolId || !open) return;
-    supabase.from("schools").select("name, logo_url, address, city, state, pincode, phone, email").eq("id", schoolId).single().then(({ data }) => setSchool(data));
-  }, [schoolId, open]);
-
-  if (!payment) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>Payment Receipt</DialogTitle></DialogHeader>
-        <div className="space-y-4 border rounded-lg p-4 print-area">
-          {/* School Header */}
-          <div className="text-center border-b pb-3">
-            {school?.logo_url && <img src={school.logo_url} alt="" className="h-12 w-12 mx-auto mb-2 rounded-lg object-cover" />}
-            <h3 className="font-bold text-lg">{school?.name || "School"}</h3>
-            {school && (
-              <p className="text-xs text-muted-foreground">
-                {[school.address, school.city, school.state, school.pincode].filter(Boolean).join(", ")}
-                {school.phone && <span> · {school.phone}</span>}
-              </p>
-            )}
-            <p className="text-sm font-medium mt-2">FEE RECEIPT</p>
-            <p className="text-xs text-muted-foreground">Receipt No: {payment.receipt_number}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><span className="text-muted-foreground">Student: </span><span className="font-medium">{payment.students?.name}</span></div>
-            <div><span className="text-muted-foreground">Adm No: </span><span className="font-medium">{payment.students?.admission_number}</span></div>
-            <div><span className="text-muted-foreground">Fee Type: </span><span className="font-medium">{payment.fee_types?.name}</span></div>
-            <div><span className="text-muted-foreground">Year: </span><span className="font-medium">{payment.academic_years?.name}</span></div>
-            <div><span className="text-muted-foreground">Amount: </span><span className="font-bold text-primary">₹{Number(payment.amount).toLocaleString()}</span></div>
-            <div><span className="text-muted-foreground">Mode: </span><span className="font-medium capitalize">{payment.payment_mode}</span></div>
-            <div className="col-span-2"><span className="text-muted-foreground">Date: </span><span className="font-medium">{format(new Date(payment.payment_date), "dd MMM yyyy, hh:mm a")}</span></div>
-          </div>
-          {payment.notes && <div className="text-sm"><span className="text-muted-foreground">Notes: </span>{payment.notes}</div>}
-          <div className="text-center border-t pt-2 text-xs text-muted-foreground">
-            This is a computer-generated receipt.
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-          <Button onClick={() => window.print()}>Print Receipt</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

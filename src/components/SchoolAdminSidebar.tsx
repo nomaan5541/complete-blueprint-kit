@@ -2,18 +2,21 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock,
+  CalendarDays, Shield, Lock, Crown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useSchool } from "@/hooks/useSchool";
+import { useSubscriptionPlan } from "@/hooks/useSubscriptionPlan";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 const navItems = [
@@ -50,12 +53,13 @@ export function SchoolAdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { schoolName, isReadOnly } = useSchool();
+  const { schoolId, schoolName, isReadOnly } = useSchool();
+  const { planTier, planName, isFeatureAvailable, getRequiredPlan, loading: planLoading } = useSubscriptionPlan(schoolId);
 
-  const handleLockedClick = (e: React.MouseEvent, title: string) => {
+  const handleLockedClick = (e: React.MouseEvent, title: string, reason: string) => {
     e.preventDefault();
     e.stopPropagation();
-    toast.error(`"${title}" is locked. Please renew your subscription from Settings to unlock.`);
+    toast.error(reason);
   };
 
   return (
@@ -70,7 +74,12 @@ export function SchoolAdminSidebar() {
               <span className="text-sm font-bold text-sidebar-primary-foreground truncate max-w-[140px] tracking-tight">
                 {schoolName || "My School"}
               </span>
-              <span className="text-[11px] text-sidebar-foreground/50 font-medium">School Admin</span>
+              {planName && (
+                <Badge variant="outline" className="text-[10px] w-fit mt-0.5 px-1.5 py-0 border-sidebar-primary/30 text-sidebar-primary/80">
+                  <Crown className="h-2.5 w-2.5 mr-1" />
+                  {planName}
+                </Badge>
+              )}
             </div>
           )}
         </div>
@@ -82,13 +91,14 @@ export function SchoolAdminSidebar() {
             <SidebarMenu>
               {navItems.map((item) => {
                 const isUnlocked = UNLOCKED_URLS.includes(item.url);
-                const isLocked = isReadOnly && !isUnlocked;
+                const isExpiredLocked = isReadOnly && !isUnlocked;
+                const isPlanLocked = !planLoading && planTier !== "none" && !isFeatureAvailable(item.url);
 
-                if (isLocked) {
+                if (isExpiredLocked) {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
-                        onClick={(e) => handleLockedClick(e, item.title)}
+                        onClick={(e) => handleLockedClick(e, item.title, `"${item.title}" is locked. Please renew your subscription from Settings to unlock.`)}
                         className="rounded-xl transition-all duration-200 opacity-50 cursor-not-allowed hover:bg-transparent"
                       >
                         <div className="relative">
@@ -102,6 +112,38 @@ export function SchoolAdminSidebar() {
                           </span>
                         )}
                       </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
+                if (isPlanLocked) {
+                  const requiredPlan = getRequiredPlan(item.url);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton
+                            onClick={(e) => handleLockedClick(e, item.title, `"${item.title}" requires the ${requiredPlan} plan or higher. Upgrade from Settings.`)}
+                            className="rounded-xl transition-all duration-200 opacity-40 cursor-not-allowed hover:bg-transparent"
+                          >
+                            <div className="relative">
+                              <item.icon className="h-4 w-4 text-muted-foreground" />
+                              <Crown className="h-2.5 w-2.5 absolute -bottom-0.5 -right-0.5 text-amber-500" />
+                            </div>
+                            {!collapsed && (
+                              <span className="flex items-center gap-2 text-muted-foreground">
+                                {item.title}
+                                <Badge variant="outline" className="text-[9px] px-1 py-0 border-amber-500/40 text-amber-600">
+                                  {requiredPlan}
+                                </Badge>
+                              </span>
+                            )}
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>Upgrade to {requiredPlan} to unlock</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </SidebarMenuItem>
                   );
                 }

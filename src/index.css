@@ -175,6 +175,22 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   }
+
+  /* Responsive table wrapper - allows horizontal scroll on mobile */
+  .table-responsive {
+    @apply w-full overflow-x-auto -mx-1 px-1;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Page container - constrains content width on large screens */
+  .page-container {
+    @apply w-full max-w-7xl mx-auto;
+  }
+
+  /* Touch-friendly tap targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
 }
 
 /* ── Animations ── */

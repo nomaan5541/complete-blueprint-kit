@@ -163,7 +163,8 @@ export default function ExamManagement() {
                       <div className="text-xs text-muted-foreground space-y-0.5">
                         {(exam as any).classes?.name && <p>Class: {(exam as any).classes.name}</p>}
                         {(exam as any).subjects?.name && <p>Subject: {(exam as any).subjects.name}</p>}
-                        {exam.start_date && <p>📅 {exam.start_date} → {exam.end_date}</p>}
+                        {(exam as any).exam_date && <p>📅 {(exam as any).exam_date}</p>}
+                        {!(exam as any).exam_date && exam.start_date && <p>📅 {exam.start_date} → {exam.end_date}</p>}
                         <p>Total Marks: {(exam as any).total_marks || 100}</p>
                         {mode === "online" && (exam as any).duration_minutes && (
                           <p>⏱ {(exam as any).duration_minutes} minutes</p>
@@ -189,9 +190,21 @@ export default function ExamManagement() {
                           </>
                         )}
                         {mode === "offline" && (
-                          <Button size="sm" variant="outline" onClick={() => setMarksExam(exam)}>
-                            <PenLine className="mr-1 h-3 w-3" /> Enter Marks
-                          </Button>
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => setMarksExam(exam)}>
+                              <PenLine className="mr-1 h-3 w-3" /> Enter Marks
+                            </Button>
+                            {status === "draft" && (
+                              <Button size="sm" variant="default" onClick={() => updateExamStatus(exam.id, "published")}>
+                                Publish
+                              </Button>
+                            )}
+                            {status === "published" && (
+                              <Button size="sm" variant="secondary" onClick={() => updateExamStatus(exam.id, "completed")}>
+                                Complete
+                              </Button>
+                            )}
+                          </>
                         )}
                       </div>
                     </CardContent>

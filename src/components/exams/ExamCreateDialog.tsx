@@ -46,6 +46,7 @@ export default function ExamCreateDialog({ open, onOpenChange, schoolId, academi
       name: form.name.trim(),
       exam_type: form.exam_type,
       academic_year_id: academicYearId,
+      exam_date: form.start_date || null,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       exam_mode: form.exam_mode,
@@ -116,8 +117,10 @@ export default function ExamCreateDialog({ open, onOpenChange, schoolId, academi
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} /></div>
-            <div className="space-y-1"><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(p => ({ ...p, end_date: e.target.value }))} /></div>
+            <div className="space-y-1"><Label>Exam Date</Label><Input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} /></div>
+            {form.exam_mode === "online" && (
+              <div className="space-y-1"><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(p => ({ ...p, end_date: e.target.value }))} /></div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

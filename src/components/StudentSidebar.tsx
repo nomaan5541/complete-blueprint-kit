@@ -1,6 +1,7 @@
 import {
-  LayoutDashboard, User, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, BookOpen, LogOut, GraduationCap, Monitor, IdCard, FolderOpen,
+  LayoutDashboard, User, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, BookOpen, LogOut, GraduationCap, Monitor, IdCard, FolderOpen, Video,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -23,6 +24,7 @@ const navItems = [
   { title: "Notifications", url: "/student/notifications", icon: Bell },
   { title: "Study Materials", url: "/student/materials", icon: FolderOpen },
   { title: "ID Card", url: "/student/id-card", icon: IdCard },
+  { title: "Meetings", url: "/student/meetings", icon: Video, comingSoon: true },
 ];
 
 export function StudentSidebar() {
@@ -61,7 +63,12 @@ export function StudentSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
                     >
                       <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex items-center gap-2">
+                          {item.title}
+                          {(item as any).comingSoon && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 leading-tight">Soon</Badge>}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

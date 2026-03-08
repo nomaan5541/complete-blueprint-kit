@@ -50,6 +50,7 @@ import FeeDues from "./pages/school/FeeDues";
 import StudentTransfer from "./pages/school/StudentTransfer";
 import StudentDocuments from "./pages/school/StudentDocuments";
 import SchoolCalendar from "./pages/school/SchoolCalendar";
+import Meetings from "./pages/school/Meetings";
 import AuditLogs from "./pages/school/AuditLogs";
 import StudentExamTake from "./pages/school/StudentExamTake";
 
@@ -65,6 +66,7 @@ import TeacherProfile from "./pages/teacher/TeacherProfile";
 import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 import TeacherAnalytics from "./pages/teacher/TeacherAnalytics";
 import TeacherExamMonitor from "./pages/teacher/TeacherExamMonitor";
+import TeacherMeetings from "./pages/teacher/TeacherMeetings";
 
 // Student pages
 import StudentDashboardPage from "./pages/student/StudentDashboard";
@@ -78,6 +80,7 @@ import StudentHomeworkPage from "./pages/student/StudentHomework";
 import StudentIDCardPage from "./pages/student/StudentIDCard";
 import StudentStudyMaterialsPage from "./pages/student/StudentStudyMaterials";
 import StudentOnlineExamsPage from "./pages/student/StudentOnlineExams";
+import StudentMeetings from "./pages/student/StudentMeetings";
 
 const queryClient = new QueryClient();
 
@@ -139,6 +142,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/reports" element={<SchoolReports />} />
         <Route path="/documents" element={<StudentDocuments />} />
         <Route path="/calendar" element={<SchoolCalendar />} />
+        <Route path="/meetings" element={<Meetings />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/settings" element={<SchoolSettings />} />
         <Route path="/setup" element={<SetupWizard />} />
@@ -163,6 +167,7 @@ function TeacherRoutesWrapper() {
         <Route path="/timetable" element={<TeacherTimetable />} />
         <Route path="/notifications" element={<TeacherNotifications />} />
         <Route path="/analytics" element={<TeacherAnalytics />} />
+        <Route path="/meetings" element={<TeacherMeetings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TeacherLayout>
@@ -185,6 +190,7 @@ function StudentPortalWrapper() {
         <Route path="/notifications" element={<StudentNotificationsPage />} />
         <Route path="/materials" element={<StudentStudyMaterialsPage />} />
         <Route path="/id-card" element={<StudentIDCardPage />} />
+        <Route path="/meetings" element={<StudentMeetings />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </StudentLayout>

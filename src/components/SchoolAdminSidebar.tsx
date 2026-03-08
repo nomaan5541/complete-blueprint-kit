@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown,
+  CalendarDays, Shield, Lock, Crown, Video,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -40,6 +40,7 @@ const navItems = [
   { title: "Reports", url: "/school/reports", icon: BarChart3 },
   { title: "Documents", url: "/school/documents", icon: FolderOpen },
   { title: "Calendar", url: "/school/calendar", icon: CalendarDays },
+  { title: "Meetings", url: "/school/meetings", icon: Video, comingSoon: true },
   { title: "Audit Logs", url: "/school/audit-logs", icon: Shield },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
@@ -158,7 +159,12 @@ export function SchoolAdminSidebar() {
                         activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
                       >
                         <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                        {!collapsed && <span>{item.title}</span>}
+                        {!collapsed && (
+                          <span className="flex items-center gap-2">
+                            {item.title}
+                            {(item as any).comingSoon && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 leading-tight">Soon</Badge>}
+                          </span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

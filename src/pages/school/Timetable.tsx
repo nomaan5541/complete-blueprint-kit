@@ -38,21 +38,18 @@ export default function Timetable() {
   const fetchAll = async () => {
     if (!schoolId) return;
     setLoading(true);
-    const [slotsRes, cRes, secRes, subRes, tRes, yRes] = await Promise.all([
+    const [slotsRes, cRes, secRes, subRes, tRes] = await Promise.all([
       supabase.from("timetable_slots").select("*").eq("school_id", schoolId).order("slot_order"),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("sections").select("*").eq("school_id", schoolId),
       supabase.from("subjects").select("*").eq("school_id", schoolId).order("name"),
       supabase.from("teachers").select("*").eq("school_id", schoolId).eq("status", "active").order("name"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).eq("status", "active"),
     ]);
     setSlots(slotsRes.data || []);
     setClasses(cRes.data || []);
     setSections(secRes.data || []);
     setSubjects(subRes.data || []);
     setTeachers(tRes.data || []);
-    setAcademicYears(yRes.data || []);
-    if (yRes.data && yRes.data.length > 0) setSelectedYear(yRes.data[0].id);
     setLoading(false);
   };
 

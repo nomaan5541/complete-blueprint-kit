@@ -86,7 +86,7 @@ export default function FeeManagement() {
   };
 
   const handleCollect = async () => {
-    if (!collectForm.student_id || !collectForm.academic_year_id || !collectForm.fee_type_id || !collectForm.amount) {
+    if (!collectForm.student_id || !selectedYearId || !collectForm.fee_type_id || !collectForm.amount) {
       toast.error("All fields are required"); return;
     }
     setSaving(true);
@@ -94,7 +94,7 @@ export default function FeeManagement() {
     const { data, error } = await supabase.from("fee_payments").insert({
       school_id: schoolId!,
       student_id: collectForm.student_id,
-      academic_year_id: collectForm.academic_year_id,
+      academic_year_id: selectedYearId,
       fee_type_id: collectForm.fee_type_id,
       amount: parseFloat(collectForm.amount),
       payment_mode: collectForm.payment_mode,
@@ -105,7 +105,7 @@ export default function FeeManagement() {
     else {
       toast.success("Payment collected");
       setCollectOpen(false);
-      setCollectForm({ student_id: "", academic_year_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
+      setCollectForm({ student_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
       setSelectedPayment(data);
       setReceiptOpen(true);
       fetchAll();

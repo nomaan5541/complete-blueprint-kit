@@ -2,10 +2,10 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield,
+  CalendarDays, Shield, Lock,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useSchool } from "@/hooks/useSchool";
 import {
@@ -14,6 +14,7 @@ import {
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const navItems = [
   { title: "Dashboard", url: "/school", icon: LayoutDashboard },
@@ -40,12 +41,22 @@ const navItems = [
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
 
+// Pages accessible even when subscription expired
+const UNLOCKED_URLS = ["/school", "/school/settings"];
+
 export function SchoolAdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { schoolName } = useSchool();
+  const { schoolName, isReadOnly } = useSchool();
+
+  const handleLockedClick = (e: React.MouseEvent, title: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast.error(`"${title}" is locked. Please renew your subscription from Settings to unlock.`);
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -69,21 +80,48 @@ export function SchoolAdminSidebar() {
           <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-sidebar-foreground/40 font-semibold">Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <NavLink
-                      to={item.url}
-                      end
-                      className="rounded-xl transition-all duration-200 hover:bg-sidebar-accent/60 group"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
-                    >
-                      <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const isUnlocked = UNLOCKED_URLS.includes(item.url);
+                const isLocked = isReadOnly && !isUnlocked;
+
+                if (isLocked) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        onClick={(e) => handleLockedClick(e, item.title)}
+                        className="rounded-xl transition-all duration-200 opacity-50 cursor-not-allowed hover:bg-transparent"
+                      >
+                        <div className="relative">
+                          <item.icon className="h-4 w-4 text-muted-foreground" />
+                          <Lock className="h-2.5 w-2.5 absolute -bottom-0.5 -right-0.5 text-destructive" />
+                        </div>
+                        {!collapsed && (
+                          <span className="flex items-center gap-2 text-muted-foreground">
+                            {item.title}
+                            <Lock className="h-3 w-3 text-destructive/70" />
+                          </span>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className="rounded-xl transition-all duration-200 hover:bg-sidebar-accent/60 group"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
+                      >
+                        <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

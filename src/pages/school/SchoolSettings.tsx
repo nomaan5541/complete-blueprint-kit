@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
+import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School, Upload, X, MessageSquare } from "lucide-react";
+import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { format } from "date-fns";
 
 export default function SchoolSettings() {
-  const { schoolId } = useSchool();
+  const { schoolId, isReadOnly, subscriptionExpired, subscriptionEndDate } = useSchool();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -28,12 +32,19 @@ export default function SchoolSettings() {
   const [savingSms, setSavingSms] = useState(false);
   const [grades, setGrades] = useState<any[]>([]);
 
+  // Renewal request state
+  const [renewalMessage, setRenewalMessage] = useState("");
+  const [sendingRenewal, setSendingRenewal] = useState(false);
+  const [renewalSent, setRenewalSent] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
+
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, gRes] = await Promise.all([
+      const [sRes, gRes, subRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
+        supabase.from("subscriptions").select("*, subscription_plans(name, price, duration_months)").eq("school_id", schoolId!).order("end_date", { ascending: false }).limit(1).maybeSingle(),
       ]);
       const s = sRes.data as any;
       if (s) {
@@ -61,6 +72,7 @@ export default function SchoolSettings() {
         setLogoPreview(s.logo_url || null);
       }
       setGrades(gRes.data || []);
+      setSubscription(subRes.data);
       setLoading(false);
     }
     fetch();
@@ -132,6 +144,28 @@ export default function SchoolSettings() {
     setSavingSms(false);
   };
 
+  const handleRenewalRequest = async () => {
+    if (!schoolId || !user) return;
+    setSendingRenewal(true);
+
+    const { error } = await supabase.from("subscription_requests").insert({
+      school_name: form.name,
+      contact_name: form.principal_name || form.name,
+      email: user.email || form.email || "",
+      phone: form.phone || null,
+      message: renewalMessage || "Subscription renewal request",
+      plan_id: subscription?.plan_id || null,
+    });
+
+    if (error) {
+      toast.error("Failed to send renewal request: " + error.message);
+    } else {
+      toast.success("Renewal request submitted! The platform administrator will contact you shortly.");
+      setRenewalSent(true);
+    }
+    setSendingRenewal(false);
+  };
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
 
   return (
@@ -141,11 +175,16 @@ export default function SchoolSettings() {
         <p className="text-muted-foreground">Manage school information and preferences</p>
       </div>
 
-      <Tabs defaultValue="info">
+      <Tabs defaultValue={subscriptionExpired ? "subscription" : "info"}>
         <TabsList>
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
           <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
+          <TabsTrigger value="subscription" className={subscriptionExpired ? "text-destructive" : ""}>
+            <CreditCard className="mr-2 h-4 w-4" />
+            Subscription
+            {subscriptionExpired && <Lock className="ml-1 h-3 w-3" />}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -291,6 +330,118 @@ export default function SchoolSettings() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Subscription Tab */}
+        <TabsContent value="subscription">
+          <div className="space-y-4">
+            {/* Current Subscription Status */}
+            <Card className={subscriptionExpired ? "border-destructive/50" : "border-success/50"}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {subscriptionExpired ? (
+                    <><AlertTriangle className="h-5 w-5 text-destructive" /> Subscription Expired</>
+                  ) : (
+                    <><CheckCircle2 className="h-5 w-5 text-success" /> Active Subscription</>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {subscriptionExpired
+                    ? "Your subscription has expired. All sections are locked except Dashboard and Settings."
+                    : "Your subscription is active and all features are available."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Plan</p>
+                    <p className="font-semibold">{subscription?.subscription_plans?.name || "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Valid Until</p>
+                    <p className={`font-semibold ${subscriptionExpired ? "text-destructive" : ""}`}>
+                      {subscriptionEndDate ? format(new Date(subscriptionEndDate), "dd MMM yyyy") : "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Status</p>
+                    {subscriptionExpired ? (
+                      <Badge variant="destructive">Expired</Badge>
+                    ) : (
+                      <Badge className="bg-success text-success-foreground">Active</Badge>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Renewal Request Form */}
+            {subscriptionExpired && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" /> Request Subscription Renewal
+                  </CardTitle>
+                  <CardDescription>
+                    Submit a renewal request to the platform administrator. They will process your request and activate your subscription.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {renewalSent ? (
+                    <div className="rounded-lg border border-success/30 bg-success/10 p-6 text-center">
+                      <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-3" />
+                      <p className="font-semibold text-lg">Renewal Request Submitted!</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        The platform administrator will review your request and contact you shortly. Once approved, all sections will be unlocked automatically.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                        <div className="grid gap-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">School:</span>
+                            <span className="font-medium">{form.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Contact:</span>
+                            <span className="font-medium">{user?.email || form.email}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Current Plan:</span>
+                            <span className="font-medium">{subscription?.subscription_plans?.name || "—"}</span>
+                          </div>
+                          {subscription?.subscription_plans?.price && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Price:</span>
+                              <span className="font-medium">₹{Number(subscription.subscription_plans.price).toLocaleString()} / {subscription.subscription_plans.duration_months} months</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Message (optional)</Label>
+                        <Textarea
+                          value={renewalMessage}
+                          onChange={(e) => setRenewalMessage(e.target.value)}
+                          placeholder="Any additional notes for the administrator (e.g., preferred plan, payment method, etc.)"
+                          rows={3}
+                        />
+                      </div>
+                      <Button onClick={handleRenewalRequest} disabled={sendingRenewal} size="lg" className="w-full">
+                        {sendingRenewal ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <CreditCard className="mr-2 h-4 w-4" />
+                        )}
+                        Submit Renewal Request
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

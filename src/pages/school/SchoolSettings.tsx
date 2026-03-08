@@ -338,6 +338,86 @@ export default function SchoolSettings() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="backup">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HardDrive className="h-5 w-5" /> Data Backup & Export
+              </CardTitle>
+              <CardDescription>
+                Download a complete backup of your school's data. All records are filtered to include only your school's data.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm space-y-2">
+                <p className="font-medium">What's included in the backup:</p>
+                <div className="grid gap-1 sm:grid-cols-2 text-muted-foreground text-xs">
+                  <span>✔ Students & Student Master</span>
+                  <span>✔ Teachers & Assignments</span>
+                  <span>✔ Classes, Sections & Subjects</span>
+                  <span>✔ Attendance Records</span>
+                  <span>✔ Exams & Marks</span>
+                  <span>✔ Fee Types, Structures & Payments</span>
+                  <span>✔ Timetable Slots & Entries</span>
+                  <span>✔ Notifications & Events</span>
+                  <span>✔ Grade Systems</span>
+                  <span>✔ Audit Logs</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="flex gap-3">
+                  <Button variant={backupFormat === "csv" ? "default" : "outline"} size="sm" onClick={() => setBackupFormat("csv")}>
+                    CSV (Spreadsheet)
+                  </Button>
+                  <Button variant={backupFormat === "json" ? "default" : "outline"} size="sm" onClick={() => setBackupFormat("json")}>
+                    JSON (Data)
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {backupFormat === "csv"
+                    ? "CSV files can be opened in Excel, Google Sheets, or any spreadsheet application."
+                    : "JSON files preserve data types and structure, ideal for system restores."}
+                </p>
+              </div>
+
+              {backupProgress && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Exporting: {backupProgress.currentTable}</span>
+                    <span className="font-medium">{backupProgress.current}/{backupProgress.total}</span>
+                  </div>
+                  <Progress value={(backupProgress.current / backupProgress.total) * 100} className="h-2" />
+                </div>
+              )}
+
+              <Button
+                size="lg"
+                className="w-full"
+                disabled={backupRunning || !schoolId}
+                onClick={async () => {
+                  if (!schoolId) return;
+                  setBackupRunning(true);
+                  setBackupProgress(null);
+                  try {
+                    const filename = await exportSchoolBackup(schoolId, form.name, backupFormat, setBackupProgress);
+                    toast.success(`Backup downloaded: ${filename}`);
+                  } catch (err: any) {
+                    toast.error("Backup failed: " + (err?.message || "Unknown error"));
+                  } finally {
+                    setBackupRunning(false);
+                    setBackupProgress(null);
+                  }
+                }}
+              >
+                {backupRunning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                {backupRunning ? "Generating Backup..." : "Download School Backup"}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Subscription Tab */}
         <TabsContent value="subscription">
           <div className="space-y-4">

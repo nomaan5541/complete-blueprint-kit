@@ -842,6 +842,44 @@ export type Database = {
           },
         ]
       }
+      school_credentials: {
+        Row: {
+          account_type: string
+          created_at: string
+          email: string
+          id: string
+          password_plain: string
+          person_name: string
+          school_id: string
+        }
+        Insert: {
+          account_type: string
+          created_at?: string
+          email: string
+          id?: string
+          password_plain: string
+          person_name: string
+          school_id: string
+        }
+        Update: {
+          account_type?: string
+          created_at?: string
+          email?: string
+          id?: string
+          password_plain?: string
+          person_name?: string
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_credentials_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_events: {
         Row: {
           created_at: string

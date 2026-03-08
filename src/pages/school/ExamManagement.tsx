@@ -116,6 +116,7 @@ export default function ExamManagement() {
         <TabsList>
           <TabsTrigger value="exams">Exams</TabsTrigger>
           <TabsTrigger value="results">View Results</TabsTrigger>
+          <TabsTrigger value="analytics"><BarChart3 className="mr-1 h-3 w-3" /> Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="exams" className="space-y-4">

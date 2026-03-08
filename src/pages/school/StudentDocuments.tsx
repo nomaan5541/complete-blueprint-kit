@@ -201,7 +201,7 @@ export default function StudentDocuments() {
             </div>
             <div className="space-y-1">
               <Label>File</Label>
-              <input ref={fileRef} type="file" className="hidden" onChange={e => setSelectedFile(e.target.files?.[0] || null)} />
+              <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={e => setSelectedFile(e.target.files?.[0] || null)} />
               <div className="flex gap-2 items-center">
                 <Button variant="outline" onClick={() => fileRef.current?.click()}>Choose File</Button>
                 {selectedFile && <span className="text-sm text-muted-foreground">{selectedFile.name}</span>}

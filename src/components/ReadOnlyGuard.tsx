@@ -37,9 +37,14 @@ export function ReadOnlyGuard({ children, fallbackMessage }: { children: ReactNo
  */
 export function ReadOnlyOverlay({ children }: { children: ReactNode }) {
   const { isReadOnly } = useSchool();
+  const location = useLocation();
+
+  // Pages that remain fully functional even when read-only
+  const EXEMPT_PATHS = ["/school/settings", "/school"];
+  const isExemptPage = EXEMPT_PATHS.includes(location.pathname);
 
   const handleCapture = useCallback((e: React.MouseEvent) => {
-    if (!isReadOnly) return;
+    if (!isReadOnly || isExemptPage) return;
 
     const target = e.target as HTMLElement;
     const tag = target.tagName.toLowerCase();

@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import { TeacherLayout } from "@/components/TeacherLayout";
+import { StudentLayout } from "@/components/StudentLayout";
 import { useSchool } from "@/hooks/useSchool";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
@@ -148,13 +149,13 @@ function TeacherRoutesWrapper() {
 
 function StudentPortalWrapper() {
   return (
-    <SchoolAdminLayout>
+    <StudentLayout>
       <Routes>
         <Route path="/" element={<StudentPortal />} />
         <Route path="/exam" element={<StudentExamTake />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
-    </SchoolAdminLayout>
+    </StudentLayout>
   );
 }
 

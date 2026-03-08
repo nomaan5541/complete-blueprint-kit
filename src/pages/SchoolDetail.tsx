@@ -22,6 +22,10 @@ export default function SchoolDetail() {
   const [counts, setCounts] = useState({ students: 0, teachers: 0 });
   const [activeYear, setActiveYear] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignForm, setAssignForm] = useState({ plan_id: "", payment_amount: "", duration_months: "12" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {

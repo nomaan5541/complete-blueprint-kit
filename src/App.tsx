@@ -59,6 +59,10 @@ import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherTimetable from "./pages/teacher/TeacherTimetable";
 import TeacherHomework from "./pages/teacher/TeacherHomework";
 import TeacherExams from "./pages/teacher/TeacherExams";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
+import TeacherNotifications from "./pages/teacher/TeacherNotifications";
+import TeacherAnalytics from "./pages/teacher/TeacherAnalytics";
+import TeacherExamMonitor from "./pages/teacher/TeacherExamMonitor";
 
 // Student pages
 import StudentDashboardPage from "./pages/student/StudentDashboard";
@@ -146,12 +150,16 @@ function TeacherRoutesWrapper() {
     <TeacherLayout>
       <Routes>
         <Route path="/" element={<TeacherDashboard />} />
+        <Route path="/profile" element={<TeacherProfile />} />
         <Route path="/attendance" element={<TeacherAttendance />} />
         <Route path="/exams" element={<TeacherExams />} />
         <Route path="/marks" element={<TeacherMarks />} />
+        <Route path="/exam-monitor" element={<TeacherExamMonitor />} />
         <Route path="/homework" element={<TeacherHomework />} />
         <Route path="/students" element={<TeacherStudents />} />
         <Route path="/timetable" element={<TeacherTimetable />} />
+        <Route path="/notifications" element={<TeacherNotifications />} />
+        <Route path="/analytics" element={<TeacherAnalytics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TeacherLayout>

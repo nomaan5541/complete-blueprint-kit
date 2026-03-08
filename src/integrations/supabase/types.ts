@@ -769,6 +769,8 @@ export type Database = {
           phone: string | null
           pincode: string | null
           principal_name: string | null
+          receipt_counter: number
+          receipt_prefix: string
           registration_number: string | null
           school_end_time: string | null
           school_start_time: string | null
@@ -790,6 +792,8 @@ export type Database = {
           phone?: string | null
           pincode?: string | null
           principal_name?: string | null
+          receipt_counter?: number
+          receipt_prefix?: string
           registration_number?: string | null
           school_end_time?: string | null
           school_start_time?: string | null
@@ -811,6 +815,8 @@ export type Database = {
           phone?: string | null
           pincode?: string | null
           principal_name?: string | null
+          receipt_counter?: number
+          receipt_prefix?: string
           registration_number?: string | null
           school_end_time?: string | null
           school_start_time?: string | null

@@ -1,0 +1,3 @@
+ALTER TABLE public.schools
+ADD COLUMN IF NOT EXISTS receipt_prefix text NOT NULL DEFAULT 'RCPT',
+ADD COLUMN IF NOT EXISTS receipt_counter integer NOT NULL DEFAULT 0;

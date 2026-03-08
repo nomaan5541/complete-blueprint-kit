@@ -340,33 +340,7 @@ export default function FeeManagement() {
       </Dialog>
 
       {/* Receipt Dialog */}
-      <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Payment Receipt</DialogTitle></DialogHeader>
-          {selectedPayment && (
-            <div className="space-y-4 border rounded-lg p-4">
-              <div className="text-center border-b pb-3">
-                <h3 className="font-bold text-lg">Fee Receipt</h3>
-                <p className="text-sm text-muted-foreground">Receipt No: {selectedPayment.receipt_number}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-muted-foreground">Student: </span><span className="font-medium">{selectedPayment.students?.name}</span></div>
-                <div><span className="text-muted-foreground">Adm No: </span><span className="font-medium">{selectedPayment.students?.admission_number}</span></div>
-                <div><span className="text-muted-foreground">Fee Type: </span><span className="font-medium">{selectedPayment.fee_types?.name}</span></div>
-                <div><span className="text-muted-foreground">Year: </span><span className="font-medium">{selectedPayment.academic_years?.name}</span></div>
-                <div><span className="text-muted-foreground">Amount: </span><span className="font-bold text-primary">₹{Number(selectedPayment.amount).toLocaleString()}</span></div>
-                <div><span className="text-muted-foreground">Mode: </span><span className="font-medium capitalize">{selectedPayment.payment_mode}</span></div>
-                <div className="col-span-2"><span className="text-muted-foreground">Date: </span><span className="font-medium">{format(new Date(selectedPayment.payment_date), "dd MMM yyyy, hh:mm a")}</span></div>
-              </div>
-              {selectedPayment.notes && <div className="text-sm"><span className="text-muted-foreground">Notes: </span>{selectedPayment.notes}</div>}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReceiptOpen(false)}>Close</Button>
-            <Button onClick={() => window.print()}>Print</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReceiptDialog open={receiptOpen} onOpenChange={setReceiptOpen} payment={selectedPayment} schoolId={schoolId} />
     </div>
   );
 }

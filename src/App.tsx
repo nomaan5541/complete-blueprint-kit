@@ -44,6 +44,9 @@ import StudentProfile from "./pages/school/StudentProfile";
 import BulkStudentImport from "./pages/school/BulkStudentImport";
 import FeeDues from "./pages/school/FeeDues";
 import StudentTransfer from "./pages/school/StudentTransfer";
+import StudentDocuments from "./pages/school/StudentDocuments";
+import SchoolCalendar from "./pages/school/SchoolCalendar";
+import AuditLogs from "./pages/school/AuditLogs";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";

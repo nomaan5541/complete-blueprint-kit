@@ -42,15 +42,12 @@ export default function Attendance() {
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [cRes, sRes, yRes] = await Promise.all([
+      const [cRes, sRes] = await Promise.all([
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
         supabase.from("sections").select("*").eq("school_id", schoolId!),
-        supabase.from("academic_years").select("*").eq("school_id", schoolId!).eq("status", "active"),
       ]);
       setClasses(cRes.data || []);
       setSections(sRes.data || []);
-      setAcademicYears(yRes.data || []);
-      if (yRes.data && yRes.data.length > 0) setSelectedYear(yRes.data[0].id);
       setLoading(false);
     }
     fetch();

@@ -35,7 +35,7 @@ export default function SchoolSettings() {
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
       ]);
-      const s = sRes.data;
+      const s = sRes.data as any;
       if (s) {
         setForm({
           name: s.name || "",
@@ -50,7 +50,12 @@ export default function SchoolSettings() {
           school_start_time: s.school_start_time || "09:00",
           school_end_time: s.school_end_time || "16:00",
           registration_number: s.registration_number || "",
-          receipt_prefix: (s as any).receipt_prefix || "RCPT",
+          receipt_prefix: s.receipt_prefix || "RCPT",
+        });
+        setSmsForm({
+          msg91_auth_key: s.msg91_auth_key || "",
+          msg91_sender_id: s.msg91_sender_id || "",
+          msg91_whatsapp_template_id: s.msg91_whatsapp_template_id || "",
         });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);

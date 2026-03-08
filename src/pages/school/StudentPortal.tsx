@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar } from "lucide-react";
+import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentPortal() {
@@ -15,6 +15,7 @@ export default function StudentPortal() {
   const [attendance, setAttendance] = useState<any[]>([]);
   const [marks, setMarks] = useState<any[]>([]);
   const [fees, setFees] = useState<any[]>([]);
+  const [feeStructures, setFeeStructures] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [timetable, setTimetable] = useState<any[]>([]);
   const [slots, setSlots] = useState<any[]>([]);
@@ -35,13 +36,14 @@ export default function StudentPortal() {
       if (!stud) { setLoading(false); return; }
 
       // Fetch all data
-      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes] = await Promise.all([
+      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes, feeStructRes] = await Promise.all([
         supabase.from("attendance").select("*").eq("student_id", stud.id).order("date", { ascending: false }).limit(60),
         supabase.from("exam_marks").select("*, subjects(name), exams(name)").eq("student_id", stud.id),
         supabase.from("fee_payments").select("*, fee_types(name)").eq("student_id", stud.id).order("payment_date", { ascending: false }),
         supabase.from("notifications").select("*").eq("school_id", prof.school_id).order("created_at", { ascending: false }).limit(20),
         stud.class_id ? supabase.from("timetable_entries").select("*, subjects(name), teachers(name), timetable_slots(name, start_time, end_time, slot_order, is_break)").eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("timetable_slots").select("*").eq("school_id", prof.school_id).order("slot_order"),
+        stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
       ]);
 
       setAttendance(attRes.data || []);
@@ -50,6 +52,7 @@ export default function StudentPortal() {
       setNotifications(notifRes.data || []);
       setTimetable(ttRes.data || []);
       setSlots(slotsRes.data || []);
+      setFeeStructures(feeStructRes.data || []);
       setLoading(false);
     }
     fetch();
@@ -71,6 +74,14 @@ export default function StudentPortal() {
   const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : "0";
   const totalFees = fees.reduce((sum, f) => sum + Number(f.amount), 0);
 
+  // Calculate fee dues
+  const feeDues = feeStructures.map((fs: any) => {
+    const paid = fees.filter((f: any) => f.fee_type_id === fs.fee_type_id).reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+    const due = Number(fs.amount) - paid;
+    return { ...fs, paid, due: due > 0 ? due : 0 };
+  });
+  const totalDue = feeDues.reduce((sum, d) => sum + d.due, 0);
+
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   return (
@@ -86,7 +97,7 @@ export default function StudentPortal() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card><CardContent className="pt-4 text-center"><ClipboardCheck className="h-5 w-5 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{attendanceRate}%</p><p className="text-xs text-muted-foreground">Attendance</p></CardContent></Card>
         <Card><CardContent className="pt-4 text-center"><FileText className="h-5 w-5 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{marks.length}</p><p className="text-xs text-muted-foreground">Exam Records</p></CardContent></Card>
-        <Card><CardContent className="pt-4 text-center"><IndianRupee className="h-5 w-5 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">₹{totalFees.toLocaleString()}</p><p className="text-xs text-muted-foreground">Fees Paid</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><IndianRupee className="h-5 w-5 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">₹{totalDue.toLocaleString()}</p><p className="text-xs text-muted-foreground">Fee Due</p></CardContent></Card>
         <Card><CardContent className="pt-4 text-center"><Bell className="h-5 w-5 mx-auto mb-1" /><p className="text-xl font-bold">{notifications.length}</p><p className="text-xs text-muted-foreground">Notices</p></CardContent></Card>
       </div>
 
@@ -95,7 +106,8 @@ export default function StudentPortal() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="marks">Marks</TabsTrigger>
-          <TabsTrigger value="fees">Fees</TabsTrigger>
+          <TabsTrigger value="dues">Fee Dues</TabsTrigger>
+          <TabsTrigger value="fees">Payments</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
           <TabsTrigger value="notices">Notices</TabsTrigger>
         </TabsList>
@@ -160,6 +172,59 @@ export default function StudentPortal() {
                     ))}
                   </TableBody>
                 </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dues">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                Fee Dues
+                {totalDue > 0 && <Badge variant="destructive" className="text-xs">₹{totalDue.toLocaleString()} pending</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {feeDues.length === 0 ? <p className="text-muted-foreground text-center py-8">No fee structure assigned for your class</p> : (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fee Type</TableHead>
+                        <TableHead className="text-right">Total Amount</TableHead>
+                        <TableHead className="text-right">Paid</TableHead>
+                        <TableHead className="text-right">Due</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {feeDues.map((d: any) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="font-medium">{d.fee_types?.name || "—"}</TableCell>
+                          <TableCell className="text-right">₹{Number(d.amount).toLocaleString()}</TableCell>
+                          <TableCell className="text-right">₹{d.paid.toLocaleString()}</TableCell>
+                          <TableCell className="text-right font-medium">{d.due > 0 ? `₹${d.due.toLocaleString()}` : "—"}</TableCell>
+                          <TableCell>
+                            {d.due === 0 ? (
+                              <Badge variant="outline" className="bg-success/10 text-success">Paid</Badge>
+                            ) : d.paid > 0 ? (
+                              <Badge variant="outline" className="bg-warning/10 text-warning">Partial</Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-destructive/10 text-destructive">Unpaid</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {totalDue > 0 && (
+                    <div className="mt-4 p-3 rounded-lg border border-destructive/20 bg-destructive/5 flex items-center gap-2 text-sm">
+                      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                      <span>Total pending dues: <strong>₹{totalDue.toLocaleString()}</strong>. Please contact your school office for payment.</span>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

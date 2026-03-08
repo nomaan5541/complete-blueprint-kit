@@ -4,15 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, GraduationCap, Users, Calendar, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
 
 export default function SchoolDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [school, setSchool] = useState<any>(null);
   const [adminProfile, setAdminProfile] = useState<any>(null);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [counts, setCounts] = useState({ students: 0, teachers: 0 });
   const [activeYear, setActiveYear] = useState<string | null>(null);
@@ -38,6 +40,8 @@ export default function SchoolDetail() {
       if (s?.admin_id) {
         const { data: p } = await supabase.from("profiles").select("*").eq("user_id", s.admin_id).single();
         setAdminProfile(p);
+        // Get admin email from auth metadata stored in profile or use school email
+        setAdminEmail(s.email || null);
       }
       setLoading(false);
     }
@@ -65,9 +69,18 @@ export default function SchoolDetail() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/schools")}><ArrowLeft className="h-4 w-4" /></Button>
-          <div>
-            <h1 className="text-3xl font-bold">{school.name}</h1>
-            <Badge variant="outline" className={statusColors[school.status] || ""}>{school.status}</Badge>
+          <div className="flex items-center gap-4">
+            {school.logo_url ? (
+              <img src={school.logo_url} alt="" className="h-12 w-12 rounded-xl object-cover border" />
+            ) : (
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">
+                {school.name.charAt(0)}
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold">{school.name}</h1>
+              <Badge variant="outline" className={statusColors[school.status] || ""}>{school.status}</Badge>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -86,10 +99,26 @@ export default function SchoolDetail() {
 
       {/* Stats cards */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{counts.students}</p><p className="text-sm text-muted-foreground">Students</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{counts.teachers}</p><p className="text-sm text-muted-foreground">Teachers</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{activeYear || "—"}</p><p className="text-sm text-muted-foreground">Academic Year</p></CardContent></Card>
-        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{subscription?.subscription_plans?.name || "None"}</p><p className="text-sm text-muted-foreground">Plan</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center">
+          <GraduationCap className="h-5 w-5 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold">{counts.students}</p>
+          <p className="text-sm text-muted-foreground">Students</p>
+        </CardContent></Card>
+        <Card><CardContent className="pt-6 text-center">
+          <Users className="h-5 w-5 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold">{counts.teachers}</p>
+          <p className="text-sm text-muted-foreground">Teachers</p>
+        </CardContent></Card>
+        <Card><CardContent className="pt-6 text-center">
+          <Calendar className="h-5 w-5 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold">{activeYear || "—"}</p>
+          <p className="text-sm text-muted-foreground">Academic Year</p>
+        </CardContent></Card>
+        <Card><CardContent className="pt-6 text-center">
+          <CreditCard className="h-5 w-5 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold">{subscription?.subscription_plans?.name || "None"}</p>
+          <p className="text-sm text-muted-foreground">Plan</p>
+        </CardContent></Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -102,7 +131,8 @@ export default function SchoolDetail() {
             <Row label="Registration No." value={school.registration_number} />
             <Row label="Principal" value={school.principal_name} />
             <Row label="Website" value={school.website} />
-            <Row label="Created" value={new Date(school.created_at).toLocaleDateString()} />
+            <Row label="School Timings" value={school.school_start_time && school.school_end_time ? `${school.school_start_time} — ${school.school_end_time}` : null} />
+            <Row label="Created" value={format(new Date(school.created_at), "dd MMM yyyy")} />
           </CardContent>
         </Card>
 
@@ -112,6 +142,7 @@ export default function SchoolDetail() {
             {adminProfile ? (
               <>
                 <Row label="Name" value={adminProfile.full_name} />
+                <Row label="Email" value={adminEmail} />
                 <Row label="Phone" value={adminProfile.phone} />
               </>
             ) : (
@@ -124,14 +155,18 @@ export default function SchoolDetail() {
           <CardHeader><CardTitle>Subscription</CardTitle></CardHeader>
           <CardContent className="text-sm">
             {subscription ? (
-              <div className="grid gap-3 sm:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-5">
                 <Row label="Plan" value={subscription.subscription_plans?.name} />
                 <Row label="Start Date" value={subscription.start_date} />
                 <Row label="End Date" value={subscription.end_date} />
                 <Row label="Amount" value={`₹${Number(subscription.payment_amount).toLocaleString()}`} />
+                <Row label="Payment" value={subscription.payment_status} />
               </div>
             ) : (
-              <p className="text-muted-foreground">No active subscription</p>
+              <div className="flex items-center justify-between">
+                <p className="text-muted-foreground">No active subscription</p>
+                <Button variant="outline" size="sm" onClick={() => navigate("/subscriptions")}>Assign Plan</Button>
+              </div>
             )}
           </CardContent>
         </Card>

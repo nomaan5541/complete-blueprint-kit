@@ -9,12 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School } from "lucide-react";
+import { Loader2, Save, School, Upload, X } from "lucide-react";
 
 export default function SchoolSettings() {
   const { schoolId } = useSchool();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [existingLogo, setExistingLogo] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "", address: "", city: "", state: "", pincode: "",
     phone: "", email: "", website: "", principal_name: "",
@@ -46,6 +49,8 @@ export default function SchoolSettings() {
           school_end_time: s.school_end_time || "16:00",
           registration_number: s.registration_number || "",
         });
+        setExistingLogo(s.logo_url || null);
+        setLogoPreview(s.logo_url || null);
       }
       setGrades(gRes.data || []);
       setLoading(false);
@@ -53,9 +58,34 @@ export default function SchoolSettings() {
     fetch();
   }, [schoolId]);
 
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("Logo must be under 2MB"); return; }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setExistingLogo(null);
+  };
+
   const saveSchool = async () => {
     if (!schoolId) return;
     setSaving(true);
+
+    let logoUrl = existingLogo;
+    if (logoFile) {
+      const ext = logoFile.name.split(".").pop();
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("school-logos").upload(path, logoFile);
+      if (uploadError) { toast.error(uploadError.message); setSaving(false); return; }
+      const { data: urlData } = supabase.storage.from("school-logos").getPublicUrl(path);
+      logoUrl = urlData.publicUrl;
+    }
+
     const { error } = await supabase.from("schools").update({
       name: form.name,
       address: form.address || null,
@@ -69,9 +99,14 @@ export default function SchoolSettings() {
       school_start_time: form.school_start_time || null,
       school_end_time: form.school_end_time || null,
       registration_number: form.registration_number || null,
+      logo_url: logoUrl,
     }).eq("id", schoolId);
     if (error) toast.error(error.message);
-    else toast.success("School settings updated");
+    else {
+      toast.success("School settings updated");
+      setExistingLogo(logoUrl);
+      setLogoFile(null);
+    }
     setSaving(false);
   };
 
@@ -97,6 +132,28 @@ export default function SchoolSettings() {
               <CardDescription>Update your school's details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Logo Upload */}
+              <div className="space-y-2">
+                <Label>School Logo</Label>
+                <div className="flex items-center gap-4">
+                  {logoPreview ? (
+                    <div className="relative">
+                      <img src={logoPreview} alt="Logo" className="h-20 w-20 rounded-xl object-cover border" />
+                      <button type="button" onClick={removeLogo} className="absolute -top-2 -right-2 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="h-20 w-20 rounded-xl border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground mt-1">Upload</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
+                    </label>
+                  )}
+                  <p className="text-xs text-muted-foreground">Max 2MB. Used in receipts and report cards.</p>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2 space-y-2"><Label>School Name</Label><Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>Principal Name</Label><Input value={form.principal_name} onChange={(e) => setForm((p) => ({ ...p, principal_name: e.target.value }))} /></div>

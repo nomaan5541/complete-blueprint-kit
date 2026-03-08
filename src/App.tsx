@@ -44,6 +44,9 @@ import StudentProfile from "./pages/school/StudentProfile";
 import BulkStudentImport from "./pages/school/BulkStudentImport";
 import FeeDues from "./pages/school/FeeDues";
 import StudentTransfer from "./pages/school/StudentTransfer";
+import StudentDocuments from "./pages/school/StudentDocuments";
+import SchoolCalendar from "./pages/school/SchoolCalendar";
+import AuditLogs from "./pages/school/AuditLogs";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
@@ -109,6 +112,9 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/timetable" element={<Timetable />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/reports" element={<SchoolReports />} />
+        <Route path="/documents" element={<StudentDocuments />} />
+        <Route path="/calendar" element={<SchoolCalendar />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/settings" element={<SchoolSettings />} />
         <Route path="/setup" element={<SetupWizard />} />
         <Route path="*" element={<NotFound />} />

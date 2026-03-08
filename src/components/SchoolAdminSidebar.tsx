@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
-  FileText, ArrowUpRight, Clock, Bell, BarChart3,
+  FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
+  CalendarDays, Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -33,6 +34,9 @@ const navItems = [
   { title: "Timetable", url: "/school/timetable", icon: Clock },
   { title: "Notifications", url: "/school/notifications", icon: Bell },
   { title: "Reports", url: "/school/reports", icon: BarChart3 },
+  { title: "Documents", url: "/school/documents", icon: FolderOpen },
+  { title: "Calendar", url: "/school/calendar", icon: CalendarDays },
+  { title: "Audit Logs", url: "/school/audit-logs", icon: Shield },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
 

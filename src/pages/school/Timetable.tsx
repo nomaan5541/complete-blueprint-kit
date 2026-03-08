@@ -56,15 +56,15 @@ export default function Timetable() {
   useEffect(() => { fetchAll(); }, [schoolId]);
 
   const loadEntries = async () => {
-    if (!selectedClass || !selectedYear || !schoolId) return;
+    if (!selectedClass || !selectedYearId || !schoolId) return;
     let query = supabase.from("timetable_entries").select("*, subjects(name), teachers(name)")
-      .eq("school_id", schoolId).eq("class_id", selectedClass).eq("academic_year_id", selectedYear);
+      .eq("school_id", schoolId).eq("class_id", selectedClass).eq("academic_year_id", selectedYearId);
     if (selectedSection) query = query.eq("section_id", selectedSection);
     const { data } = await query;
     setEntries(data || []);
   };
 
-  useEffect(() => { if (selectedClass && selectedYear) loadEntries(); }, [selectedClass, selectedSection, selectedYear]);
+  useEffect(() => { if (selectedClass && selectedYearId) loadEntries(); }, [selectedClass, selectedSection, selectedYearId]);
 
   const handleAddSlot = async () => {
     if (!slotForm.name || !slotForm.start_time || !slotForm.end_time) { toast.error("All fields required"); return; }

@@ -59,14 +59,16 @@ export default function Subscriptions() {
     });
     if (error) toast.error(error.message);
     else {
-      // Also record payment
+      // Record payment
       await supabase.from("payment_history").insert({
         school_id: assignForm.school_id,
         amount,
         status: "paid",
         notes: `Subscription: ${plan?.name}`,
       });
-      toast.success("Subscription assigned");
+      // Activate school
+      await supabase.from("schools").update({ status: "active" as any }).eq("id", assignForm.school_id);
+      toast.success("Subscription assigned & school activated");
       setAssignOpen(false);
       setAssignForm({ school_id: "", plan_id: "", payment_amount: "" });
       fetchAll();

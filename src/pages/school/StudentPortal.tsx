@@ -177,6 +177,59 @@ export default function StudentPortal() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="dues">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                Fee Dues
+                {totalDue > 0 && <Badge variant="destructive" className="text-xs">₹{totalDue.toLocaleString()} pending</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {feeDues.length === 0 ? <p className="text-muted-foreground text-center py-8">No fee structure assigned for your class</p> : (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fee Type</TableHead>
+                        <TableHead className="text-right">Total Amount</TableHead>
+                        <TableHead className="text-right">Paid</TableHead>
+                        <TableHead className="text-right">Due</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {feeDues.map((d: any) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="font-medium">{d.fee_types?.name || "—"}</TableCell>
+                          <TableCell className="text-right">₹{Number(d.amount).toLocaleString()}</TableCell>
+                          <TableCell className="text-right">₹{d.paid.toLocaleString()}</TableCell>
+                          <TableCell className="text-right font-medium">{d.due > 0 ? `₹${d.due.toLocaleString()}` : "—"}</TableCell>
+                          <TableCell>
+                            {d.due === 0 ? (
+                              <Badge variant="outline" className="bg-success/10 text-success">Paid</Badge>
+                            ) : d.paid > 0 ? (
+                              <Badge variant="outline" className="bg-warning/10 text-warning">Partial</Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-destructive/10 text-destructive">Unpaid</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {totalDue > 0 && (
+                    <div className="mt-4 p-3 rounded-lg border border-destructive/20 bg-destructive/5 flex items-center gap-2 text-sm">
+                      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                      <span>Total pending dues: <strong>₹{totalDue.toLocaleString()}</strong>. Please contact your school office for payment.</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="fees">
           <Card>
             <CardHeader><CardTitle>Fee History</CardTitle></CardHeader>

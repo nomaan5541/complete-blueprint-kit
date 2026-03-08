@@ -77,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/";
   };
 
+  useSessionTimeout();
+
   return (
     <AuthContext.Provider value={{ user, session, loading, role, signIn, signOut }}>
       {children}

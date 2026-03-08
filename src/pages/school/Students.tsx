@@ -55,7 +55,7 @@ export default function Students() {
   useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   // Helper to get display values from master or fallback to student record
-  const getMasterField = (s: any, field: string) => s.student_master?.[field] || s[field];
+  const getMasterField = (s: any, field: string) => s?.student_master?.[field] || s?.[field];
 
   const filteredStudents = students.filter((s) => {
     const name = getMasterField(s, "name");

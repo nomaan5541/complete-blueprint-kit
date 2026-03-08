@@ -75,6 +75,7 @@ import StudentNotificationsPage from "./pages/student/StudentNotifications";
 import StudentHomeworkPage from "./pages/student/StudentHomework";
 import StudentIDCardPage from "./pages/student/StudentIDCard";
 import StudentStudyMaterialsPage from "./pages/student/StudentStudyMaterials";
+import StudentOnlineExamsPage from "./pages/student/StudentOnlineExams";
 
 const queryClient = new QueryClient();
 

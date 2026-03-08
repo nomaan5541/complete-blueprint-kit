@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle, Download, HardDrive } from "lucide-react";
+import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle, Download, HardDrive, KeyRound } from "lucide-react";
+import CredentialsTab from "@/components/settings/CredentialsTab";
 import { Progress } from "@/components/ui/progress";
 import { exportSchoolBackup, type ExportFormat, type BackupProgress } from "@/lib/schoolBackup";
 import { format } from "date-fns";
@@ -186,6 +187,7 @@ export default function SchoolSettings() {
           <TabsTrigger value="grades">Grade System</TabsTrigger>
           <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
           <TabsTrigger value="backup"><HardDrive className="mr-2 h-4 w-4" />Data Backup</TabsTrigger>
+          <TabsTrigger value="credentials"><KeyRound className="mr-2 h-4 w-4" />Credentials</TabsTrigger>
           <TabsTrigger value="subscription" className={subscriptionExpired ? "text-destructive" : ""}>
             <CreditCard className="mr-2 h-4 w-4" />
             Subscription
@@ -528,6 +530,10 @@ export default function SchoolSettings() {
               </Card>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="credentials">
+          {schoolId && <CredentialsTab schoolId={schoolId} />}
         </TabsContent>
       </Tabs>
     </div>

@@ -942,7 +942,6 @@ export type Database = {
           created_at: string
           email: string
           id: string
-          password_plain: string
           person_name: string
           school_id: string
         }
@@ -951,7 +950,6 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
-          password_plain: string
           person_name: string
           school_id: string
         }
@@ -960,7 +958,6 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
-          password_plain?: string
           person_name?: string
           school_id?: string
         }

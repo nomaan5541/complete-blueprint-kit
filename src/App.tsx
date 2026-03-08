@@ -150,12 +150,16 @@ function TeacherRoutesWrapper() {
     <TeacherLayout>
       <Routes>
         <Route path="/" element={<TeacherDashboard />} />
+        <Route path="/profile" element={<TeacherProfile />} />
         <Route path="/attendance" element={<TeacherAttendance />} />
         <Route path="/exams" element={<TeacherExams />} />
         <Route path="/marks" element={<TeacherMarks />} />
+        <Route path="/exam-monitor" element={<TeacherExamMonitor />} />
         <Route path="/homework" element={<TeacherHomework />} />
         <Route path="/students" element={<TeacherStudents />} />
         <Route path="/timetable" element={<TeacherTimetable />} />
+        <Route path="/notifications" element={<TeacherNotifications />} />
+        <Route path="/analytics" element={<TeacherAnalytics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TeacherLayout>

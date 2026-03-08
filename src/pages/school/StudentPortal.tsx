@@ -297,6 +297,39 @@ export default function StudentPortal() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="online-exams">
+          <Card>
+            <CardHeader><CardTitle>Online Exams</CardTitle></CardHeader>
+            <CardContent>
+              {onlineExams.filter((e: any) => (e as any).exam_mode === "online").length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No online exams available</p>
+              ) : (
+                <div className="space-y-3">
+                  {onlineExams.filter((e: any) => (e as any).exam_mode === "online").map((exam: any) => {
+                    const attempt = attempts.find((a: any) => a.exam_id === exam.id);
+                    const isCompleted = attempt?.status === "completed";
+                    return (
+                      <div key={exam.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">{exam.name}</p>
+                          <p className="text-sm text-muted-foreground">{exam.subjects?.name} · {(exam as any).total_marks} marks · {(exam as any).duration_minutes} min</p>
+                        </div>
+                        {isCompleted ? (
+                          <Badge variant="outline" className="bg-success/10 text-success">Score: {attempt.score}</Badge>
+                        ) : (
+                          <Button size="sm" onClick={() => navigate(`/student/exam?examId=${exam.id}`)}>
+                            <PlayCircle className="mr-1 h-4 w-4" /> Take Exam
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="notices">
           <Card>
             <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>

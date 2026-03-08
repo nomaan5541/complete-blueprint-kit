@@ -30,12 +30,13 @@ export default function SchoolDetail() {
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const [schoolRes, subRes, studRes, teachRes, yearRes] = await Promise.all([
+      const [schoolRes, subRes, studRes, teachRes, yearRes, planRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", id).single(),
         supabase.from("subscriptions").select("*, subscription_plans(*)").eq("school_id", id).eq("is_active", true).maybeSingle(),
         supabase.from("students").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
         supabase.from("teachers").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
         supabase.from("academic_years").select("name").eq("school_id", id).eq("status", "active").maybeSingle(),
+        supabase.from("subscription_plans").select("*").eq("is_active", true).order("price"),
       ]);
 
       const s = schoolRes.data;

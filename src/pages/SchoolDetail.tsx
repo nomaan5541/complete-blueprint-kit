@@ -14,24 +14,31 @@ export default function SchoolDetail() {
   const [school, setSchool] = useState<any>(null);
   const [adminProfile, setAdminProfile] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
+  const [counts, setCounts] = useState({ students: 0, teachers: 0 });
+  const [activeYear, setActiveYear] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const { data: s } = await supabase.from("schools").select("*").eq("id", id).single();
+      const [schoolRes, subRes, studRes, teachRes, yearRes] = await Promise.all([
+        supabase.from("schools").select("*").eq("id", id).single(),
+        supabase.from("subscriptions").select("*, subscription_plans(*)").eq("school_id", id).eq("is_active", true).maybeSingle(),
+        supabase.from("students").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
+        supabase.from("teachers").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
+        supabase.from("academic_years").select("name").eq("school_id", id).eq("status", "active").maybeSingle(),
+      ]);
+
+      const s = schoolRes.data;
       setSchool(s);
+      setSubscription(subRes.data);
+      setCounts({ students: studRes.count ?? 0, teachers: teachRes.count ?? 0 });
+      setActiveYear(yearRes.data?.name || null);
+
       if (s?.admin_id) {
         const { data: p } = await supabase.from("profiles").select("*").eq("user_id", s.admin_id).single();
         setAdminProfile(p);
       }
-      const { data: sub } = await supabase
-        .from("subscriptions")
-        .select("*, subscription_plans(*)")
-        .eq("school_id", id)
-        .eq("is_active", true)
-        .maybeSingle();
-      setSubscription(sub);
       setLoading(false);
     }
     load();
@@ -77,6 +84,14 @@ export default function SchoolDetail() {
         </div>
       </div>
 
+      {/* Stats cards */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{counts.students}</p><p className="text-sm text-muted-foreground">Students</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{counts.teachers}</p><p className="text-sm text-muted-foreground">Teachers</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{activeYear || "—"}</p><p className="text-sm text-muted-foreground">Academic Year</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{subscription?.subscription_plans?.name || "None"}</p><p className="text-sm text-muted-foreground">Plan</p></CardContent></Card>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>School Information</CardTitle></CardHeader>
@@ -85,6 +100,8 @@ export default function SchoolDetail() {
             <Row label="Phone" value={school.phone} />
             <Row label="Address" value={[school.address, school.city, school.state, school.pincode].filter(Boolean).join(", ")} />
             <Row label="Registration No." value={school.registration_number} />
+            <Row label="Principal" value={school.principal_name} />
+            <Row label="Website" value={school.website} />
             <Row label="Created" value={new Date(school.created_at).toLocaleDateString()} />
           </CardContent>
         </Card>

@@ -30,7 +30,6 @@ export default function Timetable() {
 
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
   const [slotOpen, setSlotOpen] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
   const [slotForm, setSlotForm] = useState({ name: "", start_time: "", end_time: "", is_break: false });

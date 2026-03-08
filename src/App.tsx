@@ -142,6 +142,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/reports" element={<SchoolReports />} />
         <Route path="/documents" element={<StudentDocuments />} />
         <Route path="/calendar" element={<SchoolCalendar />} />
+        <Route path="/meetings" element={<Meetings />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/settings" element={<SchoolSettings />} />
         <Route path="/setup" element={<SetupWizard />} />

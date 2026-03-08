@@ -92,7 +92,7 @@ export default function AddSchool() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/schools")}><ArrowLeft className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/schools")}><ArrowLeft className="h-4 w-4" /></Button>
         <div>
           <h1 className="text-3xl font-bold">Add School</h1>
           <p className="text-muted-foreground">Register a new school and its administrator</p>

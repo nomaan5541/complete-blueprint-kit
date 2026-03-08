@@ -63,7 +63,12 @@ export function StudentSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
                     >
                       <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex items-center gap-2">
+                          {item.title}
+                          {(item as any).comingSoon && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 leading-tight">Soon</Badge>}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

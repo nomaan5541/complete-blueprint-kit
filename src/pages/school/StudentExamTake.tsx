@@ -54,9 +54,9 @@ export default function StudentExamTake() {
         return;
       }
 
-      // Load questions with options
+      // Load questions with options (using view that hides is_correct)
       const { data: qData } = await supabase.from("exam_questions" as any)
-        .select("*, exam_options(*)").eq("exam_id", examId).order("order_number");
+        .select("*, exam_options_student(*)").eq("exam_id", examId).order("order_number");
       
       // Shuffle questions and options for anti-cheat
       const shuffled = shuffleArray(qData || []).map((q: any) => ({

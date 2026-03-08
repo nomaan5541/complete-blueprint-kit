@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 
 type AppRole = "super_admin" | "school_admin" | "teacher" | "student";
 
@@ -75,6 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(null);
     window.location.href = "/";
   };
+
+  useSessionTimeout();
 
   return (
     <AuthContext.Provider value={{ user, session, loading, role, signIn, signOut }}>

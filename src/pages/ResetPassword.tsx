@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { GraduationCap, Loader2, CheckCircle2 } from "lucide-react";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { isPasswordStrong } from "@/lib/passwordValidation";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -17,26 +19,22 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setIsRecovery(true);
     }
-
-    // Listen for auth state changes (recovery event)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecovery(true);
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (!isPasswordStrong(password)) {
+      toast.error("Password does not meet all requirements");
       return;
     }
     if (password !== confirmPassword) {
@@ -86,13 +84,14 @@ export default function ResetPassword() {
           <form onSubmit={handleReset} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="new-password">New Password</Label>
-              <Input id="new-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <Input id="new-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordStrengthIndicator password={password} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} />
+              <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading || !isPasswordStrong(password)}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Update Password
             </Button>

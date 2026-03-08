@@ -44,6 +44,7 @@ export default function SchoolDetail() {
       setSubscription(subRes.data);
       setCounts({ students: studRes.count ?? 0, teachers: teachRes.count ?? 0 });
       setActiveYear(yearRes.data?.name || null);
+      setPlans(planRes.data || []);
 
       if (s?.admin_id) {
         const { data: p } = await supabase.from("profiles").select("*").eq("user_id", s.admin_id).single();

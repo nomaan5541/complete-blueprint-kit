@@ -24,7 +24,9 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
               <ThemeToggle />
             </header>
             <main className="flex-1 p-6 overflow-auto">
-              {children}
+              <ReadOnlyOverlay>
+                {children}
+              </ReadOnlyOverlay>
             </main>
           </div>
         </div>

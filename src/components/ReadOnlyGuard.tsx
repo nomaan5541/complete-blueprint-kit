@@ -37,7 +37,7 @@ export function ReadOnlyGuard({ children, fallbackMessage }: { children: ReactNo
 export function ReadOnlyOverlay({ children }: { children: ReactNode }) {
   const { isReadOnly } = useSchool();
 
-  const handleCapture = useCallback((e: React.MouseEvent | React.SubmitEvent) => {
+  const handleCapture = useCallback((e: React.MouseEvent) => {
     if (!isReadOnly) return;
 
     const target = e.target as HTMLElement;

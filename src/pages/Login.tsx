@@ -56,11 +56,12 @@ export default function Login() {
 
   if (forgotMode) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <GraduationCap className="h-7 w-7" />
+      <div className="min-h-screen flex items-center justify-center px-4 relative">
+        <div className="animated-bg" />
+        <Card className="w-full max-w-md glass-strong border-0 animate-scale-in">
+          <CardHeader className="text-center space-y-3">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-soft-lg">
+              <GraduationCap className="h-8 w-8" />
             </div>
             <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
             <CardDescription>
@@ -97,14 +98,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <GraduationCap className="h-7 w-7" />
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+      <div className="animated-bg" />
+      <Card className="w-full max-w-md glass-strong border-0 animate-scale-in">
+        <CardHeader className="text-center space-y-3">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-soft-lg animate-float">
+            <GraduationCap className="h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl font-bold">EduManage</CardTitle>
-          <CardDescription>Multi-School Management System</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">EduManage</CardTitle>
+          <CardDescription className="text-muted-foreground">Multi-School Management System</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -115,11 +117,11 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline">Forgot password?</button>
+                <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline transition-colors">Forgot password?</button>
               </div>
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>

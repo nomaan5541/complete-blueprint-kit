@@ -6,11 +6,12 @@ import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 export function TeacherLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full relative">
+        <div className="animated-bg" />
         <TeacherSidebar />
         <div className="flex-1 flex flex-col">
           <SubscriptionBanner />
-          <header className="h-14 flex items-center border-b bg-card px-4">
+          <header className="h-14 flex items-center border-b border-border/50 glass-subtle px-4 sticky top-0 z-30">
             <SidebarTrigger className="mr-4" />
           </header>
           <main className="flex-1 p-6 overflow-auto">

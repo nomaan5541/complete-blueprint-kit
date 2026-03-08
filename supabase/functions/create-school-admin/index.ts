@@ -14,15 +14,15 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify caller is super_admin
-    const authHeader = req.headers.get("Authorization")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const callerClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user: caller } } = await callerClient.auth.getUser();
-    if (!caller) throw new Error("Unauthorized");
+    // Verify caller is authenticated and is super_admin
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header");
 
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user: caller }, error: authErr } = await supabaseAdmin.auth.getUser(token);
+    if (authErr || !caller) throw new Error("Unauthorized: " + (authErr?.message || "No user"));
+
+    // Check super_admin role
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -34,17 +34,19 @@ serve(async (req) => {
     const body = await req.json();
     const { email, password, fullName, phone, school } = body;
 
-    // Create admin user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    if (!email || !password || !school?.name) {
+      throw new Error("Email, password, and school name are required");
+    }
+
+    // Create admin user with email confirmed
+    const { data: authData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: fullName },
+      user_metadata: { full_name: fullName || "" },
     });
-    if (authError) throw authError;
+    if (createErr) throw new Error("Failed to create user: " + createErr.message);
     const adminUserId = authData.user.id;
-
-    // Upload logo handled client-side, logo_url passed in school object
 
     // Create school
     const { data: schoolData, error: schoolError } = await supabaseAdmin
@@ -53,16 +55,14 @@ serve(async (req) => {
       .select()
       .single();
     if (schoolError) {
-      // Cleanup: delete created user
       await supabaseAdmin.auth.admin.deleteUser(adminUserId);
-      throw schoolError;
+      throw new Error("Failed to create school: " + schoolError.message);
     }
 
     // Assign school_admin role
-    const { error: roleError } = await supabaseAdmin
+    await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: adminUserId, role: "school_admin" });
-    if (roleError) throw roleError;
 
     // Update profile
     await supabaseAdmin
@@ -74,6 +74,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    console.error("create-school-admin error:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

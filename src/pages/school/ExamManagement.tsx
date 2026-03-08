@@ -16,11 +16,11 @@ import { Plus, Loader2, Trash2, PenLine } from "lucide-react";
 
 export default function ExamManagement() {
   const { schoolId } = useSchool();
+  const { academicYears, selectedYearId } = useAcademicYear();
   const [exams, setExams] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [marks, setMarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

@@ -38,24 +38,22 @@ export default function ExamManagement() {
   const [examForm, setExamForm] = useState({ name: "", exam_type: "exam", academic_year_id: "", start_date: "", end_date: "" });
 
   const fetchAll = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !selectedYearId) return;
     setLoading(true);
-    const [eRes, cRes, sRes, stRes, yRes] = await Promise.all([
-      supabase.from("exams").select("*, academic_years(name)").eq("school_id", schoolId).order("created_at", { ascending: false }),
+    const [eRes, cRes, sRes, stRes] = await Promise.all([
+      supabase.from("exams").select("*, academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("created_at", { ascending: false }),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("subjects").select("*").eq("school_id", schoolId).order("name"),
-      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("status", "active").order("name"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
+      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setExams(eRes.data || []);
     setClasses(cRes.data || []);
     setSubjects(sRes.data || []);
     setStudents(stRes.data || []);
-    setAcademicYears(yRes.data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [schoolId]);
+  useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   const handleCreateExam = async () => {
     if (!examForm.name.trim() || !examForm.academic_year_id) { toast.error("Name and academic year are required"); return; }

@@ -52,6 +52,7 @@ export default function StudentPortal() {
       setNotifications(notifRes.data || []);
       setTimetable(ttRes.data || []);
       setSlots(slotsRes.data || []);
+      setFeeStructures(feeStructRes.data || []);
       setLoading(false);
     }
     fetch();

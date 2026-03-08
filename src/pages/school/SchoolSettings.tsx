@@ -531,6 +531,10 @@ export default function SchoolSettings() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="credentials">
+          {schoolId && <CredentialsTab schoolId={schoolId} />}
+        </TabsContent>
       </Tabs>
     </div>
   );

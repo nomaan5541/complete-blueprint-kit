@@ -182,6 +182,11 @@ export default function SchoolReports() {
         </TabsContent>
 
         <TabsContent value="finance" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("fee-payments", feePayments.map(p => ({ amount: p.amount, date: p.payment_date, type: (p as any).fee_types?.name })))}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">₹{totalCollected.toLocaleString()}</p><p className="text-sm text-muted-foreground">Total Collected</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">₹{totalExpected.toLocaleString()}</p><p className="text-sm text-muted-foreground">Total Expected</p></CardContent></Card>

@@ -271,26 +271,26 @@ export default function Students() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Students</h1>
-          <p className="text-muted-foreground">Manage student records ({filteredStudents.length} total)</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Students</h1>
+          <p className="text-muted-foreground text-sm">Manage student records ({filteredStudents.length} total)</p>
         </div>
         <Button onClick={() => {
           setForm({ ...emptyStudentForm, academic_year_id: selectedYearId });
           setPhotoFile(null); setPhotoPreview(null); setDocumentUploads({});
           setOpen(true);
-        }}><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
+        }} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search by name or admission no..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Class" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Class" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Classes</SelectItem>
             {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}

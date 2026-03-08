@@ -17,11 +17,11 @@ import { format } from "date-fns";
 
 export default function FeeManagement() {
   const { schoolId } = useSchool();
+  const { academicYears, selectedYearId } = useAcademicYear();
   const [feeTypes, setFeeTypes] = useState<any[]>([]);
   const [structures, setStructures] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

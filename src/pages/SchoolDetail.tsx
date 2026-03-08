@@ -200,7 +200,17 @@ export default function SchoolDetail() {
         </Card>
 
         <Card className="md:col-span-2">
-          <CardHeader><CardTitle>Subscription</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Subscription</CardTitle>
+            <Button size="sm" onClick={() => {
+              const defaultPlan = plans[0];
+              setAssignForm({ plan_id: defaultPlan?.id || "", payment_amount: String(defaultPlan?.price || ""), duration_months: "12" });
+              setAssignOpen(true);
+            }}>
+              <CreditCard className="mr-2 h-4 w-4" />
+              {subscription ? "Change Plan" : "Assign Plan"}
+            </Button>
+          </CardHeader>
           <CardContent className="text-sm">
             {subscription ? (
               <div className="grid gap-3 sm:grid-cols-5">
@@ -211,14 +221,51 @@ export default function SchoolDetail() {
                 <Row label="Payment" value={subscription.payment_status} />
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <p className="text-muted-foreground">No active subscription</p>
-                <Button variant="outline" size="sm" onClick={() => navigate("/subscriptions")}>Assign Plan</Button>
-              </div>
+              <p className="text-muted-foreground">No active subscription</p>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Assign Subscription Dialog */}
+      <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{subscription ? "Change Subscription" : "Assign Subscription"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Plan</Label>
+              <Select value={assignForm.plan_id} onValueChange={(v) => {
+                const plan = plans.find((p: any) => p.id === v);
+                setAssignForm({ ...assignForm, plan_id: v, payment_amount: String(plan?.price || "") });
+              }}>
+                <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
+                <SelectContent>
+                  {plans.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} — ₹{Number(p.price).toLocaleString()}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duration (months)</Label>
+              <Input type="number" value={assignForm.duration_months} onChange={(e) => setAssignForm({ ...assignForm, duration_months: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Amount (₹)</Label>
+              <Input type="number" value={assignForm.payment_amount} onChange={(e) => setAssignForm({ ...assignForm, payment_amount: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+            <Button onClick={handleAssignSubscription} disabled={saving || !assignForm.plan_id}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Activate Subscription
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

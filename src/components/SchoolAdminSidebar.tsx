@@ -40,6 +40,7 @@ const navItems = [
   { title: "Reports", url: "/school/reports", icon: BarChart3 },
   { title: "Documents", url: "/school/documents", icon: FolderOpen },
   { title: "Calendar", url: "/school/calendar", icon: CalendarDays },
+  { title: "Meetings", url: "/school/meetings", icon: Video, comingSoon: true },
   { title: "Audit Logs", url: "/school/audit-logs", icon: Shield },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];

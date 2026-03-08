@@ -23,6 +23,7 @@ const navItems = [
   { title: "Timetable", url: "/teacher/timetable", icon: Clock },
   { title: "Notifications", url: "/teacher/notifications", icon: Bell },
   { title: "Analytics", url: "/teacher/analytics", icon: BarChart3 },
+  { title: "Meetings", url: "/teacher/meetings", icon: Video, comingSoon: true },
 ];
 
 export function TeacherSidebar() {

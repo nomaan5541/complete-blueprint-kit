@@ -60,7 +60,7 @@ export default function StudentExamTake() {
       
       // Shuffle questions and options for anti-cheat
       const shuffled = shuffleArray(qData || []).map((q: any) => ({
-        ...q, exam_options: shuffleArray(q.exam_options || []),
+        ...q, exam_options: shuffleArray(q.exam_options_student || q.exam_options || []),
       }));
       setQuestions(shuffled);
 

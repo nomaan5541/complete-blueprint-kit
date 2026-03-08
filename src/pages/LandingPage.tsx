@@ -191,57 +191,68 @@ export default function LandingPage() {
               </div>
             ) : (
               plans.map((plan, i) => {
-                const isPopular = i === 1;
+                const isUltimate = plan.name?.toLowerCase() === "ultimate";
+                const isPopular = i === 1 && !isUltimate;
                 const planFeatures = Array.isArray(plan.features) ? plan.features : [];
                 return (
                   <Card
                     key={plan.id}
                     className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
-                      isPopular
+                      isUltimate
+                        ? "border-2 border-yellow-500/60 shadow-2xl scale-[1.04] bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-yellow-950/40 dark:via-amber-950/30 dark:to-orange-950/20"
+                        : isPopular
                         ? "border-2 border-primary shadow-xl scale-[1.02]"
                         : "glass border-0 hover:shadow-lg"
                     }`}
                   >
-                    {isPopular && (
+                    {isUltimate && (
+                      <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-500 to-amber-500 text-white px-5 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1.5 shadow-lg">
+                        <Crown className="h-3.5 w-3.5" /> ULTIMATE
+                      </div>
+                    )}
+                    {isPopular && !isUltimate && (
                       <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold rounded-bl-xl">
                         <Star className="h-3 w-3 inline mr-1" /> Most Popular
                       </div>
                     )}
                     <CardHeader className="pb-4">
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
+                      <CardTitle className={`text-xl ${isUltimate ? "text-amber-700 dark:text-amber-400 flex items-center gap-2" : ""}`}>
+                        {isUltimate && <Crown className="h-5 w-5" />}
+                        {plan.name}
+                      </CardTitle>
                       <p className="text-sm text-muted-foreground">{plan.description}</p>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div>
-                        <span className="text-4xl font-extrabold text-foreground">₹{Number(plan.price).toLocaleString()}</span>
+                        <span className={`text-4xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>₹{Number(plan.price).toLocaleString()}</span>
                         <span className="text-muted-foreground">/{plan.duration_months} mo</span>
                       </div>
                       <div className="space-y-2 text-sm">
                         {plan.max_students && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 text-primary" />
+                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_students} students
                           </div>
                         )}
                         {plan.max_teachers && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 text-primary" />
+                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_teachers} teachers
                           </div>
                         )}
                         {planFeatures.map((feat: string, fi: number) => (
                           <div key={fi} className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 text-primary" />
+                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             {feat}
                           </div>
                         ))}
                       </div>
                       <Button
-                        className="w-full"
-                        variant={isPopular ? "default" : "outline"}
+                        className={`w-full ${isUltimate ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white border-0 shadow-lg" : ""}`}
+                        variant={isUltimate ? "default" : isPopular ? "default" : "outline"}
                         onClick={() => { setSelectedPlan(plan); setRequestOpen(true); }}
                       >
-                        Request This Plan <ChevronRight className="ml-1 h-4 w-4" />
+                        {isUltimate ? "Get Ultimate Access" : "Request This Plan"} <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>

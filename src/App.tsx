@@ -190,6 +190,7 @@ function StudentPortalWrapper() {
         <Route path="/notifications" element={<StudentNotificationsPage />} />
         <Route path="/materials" element={<StudentStudyMaterialsPage />} />
         <Route path="/id-card" element={<StudentIDCardPage />} />
+        <Route path="/meetings" element={<StudentMeetings />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </StudentLayout>

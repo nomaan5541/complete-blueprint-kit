@@ -92,7 +92,7 @@ export default function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-md">
                 <GraduationCap className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-foreground">EduManage</span>
+              <span className="text-xl font-bold tracking-tight text-foreground">EDUPRIMEX</span>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -380,10 +380,10 @@ export default function LandingPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary text-primary-foreground">
                 <GraduationCap className="h-4 w-4" />
               </div>
-              <span className="font-semibold text-foreground">EduManage</span>
+              <span className="font-semibold text-foreground">EDUPRIMEX</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} EduManage. All rights reserved.
+              © {new Date().getFullYear()} EDUPRIMEX. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>

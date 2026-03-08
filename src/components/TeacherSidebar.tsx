@@ -36,7 +36,7 @@ export function TeacherSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight">EduManage</span>
+              <span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight"><span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight">EDUPRIMEX</span></span>
               <span className="text-[11px] text-sidebar-foreground/50 font-medium">Teacher</span>
             </div>
           )}

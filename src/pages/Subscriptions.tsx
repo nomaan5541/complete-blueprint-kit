@@ -160,28 +160,32 @@ export default function Subscriptions() {
             ) : subscriptions.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No subscriptions</TableCell></TableRow>
             ) : (
-              subscriptions.map((sub) => (
-                <TableRow key={sub.id}>
-                  <TableCell className="font-medium">{sub.schools?.name || "—"}</TableCell>
-                  <TableCell>{sub.subscription_plans?.name || "—"}</TableCell>
-                  <TableCell>{sub.start_date}</TableCell>
-                  <TableCell>
-                    {sub.end_date}
-                    {isExpiring(sub.end_date) && <Badge variant="outline" className="ml-2 bg-warning/10 text-warning text-xs">Expiring</Badge>}
-                  </TableCell>
-                  <TableCell>₹{Number(sub.payment_amount).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={sub.payment_status === "paid" ? "default" : "secondary"}>
-                      {sub.payment_status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => { setRenewId(sub.id); setRenewMonths("12"); }}>
-                      <RefreshCw className="mr-1 h-3 w-3" /> Renew
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              subscriptions.map((sub) => {
+                const isExpired = isBefore(new Date(sub.end_date), new Date());
+                return (
+                  <TableRow key={sub.id} className={isExpired ? "bg-destructive/5" : ""}>
+                    <TableCell className="font-medium">{sub.schools?.name || "—"}</TableCell>
+                    <TableCell>{sub.subscription_plans?.name || "—"}</TableCell>
+                    <TableCell>{sub.start_date}</TableCell>
+                    <TableCell>
+                      {sub.end_date}
+                      {isExpired && <Badge variant="destructive" className="ml-2 text-xs">Expired</Badge>}
+                      {!isExpired && isExpiring(sub.end_date) && <Badge variant="outline" className="ml-2 bg-warning/10 text-warning text-xs">Expiring Soon</Badge>}
+                    </TableCell>
+                    <TableCell>₹{Number(sub.payment_amount).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={isExpired ? "destructive" : sub.payment_status === "paid" ? "default" : "secondary"}>
+                        {isExpired ? "expired" : sub.payment_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant={isExpired ? "default" : "ghost"} size="sm" onClick={() => { setRenewId(sub.id); setRenewMonths("12"); }}>
+                        <RefreshCw className="mr-1 h-3 w-3" /> {isExpired ? "Renew Now" : "Renew"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

@@ -35,7 +35,6 @@ export default function Attendance() {
 
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [studentAttendance, setStudentAttendance] = useState<StudentAttendance[]>([]);
   const [attendanceLoaded, setAttendanceLoaded] = useState(false);

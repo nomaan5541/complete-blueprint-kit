@@ -164,21 +164,21 @@ export default function Teachers() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Teachers</h1>
-          <p className="text-muted-foreground">Manage teaching staff ({filtered.length} total)</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Teachers</h1>
+          <p className="text-muted-foreground text-sm">Manage teaching staff ({filtered.length} total)</p>
         </div>
-        <Button onClick={() => { setForm(emptyForm); setOpen(true); }}><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
+        <Button onClick={() => { setForm(emptyForm); setOpen(true); }} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Search teachers..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="table-responsive rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

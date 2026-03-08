@@ -57,6 +57,8 @@ import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherMarks from "./pages/teacher/TeacherMarks";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherTimetable from "./pages/teacher/TeacherTimetable";
+import TeacherHomework from "./pages/teacher/TeacherHomework";
+import TeacherExams from "./pages/teacher/TeacherExams";
 
 const queryClient = new QueryClient();
 

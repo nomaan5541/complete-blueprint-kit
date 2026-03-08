@@ -40,7 +40,6 @@ import SetupWizard from "./pages/school/SetupWizard";
 import Timetable from "./pages/school/Timetable";
 import Notifications from "./pages/school/Notifications";
 import SchoolReports from "./pages/school/SchoolReports";
-import StudentPortal from "./pages/school/StudentPortal";
 import ClassSubjectMapping from "./pages/school/ClassSubjectMapping";
 import ReportCard from "./pages/school/ReportCard";
 import StudentProfile from "./pages/school/StudentProfile";
@@ -60,6 +59,18 @@ import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherTimetable from "./pages/teacher/TeacherTimetable";
 import TeacherHomework from "./pages/teacher/TeacherHomework";
 import TeacherExams from "./pages/teacher/TeacherExams";
+
+// Student pages
+import StudentDashboardPage from "./pages/student/StudentDashboard";
+import StudentProfilePage from "./pages/student/StudentProfile";
+import StudentAttendancePage from "./pages/student/StudentAttendance";
+import StudentResultsPage from "./pages/student/StudentResults";
+import StudentFeesPage from "./pages/student/StudentFees";
+import StudentTimetablePage from "./pages/student/StudentTimetable";
+import StudentNotificationsPage from "./pages/student/StudentNotifications";
+import StudentHomeworkPage from "./pages/student/StudentHomework";
+import StudentIDCardPage from "./pages/student/StudentIDCard";
+import StudentStudyMaterialsPage from "./pages/student/StudentStudyMaterials";
 
 const queryClient = new QueryClient();
 
@@ -151,8 +162,17 @@ function StudentPortalWrapper() {
   return (
     <StudentLayout>
       <Routes>
-        <Route path="/" element={<StudentPortal />} />
+        <Route path="/" element={<StudentDashboardPage />} />
+        <Route path="/profile" element={<StudentProfilePage />} />
+        <Route path="/attendance" element={<StudentAttendancePage />} />
+        <Route path="/results" element={<StudentResultsPage />} />
         <Route path="/exam" element={<StudentExamTake />} />
+        <Route path="/fees" element={<StudentFeesPage />} />
+        <Route path="/timetable" element={<StudentTimetablePage />} />
+        <Route path="/homework" element={<StudentHomeworkPage />} />
+        <Route path="/notifications" element={<StudentNotificationsPage />} />
+        <Route path="/materials" element={<StudentStudyMaterialsPage />} />
+        <Route path="/id-card" element={<StudentIDCardPage />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </StudentLayout>

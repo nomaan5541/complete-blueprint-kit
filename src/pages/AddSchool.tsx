@@ -42,16 +42,6 @@ export default function AddSchool() {
     }
     setLoading(true);
     try {
-      // Create admin user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.adminEmail,
-        password: form.adminPassword,
-        options: { data: { full_name: form.adminName } },
-      });
-      if (authError) throw authError;
-      const adminUserId = authData.user?.id;
-      if (!adminUserId) throw new Error("Failed to create admin user");
-
       // Upload logo if selected
       let logoUrl: string | null = null;
       if (logoFile) {
@@ -63,41 +53,35 @@ export default function AddSchool() {
         logoUrl = urlData.publicUrl;
       }
 
-      // Create school
-      const { data: school, error: schoolError } = await supabase
-        .from("schools")
-        .insert({
-          name: form.name,
-          address: form.address || null,
-          city: form.city || null,
-          state: form.state || null,
-          pincode: form.pincode || null,
-          phone: form.phone || null,
-          email: form.email || null,
-          registration_number: form.registration_number || null,
-          principal_name: form.principal_name || null,
-          website: form.website || null,
-          logo_url: logoUrl,
-          admin_id: adminUserId,
-        })
-        .select()
-        .single();
-      if (schoolError) throw schoolError;
+      // Use edge function to create school + admin without affecting current session
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("create-school-admin", {
+        body: {
+          email: form.adminEmail,
+          password: form.adminPassword,
+          fullName: form.adminName,
+          phone: form.adminPhone,
+          school: {
+            name: form.name,
+            address: form.address || null,
+            city: form.city || null,
+            state: form.state || null,
+            pincode: form.pincode || null,
+            phone: form.phone || null,
+            email: form.email || null,
+            registration_number: form.registration_number || null,
+            principal_name: form.principal_name || null,
+            website: form.website || null,
+            logo_url: logoUrl,
+          },
+        },
+      });
 
-      // Assign school_admin role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: adminUserId, role: "school_admin" });
-      if (roleError) throw roleError;
-
-      // Update admin profile with school_id
-      await supabase
-        .from("profiles")
-        .update({ school_id: school.id, full_name: form.adminName, phone: form.adminPhone || null })
-        .eq("user_id", adminUserId);
+      if (res.error) throw new Error(res.error.message || "Failed to create school");
+      if (res.data?.error) throw new Error(res.data.error);
 
       toast.success("School created successfully!");
-      navigate("/schools");
+      navigate("/admin/schools");
     } catch (err: any) {
       toast.error(err.message || "Failed to create school");
     } finally {
@@ -108,7 +92,7 @@ export default function AddSchool() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/schools")}><ArrowLeft className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/schools")}><ArrowLeft className="h-4 w-4" /></Button>
         <div>
           <h1 className="text-3xl font-bold">Add School</h1>
           <p className="text-muted-foreground">Register a new school and its administrator</p>
@@ -164,7 +148,7 @@ export default function AddSchool() {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate("/schools")}>Cancel</Button>
+          <Button variant="outline" type="button" onClick={() => navigate("/admin/schools")}>Cancel</Button>
           <Button type="submit" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create School

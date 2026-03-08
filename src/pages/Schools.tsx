@@ -104,7 +104,7 @@ export default function Schools() {
           <h1 className="text-3xl font-bold">Schools</h1>
           <p className="text-muted-foreground">Manage all registered schools</p>
         </div>
-        <Button onClick={() => navigate("/schools/add")}>
+        <Button onClick={() => navigate("/admin/schools/add")}>
           <Plus className="mr-2 h-4 w-4" /> Add School
         </Button>
       </div>
@@ -171,8 +171,8 @@ export default function Schools() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => navigate(`/schools/${school.id}`)}><Eye className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => navigate(`/schools/${school.id}/edit`)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/schools/${school.id}`)}><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/schools/${school.id}/edit`)}><Pencil className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setDeleteId(school.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </TableCell>

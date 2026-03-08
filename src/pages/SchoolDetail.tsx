@@ -4,10 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Pencil, GraduationCap, Users, Calendar, CreditCard } from "lucide-react";
+import { ArrowLeft, Pencil, GraduationCap, Users, Calendar, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { format, addMonths } from "date-fns";
 
 export default function SchoolDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,16 +22,21 @@ export default function SchoolDetail() {
   const [counts, setCounts] = useState({ students: 0, teachers: 0 });
   const [activeYear, setActiveYear] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignForm, setAssignForm] = useState({ plan_id: "", payment_amount: "", duration_months: "12" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const [schoolRes, subRes, studRes, teachRes, yearRes] = await Promise.all([
+      const [schoolRes, subRes, studRes, teachRes, yearRes, planRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", id).single(),
         supabase.from("subscriptions").select("*, subscription_plans(*)").eq("school_id", id).eq("is_active", true).maybeSingle(),
         supabase.from("students").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
         supabase.from("teachers").select("id", { count: "exact", head: true }).eq("school_id", id).eq("status", "active"),
         supabase.from("academic_years").select("name").eq("school_id", id).eq("status", "active").maybeSingle(),
+        supabase.from("subscription_plans").select("*").eq("is_active", true).order("price"),
       ]);
 
       const s = schoolRes.data;
@@ -36,6 +44,7 @@ export default function SchoolDetail() {
       setSubscription(subRes.data);
       setCounts({ students: studRes.count ?? 0, teachers: teachRes.count ?? 0 });
       setActiveYear(yearRes.data?.name || null);
+      setPlans(planRes.data || []);
 
       if (s?.admin_id) {
         const { data: p } = await supabase.from("profiles").select("*").eq("user_id", s.admin_id).single();
@@ -54,6 +63,45 @@ export default function SchoolDetail() {
     else { toast.success(`School ${status}`); setSchool((p: any) => ({ ...p, status })); }
   };
 
+  const handleAssignSubscription = async () => {
+    if (!assignForm.plan_id || !id) return;
+    setSaving(true);
+    try {
+      const plan = plans.find((p: any) => p.id === assignForm.plan_id);
+      const months = parseInt(assignForm.duration_months) || 12;
+      const startDate = new Date();
+      const endDate = addMonths(startDate, months);
+
+      // Deactivate existing subscriptions
+      await supabase.from("subscriptions").update({ is_active: false }).eq("school_id", id).eq("is_active", true);
+
+      const { error } = await supabase.from("subscriptions").insert({
+        school_id: id,
+        plan_id: assignForm.plan_id,
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        payment_amount: parseFloat(assignForm.payment_amount) || plan?.price || 0,
+        payment_status: "paid",
+        is_active: true,
+      });
+      if (error) throw error;
+
+      // Set school status to active
+      await supabase.from("schools").update({ status: "active" as any }).eq("id", id);
+      setSchool((p: any) => ({ ...p, status: "active" }));
+
+      toast.success("Subscription assigned successfully!");
+      setAssignOpen(false);
+      // Refresh subscription data
+      const { data: subData } = await supabase.from("subscriptions").select("*, subscription_plans(*)").eq("school_id", id).eq("is_active", true).maybeSingle();
+      setSubscription(subData);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to assign subscription");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
   if (!school) return <div className="p-10 text-center text-muted-foreground">School not found</div>;
 
@@ -68,7 +116,7 @@ export default function SchoolDetail() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/schools")}><ArrowLeft className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/schools")}><ArrowLeft className="h-4 w-4" /></Button>
           <div className="flex items-center gap-4">
             {school.logo_url ? (
               <img src={school.logo_url} alt="" className="h-12 w-12 rounded-xl object-cover border" />
@@ -93,7 +141,7 @@ export default function SchoolDetail() {
               <SelectItem value="suspended">Suspended</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => navigate(`/schools/${id}/edit`)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
+          <Button variant="outline" onClick={() => navigate(`/admin/schools/${id}/edit`)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
         </div>
       </div>
 
@@ -152,7 +200,17 @@ export default function SchoolDetail() {
         </Card>
 
         <Card className="md:col-span-2">
-          <CardHeader><CardTitle>Subscription</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Subscription</CardTitle>
+            <Button size="sm" onClick={() => {
+              const defaultPlan = plans[0];
+              setAssignForm({ plan_id: defaultPlan?.id || "", payment_amount: String(defaultPlan?.price || ""), duration_months: "12" });
+              setAssignOpen(true);
+            }}>
+              <CreditCard className="mr-2 h-4 w-4" />
+              {subscription ? "Change Plan" : "Assign Plan"}
+            </Button>
+          </CardHeader>
           <CardContent className="text-sm">
             {subscription ? (
               <div className="grid gap-3 sm:grid-cols-5">
@@ -163,14 +221,51 @@ export default function SchoolDetail() {
                 <Row label="Payment" value={subscription.payment_status} />
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <p className="text-muted-foreground">No active subscription</p>
-                <Button variant="outline" size="sm" onClick={() => navigate("/subscriptions")}>Assign Plan</Button>
-              </div>
+              <p className="text-muted-foreground">No active subscription</p>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Assign Subscription Dialog */}
+      <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{subscription ? "Change Subscription" : "Assign Subscription"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Plan</Label>
+              <Select value={assignForm.plan_id} onValueChange={(v) => {
+                const plan = plans.find((p: any) => p.id === v);
+                setAssignForm({ ...assignForm, plan_id: v, payment_amount: String(plan?.price || "") });
+              }}>
+                <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
+                <SelectContent>
+                  {plans.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} — ₹{Number(p.price).toLocaleString()}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duration (months)</Label>
+              <Input type="number" value={assignForm.duration_months} onChange={(e) => setAssignForm({ ...assignForm, duration_months: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Amount (₹)</Label>
+              <Input type="number" value={assignForm.payment_amount} onChange={(e) => setAssignForm({ ...assignForm, payment_amount: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+            <Button onClick={handleAssignSubscription} disabled={saving || !assignForm.plan_id}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Activate Subscription
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

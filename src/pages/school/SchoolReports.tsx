@@ -136,6 +136,11 @@ export default function SchoolReports() {
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("students", students.map(s => ({ name: s.name, class: (s as any).classes?.name, status: s.status, admission_date: s.admission_date })))}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">{totalStudents}</p><p className="text-sm text-muted-foreground">Total Students</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">{activeStudents}</p><p className="text-sm text-muted-foreground">Active Students</p></CardContent></Card>

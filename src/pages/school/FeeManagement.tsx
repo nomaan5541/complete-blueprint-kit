@@ -260,12 +260,6 @@ export default function FeeManagement() {
         <DialogContent>
           <DialogHeader><DialogTitle>Add Fee Structure</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={structForm.academic_year_id} onValueChange={(v) => setStructForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-              </Select>
             </div>
             <div className="space-y-1">
               <Label>Class</Label>

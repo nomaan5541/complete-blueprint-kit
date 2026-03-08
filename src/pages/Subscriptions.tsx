@@ -229,23 +229,40 @@ export default function Subscriptions() {
       <Dialog open={!!renewId} onOpenChange={() => setRenewId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Renew Subscription</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Extend by (months)</Label>
-              <Select value={renewMonths} onValueChange={setRenewMonths}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 months</SelectItem>
-                  <SelectItem value="6">6 months</SelectItem>
-                  <SelectItem value="12">12 months</SelectItem>
-                  <SelectItem value="24">24 months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {renewId && (() => {
+            const sub = subscriptions.find((s) => s.id === renewId);
+            const isExpired = sub ? isBefore(new Date(sub.end_date), new Date()) : false;
+            const baseDate = sub ? (isExpired ? new Date() : new Date(sub.end_date)) : new Date();
+            const newEnd = addMonths(baseDate, parseInt(renewMonths));
+            return (
+              <div className="space-y-4">
+                {sub && (
+                  <div className="rounded-lg border bg-muted/30 p-3 space-y-1 text-sm">
+                    <div><span className="text-muted-foreground">School: </span><span className="font-medium">{sub.schools?.name}</span></div>
+                    <div><span className="text-muted-foreground">Plan: </span><span className="font-medium">{sub.subscription_plans?.name}</span></div>
+                    <div><span className="text-muted-foreground">Current Expiry: </span><span className={`font-medium ${isExpired ? "text-destructive" : ""}`}>{sub.end_date} {isExpired && "(Expired)"}</span></div>
+                    <div><span className="text-muted-foreground">New Expiry: </span><span className="font-medium text-primary">{format(newEnd, "dd MMM yyyy")}</span></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label>Extend by</Label>
+                  <Select value={renewMonths} onValueChange={setRenewMonths}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 month</SelectItem>
+                      <SelectItem value="3">3 months</SelectItem>
+                      <SelectItem value="6">6 months</SelectItem>
+                      <SelectItem value="12">12 months (1 year)</SelectItem>
+                      <SelectItem value="24">24 months (2 years)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenewId(null)}>Cancel</Button>
-            <Button onClick={handleRenew} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Renew</Button>
+            <Button onClick={handleRenew} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Renew Subscription</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

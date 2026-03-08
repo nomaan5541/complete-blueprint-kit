@@ -130,6 +130,7 @@ export default function SchoolSettings() {
     if (error) toast.error(error.message);
     else toast.success("SMS settings saved");
     setSavingSms(false);
+  };
 
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
 

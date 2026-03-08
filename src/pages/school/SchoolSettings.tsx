@@ -145,6 +145,7 @@ export default function SchoolSettings() {
         <TabsList>
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
+          <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">

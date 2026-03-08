@@ -163,7 +163,8 @@ export default function ExamManagement() {
                       <div className="text-xs text-muted-foreground space-y-0.5">
                         {(exam as any).classes?.name && <p>Class: {(exam as any).classes.name}</p>}
                         {(exam as any).subjects?.name && <p>Subject: {(exam as any).subjects.name}</p>}
-                        {exam.start_date && <p>📅 {exam.start_date} → {exam.end_date}</p>}
+                        {(exam as any).exam_date && <p>📅 {(exam as any).exam_date}</p>}
+                        {!(exam as any).exam_date && exam.start_date && <p>📅 {exam.start_date} → {exam.end_date}</p>}
                         <p>Total Marks: {(exam as any).total_marks || 100}</p>
                         {mode === "online" && (exam as any).duration_minutes && (
                           <p>⏱ {(exam as any).duration_minutes} minutes</p>

@@ -40,6 +40,10 @@ import SchoolReports from "./pages/school/SchoolReports";
 import StudentPortal from "./pages/school/StudentPortal";
 import ClassSubjectMapping from "./pages/school/ClassSubjectMapping";
 import ReportCard from "./pages/school/ReportCard";
+import StudentProfile from "./pages/school/StudentProfile";
+import BulkStudentImport from "./pages/school/BulkStudentImport";
+import FeeDues from "./pages/school/FeeDues";
+import StudentTransfer from "./pages/school/StudentTransfer";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
@@ -93,7 +97,11 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/subject-mapping" element={<ClassSubjectMapping />} />
         <Route path="/report-card" element={<ReportCard />} />
         <Route path="/students" element={<Students />} />
+        <Route path="/students/profile" element={<StudentProfile />} />
+        <Route path="/students/import" element={<BulkStudentImport />} />
+        <Route path="/students/transfer" element={<StudentTransfer />} />
         <Route path="/promotion" element={<StudentPromotion />} />
+        <Route path="/fees/dues" element={<FeeDues />} />
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/exams" element={<ExamManagement />} />

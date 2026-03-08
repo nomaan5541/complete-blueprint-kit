@@ -83,11 +83,11 @@ export default function Timetable() {
   };
 
   const handleAddEntry = async () => {
-    if (!entryForm.slot_id || !selectedClass || !selectedYear) { toast.error("Select class and fill all fields"); return; }
+    if (!entryForm.slot_id || !selectedClass || !selectedYearId) { toast.error("Select class and fill all fields"); return; }
     setSaving(true);
     const { error } = await supabase.from("timetable_entries").insert({
       school_id: schoolId!,
-      academic_year_id: selectedYear,
+      academic_year_id: selectedYearId,
       class_id: selectedClass,
       section_id: selectedSection || null,
       slot_id: entryForm.slot_id,

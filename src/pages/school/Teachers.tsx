@@ -164,30 +164,30 @@ export default function Teachers() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Teachers</h1>
-          <p className="text-muted-foreground">Manage teaching staff ({filtered.length} total)</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Teachers</h1>
+          <p className="text-muted-foreground text-sm">Manage teaching staff ({filtered.length} total)</p>
         </div>
-        <Button onClick={() => { setForm(emptyForm); setOpen(true); }}><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
+        <Button onClick={() => { setForm(emptyForm); setOpen(true); }} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Search teachers..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="table-responsive rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Qualification</TableHead>
-              <TableHead>Assignments</TableHead>
-              <TableHead>Account</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead className="hidden sm:table-cell">Phone</TableHead>
+              <TableHead className="hidden lg:table-cell">Qualification</TableHead>
+              <TableHead className="hidden md:table-cell">Assignments</TableHead>
+              <TableHead className="hidden sm:table-cell">Account</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -202,11 +202,14 @@ export default function Teachers() {
                 const teacherAssignments = assignments.filter((a) => a.teacher_id === t.id);
                 return (
                   <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.name}</TableCell>
-                    <TableCell>{t.email || "—"}</TableCell>
-                    <TableCell>{t.phone || "—"}</TableCell>
-                    <TableCell>{t.qualification || "—"}</TableCell>
                     <TableCell>
+                      <div className="font-medium">{t.name}</div>
+                      <div className="text-xs text-muted-foreground md:hidden">{t.email || ""}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{t.email || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{t.phone || "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{t.qualification || "—"}</TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {teacherAssignments.length === 0 ? (
                           <span className="text-muted-foreground text-xs">None</span>
@@ -220,7 +223,7 @@ export default function Teachers() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {t.user_id ? (
                         <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
                       ) : (

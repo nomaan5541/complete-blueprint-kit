@@ -132,18 +132,18 @@ export default function FeeManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Fee Management</h1>
-        <p className="text-muted-foreground">Manage fee types, structures, and collections</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Fee Management</h1>
+        <p className="text-muted-foreground text-sm">Manage fee types, structures, and collections</p>
       </div>
 
-      <Tabs defaultValue="collect">
-        <TabsList>
-          <TabsTrigger value="collect">Collect Fees</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-          <TabsTrigger value="structure">Fee Structure</TabsTrigger>
-          <TabsTrigger value="types">Fee Types</TabsTrigger>
+      <Tabs defaultValue="collect" className="w-full">
+        <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:grid-cols-none">
+          <TabsTrigger value="collect" className="text-xs sm:text-sm">Collect Fees</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
+          <TabsTrigger value="structure" className="text-xs sm:text-sm">Structure</TabsTrigger>
+          <TabsTrigger value="types" className="text-xs sm:text-sm">Fee Types</TabsTrigger>
         </TabsList>
 
         {/* Collect Tab */}
@@ -153,7 +153,7 @@ export default function FeeManagement() {
 
         {/* History Tab */}
         <TabsContent value="history">
-          <div className="rounded-lg border bg-card">
+          <div className="table-responsive rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -196,7 +196,7 @@ export default function FeeManagement() {
         {/* Structure Tab */}
         <TabsContent value="structure" className="space-y-4">
           <Button onClick={() => setStructureOpen(true)}><Plus className="mr-2 h-4 w-4" /> Add Fee Structure</Button>
-          <div className="rounded-lg border bg-card">
+          <div className="table-responsive rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>

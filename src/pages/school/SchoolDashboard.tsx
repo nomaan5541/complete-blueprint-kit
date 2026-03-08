@@ -107,20 +107,20 @@ export default function SchoolDashboard() {
   }, [schoolId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">School Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your school — {format(new Date(), "dd MMM yyyy")}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">School Dashboard</h1>
+        <p className="text-muted-foreground text-sm">Overview of your school — {format(new Date(), "dd MMM yyyy")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Active Students" value={loading ? "..." : stats.students} icon={GraduationCap} />
         <StatsCard title="Active Teachers" value={loading ? "..." : stats.teachers} icon={Users} />
         <StatsCard title="Classes" value={loading ? "..." : stats.classes} icon={Layers} />
         <StatsCard title="Pending Fees" value={loading ? "..." : pendingFeeStudents} icon={AlertCircle} description="Students with no payments" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {/* Today's Attendance */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><ClipboardCheck className="h-4 w-4" /> Today's Attendance</CardTitle></CardHeader>
@@ -128,10 +128,10 @@ export default function SchoolDashboard() {
             {todayAttendance.present + todayAttendance.absent + todayAttendance.leave === 0 ? (
               <p className="text-sm text-muted-foreground">No attendance marked today</p>
             ) : (
-              <div className="flex gap-3">
-                <Badge variant="outline" className="bg-success/10 text-success">Present: {todayAttendance.present}</Badge>
-                <Badge variant="outline" className="bg-destructive/10 text-destructive">Absent: {todayAttendance.absent}</Badge>
-                <Badge variant="outline" className="bg-warning/10 text-warning">Leave: {todayAttendance.leave}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-success/10 text-success text-xs">Present: {todayAttendance.present}</Badge>
+                <Badge variant="outline" className="bg-destructive/10 text-destructive text-xs">Absent: {todayAttendance.absent}</Badge>
+                <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Leave: {todayAttendance.leave}</Badge>
               </div>
             )}
           </CardContent>

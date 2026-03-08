@@ -17,7 +17,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger className="mr-4" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
             <ReadOnlyOverlay>
               {children}
             </ReadOnlyOverlay>

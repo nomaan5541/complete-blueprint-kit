@@ -271,26 +271,26 @@ export default function Students() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Students</h1>
-          <p className="text-muted-foreground">Manage student records ({filteredStudents.length} total)</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Students</h1>
+          <p className="text-muted-foreground text-sm">Manage student records ({filteredStudents.length} total)</p>
         </div>
         <Button onClick={() => {
           setForm({ ...emptyStudentForm, academic_year_id: selectedYearId });
           setPhotoFile(null); setPhotoPreview(null); setDocumentUploads({});
           setOpen(true);
-        }}><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
+        }} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search by name or admission no..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Class" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Class" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Classes</SelectItem>
             {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -298,16 +298,16 @@ export default function Students() {
         </Select>
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="table-responsive rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Adm. No.</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Class</TableHead>
-              <TableHead>Section</TableHead>
-              <TableHead>Father</TableHead>
-              <TableHead>Account</TableHead>
+              <TableHead className="hidden md:table-cell">Class</TableHead>
+              <TableHead className="hidden lg:table-cell">Section</TableHead>
+              <TableHead className="hidden lg:table-cell">Father</TableHead>
+              <TableHead className="hidden sm:table-cell">Account</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -323,11 +323,14 @@ export default function Students() {
                 return (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono text-xs">{getMasterField(s, "admission_number")}</TableCell>
-                    <TableCell className="font-medium">{getMasterField(s, "name")}</TableCell>
-                    <TableCell>{s.classes?.name || "—"}</TableCell>
-                    <TableCell>{s.sections?.name || "—"}</TableCell>
-                    <TableCell>{getMasterField(s, "father_name") || "—"}</TableCell>
                     <TableCell>
+                      <div className="font-medium">{getMasterField(s, "name")}</div>
+                      <div className="text-xs text-muted-foreground md:hidden">{s.classes?.name || "—"}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{s.classes?.name || "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{s.sections?.name || "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{getMasterField(s, "father_name") || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {masterUserId ? (
                         <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
                       ) : (
@@ -340,7 +343,7 @@ export default function Students() {
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
                         {!masterUserId && (
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
+                          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
                             <UserPlus className="h-4 w-4" />
                           </Button>
                         )}
@@ -357,7 +360,7 @@ export default function Students() {
 
       {/* Add Student Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Add Student</DialogTitle></DialogHeader>
           <StudentFormTabs
             form={form} setForm={setForm}

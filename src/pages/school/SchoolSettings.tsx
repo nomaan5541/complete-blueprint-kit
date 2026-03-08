@@ -22,7 +22,7 @@ export default function SchoolSettings() {
     name: "", address: "", city: "", state: "", pincode: "",
     phone: "", email: "", website: "", principal_name: "",
     school_start_time: "09:00", school_end_time: "16:00",
-    registration_number: "",
+    registration_number: "", receipt_prefix: "RCPT",
   });
   const [grades, setGrades] = useState<any[]>([]);
 

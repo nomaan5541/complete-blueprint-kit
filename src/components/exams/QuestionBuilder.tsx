@@ -205,9 +205,12 @@ export default function QuestionBuilder({ exam, open, onOpenChange }: Props) {
                         onChange={e => updateQuestion(qIdx, "image_url", e.target.value)} />
                       <label className="shrink-0 cursor-pointer inline-flex items-center gap-1 px-2 h-8 rounded-md border bg-muted text-xs hover:bg-muted/80">
                         📷 Upload
-                        <input type="file" accept="image/png,image/jpg,image/jpeg" className="hidden" onChange={async (e) => {
+                        <input type="file" accept="image/png,image/jpg,image/jpeg,image/webp" className="hidden" onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
+                          const { validateFileUpload } = await import("@/lib/fileValidation");
+                          const err = validateFileUpload(file);
+                          if (err) { toast.error(err); return; }
                           const path = `questions/${exam.id}/${Date.now()}_${file.name}`;
                           const { error } = await supabase.storage.from("exam-images").upload(path, file, { upsert: true });
                           if (error) { toast.error("Upload failed"); return; }

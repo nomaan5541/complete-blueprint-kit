@@ -69,19 +69,19 @@ export default function FeeManagement() {
   };
 
   const handleAddStructure = async () => {
-    if (!structForm.academic_year_id || !structForm.class_id || !structForm.fee_type_id || !structForm.amount) {
+    if (!selectedYearId || !structForm.class_id || !structForm.fee_type_id || !structForm.amount) {
       toast.error("All fields are required"); return;
     }
     setSaving(true);
     const { error } = await supabase.from("fee_structures").insert({
       school_id: schoolId!,
-      academic_year_id: structForm.academic_year_id,
+      academic_year_id: selectedYearId,
       class_id: structForm.class_id,
       fee_type_id: structForm.fee_type_id,
       amount: parseFloat(structForm.amount),
     });
     if (error) toast.error(error.message);
-    else { toast.success("Fee structure added"); setStructureOpen(false); setStructForm({ academic_year_id: "", class_id: "", fee_type_id: "", amount: "" }); fetchAll(); }
+    else { toast.success("Fee structure added"); setStructureOpen(false); setStructForm({ class_id: "", fee_type_id: "", amount: "" }); fetchAll(); }
     setSaving(false);
   };
 

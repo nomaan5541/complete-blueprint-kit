@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus } from "lucide-react";
 
 export default function Students() {
+  const navigate = useNavigate();
   const { schoolId } = useSchool();
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);

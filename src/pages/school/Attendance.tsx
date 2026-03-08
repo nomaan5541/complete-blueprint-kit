@@ -56,8 +56,8 @@ export default function Attendance() {
   const filteredSections = sections.filter((s) => s.class_id === selectedClass);
 
   const loadAttendance = async () => {
-    if (!selectedClass || !selectedYear || !selectedDate || !schoolId) {
-      toast.error("Select class, academic year, and date"); return;
+    if (!selectedClass || !selectedYearId || !selectedDate || !schoolId) {
+      toast.error("Select class and date"); return;
     }
     setAttendanceLoaded(false);
 

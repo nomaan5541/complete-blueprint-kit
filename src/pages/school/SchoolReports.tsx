@@ -210,6 +210,11 @@ export default function SchoolReports() {
         </TabsContent>
 
         <TabsContent value="attendance" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => exportToCsv("attendance-summary", [{ total: totalRecords, present: presentCount, absent: absentCount, leave: leaveCount, rate: attendanceRate + "%" }])}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-success">{attendanceRate}%</p><p className="text-sm text-muted-foreground">Overall Rate</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold">{totalRecords}</p><p className="text-sm text-muted-foreground">Total Records</p></CardContent></Card>

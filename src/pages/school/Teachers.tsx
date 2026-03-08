@@ -208,8 +208,8 @@ export default function Teachers() {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{t.email || "—"}</TableCell>
                     <TableCell className="hidden sm:table-cell">{t.phone || "—"}</TableCell>
-                    <TableCell>{t.qualification || "—"}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">{t.qualification || "—"}</TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {teacherAssignments.length === 0 ? (
                           <span className="text-muted-foreground text-xs">None</span>
@@ -223,7 +223,7 @@ export default function Teachers() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {t.user_id ? (
                         <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
                       ) : (

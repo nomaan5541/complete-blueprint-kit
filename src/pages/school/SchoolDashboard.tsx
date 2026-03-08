@@ -128,10 +128,10 @@ export default function SchoolDashboard() {
             {todayAttendance.present + todayAttendance.absent + todayAttendance.leave === 0 ? (
               <p className="text-sm text-muted-foreground">No attendance marked today</p>
             ) : (
-              <div className="flex gap-3">
-                <Badge variant="outline" className="bg-success/10 text-success">Present: {todayAttendance.present}</Badge>
-                <Badge variant="outline" className="bg-destructive/10 text-destructive">Absent: {todayAttendance.absent}</Badge>
-                <Badge variant="outline" className="bg-warning/10 text-warning">Leave: {todayAttendance.leave}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-success/10 text-success text-xs">Present: {todayAttendance.present}</Badge>
+                <Badge variant="outline" className="bg-destructive/10 text-destructive text-xs">Absent: {todayAttendance.absent}</Badge>
+                <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Leave: {todayAttendance.leave}</Badge>
               </div>
             )}
           </CardContent>

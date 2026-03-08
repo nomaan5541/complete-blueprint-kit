@@ -196,7 +196,7 @@ export default function FeeManagement() {
         {/* Structure Tab */}
         <TabsContent value="structure" className="space-y-4">
           <Button onClick={() => setStructureOpen(true)}><Plus className="mr-2 h-4 w-4" /> Add Fee Structure</Button>
-          <div className="rounded-lg border bg-card">
+          <div className="table-responsive rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>

@@ -139,11 +139,11 @@ export default function FeeManagement() {
       </div>
 
       <Tabs defaultValue="collect" className="w-full">
-        <TabsList>
-          <TabsTrigger value="collect">Collect Fees</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-          <TabsTrigger value="structure">Fee Structure</TabsTrigger>
-          <TabsTrigger value="types">Fee Types</TabsTrigger>
+        <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:grid-cols-none">
+          <TabsTrigger value="collect" className="text-xs sm:text-sm">Collect Fees</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
+          <TabsTrigger value="structure" className="text-xs sm:text-sm">Structure</TabsTrigger>
+          <TabsTrigger value="types" className="text-xs sm:text-sm">Fee Types</TabsTrigger>
         </TabsList>
 
         {/* Collect Tab */}

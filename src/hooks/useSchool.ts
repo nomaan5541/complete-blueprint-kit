@@ -95,7 +95,7 @@ export function useSchool() {
     fetch();
   }, [user, role]);
 
-  const isReadOnly = subscriptionExpired || schoolStatus === "expired" || schoolStatus === "suspended" || schoolStatus === "inactive";
+  const isReadOnly = schoolStatus === "expired" || schoolStatus === "suspended" || schoolStatus === "inactive";
 
   return { schoolId, schoolName, setupCompleted, loading, schoolStatus, subscriptionExpired, subscriptionEndDate, isReadOnly };
 }

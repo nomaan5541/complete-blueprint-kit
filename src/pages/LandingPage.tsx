@@ -383,7 +383,7 @@ export default function LandingPage() {
               <span className="font-semibold text-foreground">EDUPRIMEX</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} EduManage. All rights reserved.
+              © {new Date().getFullYear()} EDUPRIMEX. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>

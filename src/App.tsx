@@ -149,13 +149,13 @@ function TeacherRoutesWrapper() {
 
 function StudentPortalWrapper() {
   return (
-    <SchoolAdminLayout>
+    <StudentLayout>
       <Routes>
         <Route path="/" element={<StudentPortal />} />
         <Route path="/exam" element={<StudentExamTake />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
-    </SchoolAdminLayout>
+    </StudentLayout>
   );
 }
 

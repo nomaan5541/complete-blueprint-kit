@@ -380,7 +380,7 @@ export default function LandingPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary text-primary-foreground">
                 <GraduationCap className="h-4 w-4" />
               </div>
-              <span className="font-semibold text-foreground">EduManage</span>
+              <span className="font-semibold text-foreground">EDUPRIMEX</span>
             </div>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} EduManage. All rights reserved.

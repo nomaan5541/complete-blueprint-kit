@@ -2,23 +2,38 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { InvoiceGenerator } from "@/components/InvoiceGenerator";
+
+interface InvoiceData {
+  schoolName: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: string | null;
+  status: string;
+  transactionId: string | null;
+  planName?: string;
+  notes: string | null;
+}
 
 export default function Payments() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
 
   useEffect(() => {
     async function fetch() {
       setLoading(true);
       let query = supabase
         .from("payment_history")
-        .select("*, schools(name)")
+        .select("*, schools(name), subscriptions(subscription_plans(name))")
         .order("payment_date", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter as any);
       const { data } = await query;
@@ -42,6 +57,20 @@ export default function Payments() {
       refunded: "bg-muted text-muted-foreground",
     };
     return map[status] || "";
+  };
+
+  const openInvoice = (p: any) => {
+    setSelectedInvoice({
+      schoolName: p.schools?.name || "Unknown School",
+      amount: p.amount,
+      paymentDate: p.payment_date,
+      paymentMethod: p.payment_method,
+      status: p.status,
+      transactionId: p.transaction_id,
+      planName: p.subscriptions?.subscription_plans?.name,
+      notes: p.notes,
+    });
+    setInvoiceOpen(true);
   };
 
   return (
@@ -77,7 +106,7 @@ export default function Payments() {
               <TableHead>Date</TableHead>
               <TableHead>Method</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Notes</TableHead>
+              <TableHead>Invoice</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -93,13 +122,19 @@ export default function Payments() {
                   <TableCell>{format(new Date(p.payment_date), "dd MMM yyyy")}</TableCell>
                   <TableCell>{p.payment_method || "—"}</TableCell>
                   <TableCell><Badge variant="outline" className={statusBadge(p.status)}>{p.status}</Badge></TableCell>
-                  <TableCell className="max-w-[200px] truncate">{p.notes || "—"}</TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="sm" onClick={() => openInvoice(p)}>
+                      <FileText className="h-4 w-4 mr-1" /> Invoice
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      <InvoiceGenerator open={invoiceOpen} onClose={() => setInvoiceOpen(false)} invoice={selectedInvoice} />
     </div>
   );
 }

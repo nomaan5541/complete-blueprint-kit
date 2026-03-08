@@ -44,15 +44,15 @@ export default function FeeDues() {
   }, [schoolId]);
 
   useEffect(() => {
-    if (!schoolId || !selectedYear) return;
+    if (!schoolId || !selectedYearId) return;
     Promise.all([
-      supabase.from("fee_structures").select("*").eq("school_id", schoolId).eq("academic_year_id", selectedYear),
-      supabase.from("fee_payments").select("student_id, amount").eq("school_id", schoolId).eq("academic_year_id", selectedYear),
+      supabase.from("fee_structures").select("*").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
+      supabase.from("fee_payments").select("student_id, amount").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
     ]).then(([fsRes, fpRes]) => {
       setFeeStructures(fsRes.data || []);
       setFeePayments(fpRes.data || []);
     });
-  }, [schoolId, selectedYear]);
+  }, [schoolId, selectedYearId]);
 
   // Calculate dues per student
   const studentDues: StudentDue[] = students.map(s => {

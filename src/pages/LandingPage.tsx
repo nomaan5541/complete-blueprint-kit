@@ -181,7 +181,7 @@ export default function LandingPage() {
               <CreditCard className="h-3.5 w-3.5 mr-1.5" /> Pricing
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Simple, Transparent Pricing</h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Choose the plan that fits your school's needs.</p>
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Choose the plan that fits your school. All plans include free setup & onboarding.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {plans.length === 0 ? (
@@ -192,30 +192,48 @@ export default function LandingPage() {
             ) : (
               plans.map((plan, i) => {
                 const isUltimate = plan.name?.toLowerCase() === "ultimate";
-                const isPopular = i === 1 && !isUltimate;
+                const isProfessional = plan.name?.toLowerCase() === "professional";
                 const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+                
+                // Offer tags
+                const offerTag = isUltimate
+                  ? "BEST VALUE"
+                  : isProfessional
+                  ? "MOST POPULAR"
+                  : "GREAT START";
+                
+                // Original prices (for strike-through)
+                const originalPrice = isUltimate ? 29999 : isProfessional ? 14999 : 7999;
+                const savings = originalPrice - Number(plan.price);
+                const discount = Math.round((savings / originalPrice) * 100);
+                const monthlyPrice = Math.round(Number(plan.price) / (plan.duration_months || 12));
+
                 return (
                   <Card
                     key={plan.id}
                     className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
                       isUltimate
                         ? "border-2 border-yellow-500/60 shadow-2xl scale-[1.04] bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-yellow-950/40 dark:via-amber-950/30 dark:to-orange-950/20"
-                        : isPopular
+                        : isProfessional
                         ? "border-2 border-primary shadow-xl scale-[1.02]"
                         : "glass border-0 hover:shadow-lg"
                     }`}
                   >
-                    {isUltimate && (
-                      <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-500 to-amber-500 text-white px-5 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1.5 shadow-lg">
-                        <Crown className="h-3.5 w-3.5" /> ULTIMATE
-                      </div>
-                    )}
-                    {isPopular && !isUltimate && (
-                      <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold rounded-bl-xl">
-                        <Star className="h-3 w-3 inline mr-1" /> Most Popular
-                      </div>
-                    )}
-                    <CardHeader className="pb-4">
+                    {/* Offer ribbon */}
+                    <div className={`absolute top-0 right-0 px-4 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1.5 shadow-lg ${
+                      isUltimate
+                        ? "bg-gradient-to-l from-yellow-500 to-amber-500 text-white"
+                        : isProfessional
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-emerald-500 text-white"
+                    }`}>
+                      {isUltimate && <Crown className="h-3.5 w-3.5" />}
+                      {isProfessional && <Star className="h-3 w-3" />}
+                      {!isUltimate && !isProfessional && <Zap className="h-3 w-3" />}
+                      {offerTag}
+                    </div>
+
+                    <CardHeader className="pb-4 pt-8">
                       <CardTitle className={`text-xl ${isUltimate ? "text-amber-700 dark:text-amber-400 flex items-center gap-2" : ""}`}>
                         {isUltimate && <Crown className="h-5 w-5" />}
                         {plan.name}
@@ -223,42 +241,81 @@ export default function LandingPage() {
                       <p className="text-sm text-muted-foreground">{plan.description}</p>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* Pricing with offer */}
                       <div>
-                        <span className={`text-4xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>₹{Number(plan.price).toLocaleString()}</span>
-                        <span className="text-muted-foreground">/{plan.duration_months} mo</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-4xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
+                            ₹{Number(plan.price).toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-muted-foreground">/year</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-muted-foreground line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
+                          <Badge variant="secondary" className={`text-xs font-semibold ${
+                            isUltimate ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                          }`}>
+                            SAVE {discount}%
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Just ₹{monthlyPrice.toLocaleString("en-IN")}/month
+                        </p>
                       </div>
+
+                      {/* Features */}
                       <div className="space-y-2 text-sm">
                         {plan.max_students && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
-                            Up to {plan.max_students} students
+                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                            Up to {plan.max_students.toLocaleString()} students
+                          </div>
+                        )}
+                        {!plan.max_students && (
+                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                            Unlimited students
                           </div>
                         )}
                         {plan.max_teachers && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_teachers} teachers
+                          </div>
+                        )}
+                        {!plan.max_teachers && (
+                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                            Unlimited teachers
                           </div>
                         )}
                         {planFeatures.map((feat: string, fi: number) => (
                           <div key={fi} className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             {feat}
                           </div>
                         ))}
                       </div>
+
                       <Button
                         className={`w-full ${isUltimate ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white border-0 shadow-lg" : ""}`}
-                        variant={isUltimate ? "default" : isPopular ? "default" : "outline"}
+                        variant={isUltimate ? "default" : isProfessional ? "default" : "outline"}
                         onClick={() => { setSelectedPlan(plan); setRequestOpen(true); }}
                       >
-                        {isUltimate ? "Get Ultimate Access" : "Request This Plan"} <ChevronRight className="ml-1 h-4 w-4" />
+                        {isUltimate ? "Get Ultimate Access" : isProfessional ? "Choose Professional" : "Get Started"} <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
                 );
               })
             )}
+          </div>
+          
+          {/* Trust badge */}
+          <div className="text-center mt-10">
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              30-day money-back guarantee · Free setup & training · No hidden charges
+            </p>
           </div>
         </div>
       </section>

@@ -183,11 +183,11 @@ export default function Teachers() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Qualification</TableHead>
-              <TableHead>Assignments</TableHead>
-              <TableHead>Account</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead className="hidden sm:table-cell">Phone</TableHead>
+              <TableHead className="hidden lg:table-cell">Qualification</TableHead>
+              <TableHead className="hidden md:table-cell">Assignments</TableHead>
+              <TableHead className="hidden sm:table-cell">Account</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>

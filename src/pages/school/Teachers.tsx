@@ -97,17 +97,18 @@ export default function Teachers() {
     if (accountForm.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setSaving(true);
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: accountForm.email, password: accountForm.password,
-        options: { data: { full_name: selectedTeacher.name } },
+      const { data, error } = await supabase.functions.invoke("create-user-account", {
+        body: {
+          email: accountForm.email,
+          password: accountForm.password,
+          fullName: selectedTeacher.name,
+          role: "teacher",
+          schoolId,
+          teacherId: selectedTeacher.id,
+        },
       });
-      if (authError) throw authError;
-      const userId = authData.user?.id;
-      if (!userId) throw new Error("Failed to create user");
-
-      await supabase.from("user_roles").insert({ user_id: userId, role: "teacher" });
-      await supabase.from("teachers").update({ user_id: userId }).eq("id", selectedTeacher.id);
-      await supabase.from("profiles").update({ school_id: schoolId, full_name: selectedTeacher.name }).eq("user_id", userId);
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("Teacher login account created");
       setAccountOpen(false);

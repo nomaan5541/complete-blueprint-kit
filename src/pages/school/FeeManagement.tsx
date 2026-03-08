@@ -132,13 +132,13 @@ export default function FeeManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Fee Management</h1>
-        <p className="text-muted-foreground">Manage fee types, structures, and collections</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Fee Management</h1>
+        <p className="text-muted-foreground text-sm">Manage fee types, structures, and collections</p>
       </div>
 
-      <Tabs defaultValue="collect">
+      <Tabs defaultValue="collect" className="w-full">
         <TabsList>
           <TabsTrigger value="collect">Collect Fees</TabsTrigger>
           <TabsTrigger value="history">Payment History</TabsTrigger>

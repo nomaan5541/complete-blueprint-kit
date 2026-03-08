@@ -765,6 +765,9 @@ export type Database = {
           email: string | null
           id: string
           logo_url: string | null
+          msg91_auth_key: string | null
+          msg91_sender_id: string | null
+          msg91_whatsapp_template_id: string | null
           name: string
           phone: string | null
           pincode: string | null
@@ -788,6 +791,9 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          msg91_auth_key?: string | null
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
           name: string
           phone?: string | null
           pincode?: string | null
@@ -811,6 +817,9 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          msg91_auth_key?: string | null
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
           name?: string
           phone?: string | null
           pincode?: string | null

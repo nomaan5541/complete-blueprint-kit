@@ -94,7 +94,7 @@ export default function StudentTransfer() {
         <Input placeholder="Search by name or admission no..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="table-responsive rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

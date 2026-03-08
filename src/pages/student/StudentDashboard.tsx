@@ -26,42 +26,42 @@ export default function StudentDashboard() {
   const recentNotices = notifications.slice(0, 3);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Welcome, {student.name}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold">Welcome, {student.name}</h1>
+        <p className="text-muted-foreground text-sm">
           {student.classes?.name} {student.sections?.name ? `- Section ${student.sections.name}` : ""} · {student.academic_years?.name}
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/student/attendance")}>
           <CardContent className="pt-4 text-center">
-            <ClipboardCheck className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
-            <p className="text-2xl font-bold">{attendanceRate}%</p>
-            <p className="text-xs text-muted-foreground">Attendance ({presentDays}/{totalDays})</p>
+            <ClipboardCheck className="h-5 w-5 sm:h-6 sm:w-6 mx-auto mb-1.5 text-emerald-500" />
+            <p className="text-xl sm:text-2xl font-bold">{attendanceRate}%</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Attendance ({presentDays}/{totalDays})</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/student/results")}>
           <CardContent className="pt-4 text-center">
-            <FileText className="h-6 w-6 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">{marks.length}</p>
-            <p className="text-xs text-muted-foreground">Exam Records</p>
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 mx-auto mb-1.5 text-primary" />
+            <p className="text-xl sm:text-2xl font-bold">{marks.length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Exam Records</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/student/fees")}>
           <CardContent className="pt-4 text-center">
-            <IndianRupee className="h-6 w-6 mx-auto mb-2 text-amber-500" />
-            <p className="text-2xl font-bold">₹{totalDue.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Fee Due</p>
+            <IndianRupee className="h-5 w-5 sm:h-6 sm:w-6 mx-auto mb-1.5 text-amber-500" />
+            <p className="text-xl sm:text-2xl font-bold">₹{totalDue.toLocaleString()}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Fee Due</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/student/notifications")}>
           <CardContent className="pt-4 text-center">
-            <Bell className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-            <p className="text-2xl font-bold">{notifications.length}</p>
-            <p className="text-xs text-muted-foreground">Notices</p>
+            <Bell className="h-5 w-5 sm:h-6 sm:w-6 mx-auto mb-1.5 text-blue-500" />
+            <p className="text-xl sm:text-2xl font-bold">{notifications.length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Notices</p>
           </CardContent>
         </Card>
       </div>

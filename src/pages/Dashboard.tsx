@@ -66,13 +66,13 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to <p className="text-muted-foreground">Welcome to EDUPRIMEX Super Admin Panel</p> Super Admin Panel</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground text-sm">Welcome to EDUPRIMEX Super Admin Panel</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
         <StatsCard title="Total Schools" value={loading ? "..." : stats.totalSchools} icon={School} />
         <StatsCard title="Active Schools" value={loading ? "..." : stats.activeSchools} icon={CheckCircle} />
         <StatsCard title="Expired Schools" value={loading ? "..." : stats.expiredSchools} icon={AlertTriangle} />

@@ -103,13 +103,13 @@ export default function ExamManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Exams & Results</h1>
-          <p className="text-muted-foreground">Online MCQ exams & offline marks entry</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Exams & Results</h1>
+          <p className="text-muted-foreground text-sm">Online MCQ exams & offline marks entry</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}><Plus className="mr-2 h-4 w-4" /> Create Exam</Button>
+        <Button onClick={() => setCreateOpen(true)} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Create Exam</Button>
       </div>
 
       <Tabs defaultValue="exams">

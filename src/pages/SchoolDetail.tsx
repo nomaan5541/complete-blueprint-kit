@@ -141,7 +141,7 @@ export default function SchoolDetail() {
               <SelectItem value="suspended">Suspended</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => navigate(`/schools/${id}/edit`)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
+          <Button variant="outline" onClick={() => navigate(`/admin/schools/${id}/edit`)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
         </div>
       </div>
 

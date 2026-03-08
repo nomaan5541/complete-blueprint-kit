@@ -97,7 +97,7 @@ export default function StudentPortal() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card><CardContent className="pt-4 text-center"><ClipboardCheck className="h-5 w-5 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{attendanceRate}%</p><p className="text-xs text-muted-foreground">Attendance</p></CardContent></Card>
         <Card><CardContent className="pt-4 text-center"><FileText className="h-5 w-5 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{marks.length}</p><p className="text-xs text-muted-foreground">Exam Records</p></CardContent></Card>
-        <Card><CardContent className="pt-4 text-center"><IndianRupee className="h-5 w-5 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">₹{totalFees.toLocaleString()}</p><p className="text-xs text-muted-foreground">Fees Paid</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><IndianRupee className="h-5 w-5 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">₹{totalDue.toLocaleString()}</p><p className="text-xs text-muted-foreground">Fee Due</p></CardContent></Card>
         <Card><CardContent className="pt-4 text-center"><Bell className="h-5 w-5 mx-auto mb-1" /><p className="text-xl font-bold">{notifications.length}</p><p className="text-xs text-muted-foreground">Notices</p></CardContent></Card>
       </div>
 

@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import { TeacherLayout } from "@/components/TeacherLayout";
 import { useSchool } from "@/hooks/useSchool";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +17,7 @@ import AddSchool from "./pages/AddSchool";
 import SchoolDetail from "./pages/SchoolDetail";
 import EditSchool from "./pages/EditSchool";
 import Subscriptions from "./pages/Subscriptions";
+import SubscriptionRequests from "./pages/SubscriptionRequests";
 import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
@@ -67,6 +69,7 @@ function SuperAdminRoutes() {
         <Route path="/schools/:id" element={<SchoolDetail />} />
         <Route path="/schools/:id/edit" element={<EditSchool />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
+        <Route path="/subscription-requests" element={<SubscriptionRequests />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<SettingsPage />} />
@@ -152,7 +155,7 @@ function StudentPortalWrapper() {
 function ProtectedRoutes() {
   const { user, loading, role } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   if (role === "student") {
     return (
@@ -184,7 +187,8 @@ function ProtectedRoutes() {
   // Default: super_admin
   return (
     <Routes>
-      <Route path="/*" element={<SuperAdminRoutes />} />
+      <Route path="/admin/*" element={<SuperAdminRoutes />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
   );
 }
@@ -194,11 +198,21 @@ function AppRoutes() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/" element={user ? <ProtectedRedirect /> : <LandingPage />} />
+      <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );
+}
+
+function ProtectedRedirect() {
+  const { role } = useAuth();
+  if (role === "super_admin") return <Navigate to="/admin" replace />;
+  if (role === "school_admin") return <Navigate to="/school" replace />;
+  if (role === "teacher") return <Navigate to="/teacher" replace />;
+  if (role === "student") return <Navigate to="/student" replace />;
+  return <Navigate to="/login" replace />;
 }
 
 const App = () => (

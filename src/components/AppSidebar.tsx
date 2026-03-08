@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
   GraduationCap,
+  Inbox,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -27,12 +28,13 @@ import {
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Schools", url: "/schools", icon: School },
-  { title: "Subscriptions", url: "/subscriptions", icon: CreditCard },
-  { title: "Payment History", url: "/payments", icon: Receipt },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+  { title: "Schools", url: "/admin/schools", icon: School },
+  { title: "Subscriptions", url: "/admin/subscriptions", icon: CreditCard },
+  { title: "Requests", url: "/admin/subscription-requests", icon: Inbox },
+  { title: "Payment History", url: "/admin/payments", icon: Receipt },
+  { title: "Reports", url: "/admin/reports", icon: BarChart3 },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

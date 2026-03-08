@@ -88,3 +88,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles for receipts and report cards */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 2rem;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

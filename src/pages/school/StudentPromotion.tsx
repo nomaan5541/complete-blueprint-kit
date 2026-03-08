@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,7 +41,8 @@ export default function StudentPromotion() {
 
   const loadStudents = async () => {
     if (!fromYear || !fromClass) { toast.error("Select source year and class"); return; }
-    const { data } = await supabase.from("students").select("id, name, admission_number, sections(name)")
+    const { data } = await supabase.from("students")
+      .select("id, name, admission_number, student_master_id, sections(name)")
       .eq("school_id", schoolId!).eq("academic_year_id", fromYear).eq("class_id", fromClass).eq("status", "active").order("name");
     setStudents(data || []);
     setSelectedStudents(new Set((data || []).map((s: any) => s.id)));
@@ -51,8 +52,7 @@ export default function StudentPromotion() {
   const toggleStudent = (id: string) => {
     setSelectedStudents((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -67,26 +67,42 @@ export default function StudentPromotion() {
     if (selectedStudents.size === 0) { toast.error("Select at least one student"); return; }
     setPromoting(true);
 
-    // Mark old records as promoted
     const ids = Array.from(selectedStudents);
     const { error: updateError } = await supabase.from("students").update({ status: "promoted" }).in("id", ids);
     if (updateError) { toast.error(updateError.message); setPromoting(false); return; }
 
-    // Create new records in new year/class
+    // Create new year records linked to same student_master
     const studentsToPromote = students.filter((s) => selectedStudents.has(s.id));
-    const newRecords = studentsToPromote.map((s) => ({
-      school_id: schoolId!,
-      academic_year_id: toYear,
-      admission_number: s.admission_number,
-      name: s.name,
-      class_id: toClass,
-      status: "active" as const,
-    }));
-
-    // Insert one by one to handle unique constraint gracefully
     let successCount = 0;
-    for (const record of newRecords) {
-      const { error } = await supabase.from("students").insert(record);
+    for (const s of studentsToPromote) {
+      // Get personal data from master if available
+      let personalData: any = { name: s.name };
+      if (s.student_master_id) {
+        const { data: master } = await supabase.from("student_master" as any)
+          .select("name, gender, date_of_birth, blood_group, father_name, mother_name, father_phone, address, city, state, pincode, photo_url")
+          .eq("id", s.student_master_id).single();
+        if (master) personalData = master;
+      }
+
+      const { error } = await supabase.from("students").insert({
+        school_id: schoolId!,
+        academic_year_id: toYear,
+        admission_number: s.admission_number,
+        name: personalData.name,
+        gender: personalData.gender || null,
+        date_of_birth: personalData.date_of_birth || null,
+        blood_group: personalData.blood_group || null,
+        father_name: personalData.father_name || null,
+        mother_name: personalData.mother_name || null,
+        father_phone: personalData.father_phone || null,
+        address: personalData.address || null,
+        city: personalData.city || null,
+        state: personalData.state || null,
+        pincode: personalData.pincode || null,
+        class_id: toClass,
+        student_master_id: s.student_master_id,
+        status: "active",
+      });
       if (!error) successCount++;
     }
 
@@ -130,7 +146,6 @@ export default function StudentPromotion() {
                 </Select>
               </div>
             </div>
-
             <div className="space-y-3">
               <h3 className="font-semibold text-sm text-muted-foreground">TO</h3>
               <div className="space-y-2">
@@ -184,9 +199,7 @@ export default function StudentPromotion() {
                 ) : (
                   students.map((s) => (
                     <TableRow key={s.id}>
-                      <TableCell>
-                        <Checkbox checked={selectedStudents.has(s.id)} onCheckedChange={() => toggleStudent(s.id)} />
-                      </TableCell>
+                      <TableCell><Checkbox checked={selectedStudents.has(s.id)} onCheckedChange={() => toggleStudent(s.id)} /></TableCell>
                       <TableCell className="font-mono text-xs">{s.admission_number}</TableCell>
                       <TableCell className="font-medium">{s.name}</TableCell>
                       <TableCell>{(s.sections as any)?.name || "—"}</TableCell>

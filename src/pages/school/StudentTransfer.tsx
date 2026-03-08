@@ -4,7 +4,7 @@ import { useSchool } from "@/hooks/useSchool";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -27,7 +27,7 @@ export default function StudentTransfer() {
     if (!schoolId) return;
     setLoading(true);
     const { data } = await supabase.from("students")
-      .select("*, classes(name), sections(name), academic_years(name)")
+      .select("*, classes(name), sections(name), academic_years(name), student_master(id, name, admission_number)")
       .eq("school_id", schoolId)
       .in("status", ["active", "transferred", "left", "completed"])
       .order("name");
@@ -37,9 +37,12 @@ export default function StudentTransfer() {
 
   useEffect(() => { fetchStudents(); }, [schoolId]);
 
+  const getName = (s: any) => s.student_master?.name || s.name;
+  const getAdmNo = (s: any) => s.student_master?.admission_number || s.admission_number;
+
   const filtered = students.filter(s => {
     if (!search) return true;
-    return s.name.toLowerCase().includes(search.toLowerCase()) || s.admission_number.toLowerCase().includes(search.toLowerCase());
+    return getName(s).toLowerCase().includes(search.toLowerCase()) || getAdmNo(s).toLowerCase().includes(search.toLowerCase());
   });
 
   const openTransfer = (s: any) => {
@@ -51,24 +54,24 @@ export default function StudentTransfer() {
   const handleTransfer = async () => {
     if (!selectedStudent) return;
     setSaving(true);
-    const { error } = await supabase.from("students").update({
-      status: transferForm.status,
-    }).eq("id", selectedStudent.id);
+    // Update year record
+    const { error } = await supabase.from("students").update({ status: transferForm.status }).eq("id", selectedStudent.id);
+    if (error) { toast.error(error.message); setSaving(false); return; }
 
-    if (error) toast.error(error.message);
-    else {
-      toast.success(`Student status updated to ${transferForm.status}`);
-      setOpen(false);
-      fetchStudents();
+    // Also update master record status
+    if (selectedStudent.student_master_id) {
+      await supabase.from("student_master" as any).update({ status: transferForm.status } as any).eq("id", selectedStudent.student_master_id);
     }
+
+    toast.success(`Student status updated to ${transferForm.status}`);
+    setOpen(false);
+    fetchStudents();
     setSaving(false);
   };
 
   const statusColor: Record<string, string> = {
-    active: "bg-success/10 text-success",
-    transferred: "bg-warning/10 text-warning",
-    left: "bg-destructive/10 text-destructive",
-    completed: "bg-primary/10 text-primary",
+    active: "bg-success/10 text-success", transferred: "bg-warning/10 text-warning",
+    left: "bg-destructive/10 text-destructive", completed: "bg-primary/10 text-primary",
     promoted: "bg-primary/10 text-primary",
   };
 
@@ -80,22 +83,10 @@ export default function StudentTransfer() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-6 text-center">
-          <p className="text-2xl font-bold">{students.filter(s => s.status === "active").length}</p>
-          <p className="text-xs text-muted-foreground">Active</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <p className="text-2xl font-bold text-warning">{students.filter(s => s.status === "transferred").length}</p>
-          <p className="text-xs text-muted-foreground">Transferred</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <p className="text-2xl font-bold text-destructive">{students.filter(s => s.status === "left").length}</p>
-          <p className="text-xs text-muted-foreground">Left</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <p className="text-2xl font-bold text-primary">{students.filter(s => s.status === "completed").length}</p>
-          <p className="text-xs text-muted-foreground">Completed</p>
-        </CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{students.filter(s => s.status === "active").length}</p><p className="text-xs text-muted-foreground">Active</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-warning">{students.filter(s => s.status === "transferred").length}</p><p className="text-xs text-muted-foreground">Transferred</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-destructive">{students.filter(s => s.status === "left").length}</p><p className="text-xs text-muted-foreground">Left</p></CardContent></Card>
+        <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold text-primary">{students.filter(s => s.status === "completed").length}</p><p className="text-xs text-muted-foreground">Completed</p></CardContent></Card>
       </div>
 
       <div className="relative max-w-sm">
@@ -123,8 +114,8 @@ export default function StudentTransfer() {
             ) : (
               filtered.map(s => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-mono text-xs">{s.admission_number}</TableCell>
-                  <TableCell className="font-medium">{s.name}</TableCell>
+                  <TableCell className="font-mono text-xs">{getAdmNo(s)}</TableCell>
+                  <TableCell className="font-medium">{getName(s)}</TableCell>
                   <TableCell>{s.classes?.name || "—"}</TableCell>
                   <TableCell>{s.academic_years?.name || "—"}</TableCell>
                   <TableCell><Badge variant="outline" className={statusColor[s.status] || ""}>{s.status}</Badge></TableCell>
@@ -145,7 +136,7 @@ export default function StudentTransfer() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Change Student Status</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Student: <strong>{selectedStudent?.name}</strong> ({selectedStudent?.admission_number})</p>
+          <p className="text-sm text-muted-foreground">Student: <strong>{getName(selectedStudent)}</strong> ({getAdmNo(selectedStudent)})</p>
           <div className="space-y-4">
             <div className="space-y-1">
               <Label>New Status</Label>

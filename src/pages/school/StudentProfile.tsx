@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, User, GraduationCap, IndianRupee, ClipboardCheck, FileText } from "lucide-react";
+import { ArrowLeft, GraduationCap, IndianRupee, ClipboardCheck } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentProfile() {
@@ -17,7 +17,8 @@ export default function StudentProfile() {
   const studentId = searchParams.get("id");
 
   const [student, setStudent] = useState<any>(null);
-  const [history, setHistory] = useState<any[]>([]);
+  const [master, setMaster] = useState<any>(null);
+  const [yearRecords, setYearRecords] = useState<any[]>([]);
   const [feePayments, setFeePayments] = useState<any[]>([]);
   const [attendance, setAttendance] = useState<any[]>([]);
   const [examMarks, setExamMarks] = useState<any[]>([]);
@@ -27,35 +28,42 @@ export default function StudentProfile() {
   useEffect(() => {
     if (!schoolId || !studentId) return;
     async function fetch() {
-      // Get current student record
+      // Get current student year record
       const { data: s } = await supabase.from("students")
         .select("*, classes(name), sections(name), academic_years(name)")
         .eq("id", studentId!).single();
       setStudent(s);
-
       if (!s) { setLoading(false); return; }
 
-      // Get all records for this admission number (academic history)
+      // Get master record for permanent data
+      let masterData = null;
+      if (s.student_master_id) {
+        const { data: m } = await supabase.from("student_master" as any)
+          .select("*").eq("id", s.student_master_id).single();
+        masterData = m;
+      }
+      setMaster(masterData);
+
+      // Get all year records for this student (via master_id or admission_number)
+      const yearQuery = s.student_master_id
+        ? supabase.from("students").select("id, name, admission_number, status, class_id, section_id, academic_year_id, classes(name), sections(name), academic_years(name)")
+            .eq("school_id", schoolId!).eq("student_master_id", s.student_master_id).order("created_at", { ascending: false })
+        : supabase.from("students").select("id, name, admission_number, status, class_id, section_id, academic_year_id, classes(name), sections(name), academic_years(name)")
+            .eq("school_id", schoolId!).eq("admission_number", s.admission_number).order("created_at", { ascending: false });
+
       const [histRes, feeRes, attRes, marksRes, fsRes] = await Promise.all([
-        supabase.from("students")
-          .select("id, admission_number, name, status, class_id, section_id, academic_year_id, classes(name), sections(name), academic_years(name)")
-          .eq("school_id", schoolId!).eq("admission_number", s.admission_number)
-          .order("created_at", { ascending: false }),
-        supabase.from("fee_payments")
-          .select("*, fee_types(name), academic_years(name)")
+        yearQuery,
+        supabase.from("fee_payments").select("*, fee_types(name), academic_years(name)")
           .eq("student_id", studentId!).order("payment_date", { ascending: false }),
-        supabase.from("attendance")
-          .select("date, status")
+        supabase.from("attendance").select("date, status")
           .eq("student_id", studentId!).order("date", { ascending: false }).limit(100),
-        supabase.from("exam_marks")
-          .select("*, exams(name), subjects(name)")
+        supabase.from("exam_marks").select("*, exams(name), subjects(name)")
           .eq("student_id", studentId!),
-        supabase.from("fee_structures")
-          .select("*, fee_types(name)")
+        supabase.from("fee_structures").select("*, fee_types(name)")
           .eq("class_id", s.class_id).eq("academic_year_id", s.academic_year_id),
       ]);
 
-      setHistory(histRes.data || []);
+      setYearRecords(histRes.data || []);
       setFeePayments(feeRes.data || []);
       setAttendance(attRes.data || []);
       setExamMarks(marksRes.data || []);
@@ -68,12 +76,12 @@ export default function StudentProfile() {
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
   if (!student) return <div className="p-10 text-center text-muted-foreground">Student not found</div>;
 
-  // Fee calculations
+  // Use master for personal info, fallback to student record
+  const getField = (field: string) => master?.[field] || student[field];
+
   const totalFeeExpected = feeStructures.reduce((sum, fs) => sum + Number(fs.amount), 0);
   const totalPaid = feePayments.reduce((sum, p) => sum + Number(p.amount), 0);
   const feeDue = totalFeeExpected - totalPaid;
-
-  // Attendance calculations
   const totalDays = attendance.length;
   const presentDays = attendance.filter(a => a.status === "present").length;
   const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : "0";
@@ -91,13 +99,12 @@ export default function StudentProfile() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">{student.name}</h1>
-          <p className="text-muted-foreground">Admission No: {student.admission_number}</p>
+          <h1 className="text-3xl font-bold">{getField("name")}</h1>
+          <p className="text-muted-foreground">Admission No: {getField("admission_number")}</p>
         </div>
         <Badge variant="outline" className={statusColor[student.status] || ""}>{student.status}</Badge>
       </div>
 
-      {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-4">
         <Card><CardContent className="pt-6 text-center">
           <GraduationCap className="h-5 w-5 mx-auto mb-1 text-primary" />
@@ -132,17 +139,21 @@ export default function StudentProfile() {
 
         <TabsContent value="personal">
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-base">Personal Information</CardTitle>
+              {master && <p className="text-xs text-muted-foreground">From permanent student record (Master ID)</p>}
+            </CardHeader>
+            <CardContent>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <InfoItem label="Name" value={student.name} />
-                <InfoItem label="Gender" value={student.gender} />
-                <InfoItem label="Date of Birth" value={student.date_of_birth} />
-                <InfoItem label="Blood Group" value={student.blood_group} />
-                <InfoItem label="Father Name" value={student.father_name} />
-                <InfoItem label="Mother Name" value={student.mother_name} />
-                <InfoItem label="Father Phone" value={student.father_phone} />
-                <InfoItem label="Address" value={[student.address, student.city, student.state, student.pincode].filter(Boolean).join(", ")} />
-                <InfoItem label="Admission Date" value={student.admission_date} />
+                <InfoItem label="Name" value={getField("name")} />
+                <InfoItem label="Gender" value={getField("gender")} />
+                <InfoItem label="Date of Birth" value={getField("date_of_birth")} />
+                <InfoItem label="Blood Group" value={getField("blood_group")} />
+                <InfoItem label="Father Name" value={getField("father_name")} />
+                <InfoItem label="Mother Name" value={getField("mother_name")} />
+                <InfoItem label="Father Phone" value={getField("father_phone")} />
+                <InfoItem label="Address" value={[getField("address"), getField("city"), getField("state"), getField("pincode")].filter(Boolean).join(", ")} />
+                <InfoItem label="Admission Date" value={getField("admission_date")} />
                 <InfoItem label="Class" value={student.classes?.name} />
                 <InfoItem label="Section" value={student.sections?.name} />
                 <InfoItem label="Academic Year" value={student.academic_years?.name} />
@@ -165,15 +176,15 @@ export default function StudentProfile() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {history.map((h) => (
-                    <TableRow key={h.id}>
+                  {yearRecords.map((h) => (
+                    <TableRow key={h.id} className={h.id === studentId ? "bg-primary/5" : ""}>
                       <TableCell>{h.academic_years?.name || "—"}</TableCell>
                       <TableCell>{h.classes?.name || "—"}</TableCell>
                       <TableCell>{h.sections?.name || "—"}</TableCell>
                       <TableCell><Badge variant="outline" className={statusColor[h.status] || ""}>{h.status}</Badge></TableCell>
                     </TableRow>
                   ))}
-                  {history.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No history</TableCell></TableRow>}
+                  {yearRecords.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No history</TableCell></TableRow>}
                 </TableBody>
               </Table>
             </CardContent>

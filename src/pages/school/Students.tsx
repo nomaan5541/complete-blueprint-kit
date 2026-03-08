@@ -278,7 +278,7 @@ export default function Students() {
           <h1 className="text-3xl font-bold">Students</h1>
           <p className="text-muted-foreground">Manage student records ({filteredStudents.length} total)</p>
         </div>
-        <Button onClick={() => { setForm(emptyForm); setOpen(true); }}><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
+        <Button onClick={() => { setForm({ ...emptyForm, academic_year_id: selectedYearId }); setOpen(true); }}><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
       </div>
 
       <div className="flex items-center gap-4">

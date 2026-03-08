@@ -186,8 +186,9 @@
 
   /* Responsive table wrapper - allows horizontal scroll on mobile */
   .table-responsive {
-    @apply w-full overflow-x-auto -mx-1 px-1;
+    @apply w-full overflow-x-auto;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
   }
 
   /* Page container - constrains content width on large screens */

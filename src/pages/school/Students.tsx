@@ -234,20 +234,18 @@ export default function Students() {
     setSaving(true);
     try {
       const studentName = getMasterField(selectedStudent, "name");
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: accountForm.email, password: accountForm.password,
-        options: { data: { full_name: studentName } },
+      const { data, error } = await supabase.functions.invoke("create-user-account", {
+        body: {
+          email: accountForm.email,
+          password: accountForm.password,
+          fullName: studentName,
+          role: "student",
+          schoolId,
+          studentId: selectedStudent.id,
+        },
       });
-      if (authError) throw authError;
-      const userId = authData.user?.id;
-      if (!userId) throw new Error("Failed to create user");
-
-      await supabase.from("user_roles").insert({ user_id: userId, role: "student" });
-      await supabase.from("students").update({ user_id: userId }).eq("id", selectedStudent.id);
-      if (selectedStudent.student_master_id) {
-        await supabase.from("student_master" as any).update({ user_id: userId } as any).eq("id", selectedStudent.student_master_id);
-      }
-      await supabase.from("profiles").update({ school_id: schoolId, full_name: studentName }).eq("user_id", userId);
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("Student login account created");
       setAccountOpen(false);

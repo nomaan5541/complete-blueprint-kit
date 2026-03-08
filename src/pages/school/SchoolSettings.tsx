@@ -239,6 +239,59 @@ export default function SchoolSettings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="sms">
+          <Card>
+            <CardHeader>
+              <CardTitle>SMS & WhatsApp Settings</CardTitle>
+              <CardDescription>Configure MSG91 credentials to send notifications via SMS and WhatsApp to parents and teachers</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                <p className="font-medium mb-1">How to get MSG91 credentials:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Sign up at <span className="font-mono text-primary">msg91.com</span></li>
+                  <li>Go to Dashboard → Settings → Authkey to get your Auth Key</li>
+                  <li>Register a Sender ID (6 characters) under SMS → Sender ID</li>
+                  <li>For WhatsApp, create a template under WhatsApp → Templates</li>
+                </ol>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2 space-y-2">
+                  <Label>MSG91 Auth Key</Label>
+                  <Input
+                    type="password"
+                    value={smsForm.msg91_auth_key}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_auth_key: e.target.value }))}
+                    placeholder="Enter your MSG91 authentication key"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sender ID</Label>
+                  <Input
+                    value={smsForm.msg91_sender_id}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_sender_id: e.target.value.toUpperCase() }))}
+                    placeholder="e.g. SCHOOL"
+                    maxLength={6}
+                  />
+                  <p className="text-xs text-muted-foreground">6-character sender ID registered with MSG91</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>WhatsApp Template ID (optional)</Label>
+                  <Input
+                    value={smsForm.msg91_whatsapp_template_id}
+                    onChange={(e) => setSmsForm((p) => ({ ...p, msg91_whatsapp_template_id: e.target.value }))}
+                    placeholder="Template ID from MSG91"
+                  />
+                </div>
+              </div>
+              <Button onClick={saveSmsSettings} disabled={savingSms}>
+                {savingSms ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save SMS Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

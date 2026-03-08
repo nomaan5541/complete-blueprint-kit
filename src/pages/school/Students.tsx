@@ -16,10 +16,10 @@ import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus } from "lucide-rea
 export default function Students() {
   const navigate = useNavigate();
   const { schoolId } = useSchool();
+  const { academicYears, selectedYearId } = useAcademicYear();
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);

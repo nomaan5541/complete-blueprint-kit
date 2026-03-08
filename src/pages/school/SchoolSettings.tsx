@@ -48,6 +48,7 @@ export default function SchoolSettings() {
           school_start_time: s.school_start_time || "09:00",
           school_end_time: s.school_end_time || "16:00",
           registration_number: s.registration_number || "",
+          receipt_prefix: (s as any).receipt_prefix || "RCPT",
         });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);

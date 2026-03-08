@@ -280,7 +280,14 @@ export default function SchoolReports() {
 
         <TabsContent value="teachers" className="space-y-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">Teacher Workload</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Teacher Workload</CardTitle>
+                <Button variant="outline" size="sm" onClick={() => exportToCsv("teacher-workload", teacherWorkload)}>
+                  <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>

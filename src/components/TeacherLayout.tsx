@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TeacherSidebar } from "@/components/TeacherSidebar";
 import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ReadOnlyOverlay } from "@/components/ReadOnlyGuard";
 
 export function TeacherLayout({ children }: { children: ReactNode }) {
   return (
@@ -17,7 +18,9 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </header>
           <main className="flex-1 p-6 overflow-auto">
-            {children}
+            <ReadOnlyOverlay>
+              {children}
+            </ReadOnlyOverlay>
           </main>
         </div>
       </div>

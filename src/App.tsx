@@ -50,6 +50,7 @@ import FeeDues from "./pages/school/FeeDues";
 import StudentTransfer from "./pages/school/StudentTransfer";
 import StudentDocuments from "./pages/school/StudentDocuments";
 import SchoolCalendar from "./pages/school/SchoolCalendar";
+import Meetings from "./pages/school/Meetings";
 import AuditLogs from "./pages/school/AuditLogs";
 import StudentExamTake from "./pages/school/StudentExamTake";
 

@@ -30,12 +30,35 @@ Deno.serve(async (req) => {
       .single();
     if (nErr || !notification) throw new Error("Notification not found");
 
-    // Fetch school name
+    // Authorization: verify caller belongs to this school
     const { data: schoolRow } = await supabase
       .from("schools")
-      .select("name")
+      .select("admin_id, name")
       .eq("id", notification.school_id)
       .single();
+
+    const isAdmin = schoolRow?.admin_id === user.id;
+
+    const { data: teacherRow } = await supabase
+      .from("teachers")
+      .select("id")
+      .eq("school_id", notification.school_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const { data: superAdminRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (!isAdmin && !teacherRow && !superAdminRole) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Fetch MSG91 config from secure table
     const { data: smsConfig } = await supabase

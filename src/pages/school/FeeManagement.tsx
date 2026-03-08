@@ -296,13 +296,6 @@ export default function FeeManagement() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Academic Year</Label>
-              <Select value={collectForm.academic_year_id} onValueChange={(v) => setCollectForm(p => ({ ...p, academic_year_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{academicYears.map((y) => <SelectItem key={y.id} value={y.id}>{y.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
               <Label>Fee Type</Label>
               <Select value={collectForm.fee_type_id} onValueChange={(v) => setCollectForm(p => ({ ...p, fee_type_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>

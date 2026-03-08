@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Loader2, Search, Trash2, Link } from "lucide-react";
+import { Plus, Loader2, Search, Trash2, Link, Pencil, UserPlus } from "lucide-react";
 
 export default function Teachers() {
   const { schoolId } = useSchool();
@@ -20,14 +20,17 @@ export default function Teachers() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
+  const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [assignForm, setAssignForm] = useState({ class_id: "", subject_id: "", academic_year_id: "" });
-  const [form, setForm] = useState({
-    name: "", gender: "", phone: "", email: "", qualification: "", joining_date: "",
-  });
+  const [accountForm, setAccountForm] = useState({ email: "", password: "" });
+  const emptyForm = { name: "", gender: "", phone: "", email: "", qualification: "", joining_date: "" };
+  const [form, setForm] = useState(emptyForm);
 
   const fetchAll = async () => {
     if (!schoolId) return;
@@ -57,20 +60,61 @@ export default function Teachers() {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
     const { error } = await supabase.from("teachers").insert({
-      school_id: schoolId!,
-      name: form.name.trim(),
-      gender: form.gender || null,
-      phone: form.phone || null,
-      email: form.email || null,
-      qualification: form.qualification || null,
-      joining_date: form.joining_date || null,
+      school_id: schoolId!, name: form.name.trim(),
+      gender: form.gender || null, phone: form.phone || null, email: form.email || null,
+      qualification: form.qualification || null, joining_date: form.joining_date || null,
     });
     if (error) toast.error(error.message);
-    else {
-      toast.success("Teacher added");
-      setOpen(false);
-      setForm({ name: "", gender: "", phone: "", email: "", qualification: "", joining_date: "" });
+    else { toast.success("Teacher added"); setOpen(false); setForm(emptyForm); fetchAll(); }
+    setSaving(false);
+  };
+
+  const handleEdit = async () => {
+    if (!selectedTeacher || !form.name.trim()) { toast.error("Name is required"); return; }
+    setSaving(true);
+    const { error } = await supabase.from("teachers").update({
+      name: form.name.trim(), gender: form.gender || null, phone: form.phone || null,
+      email: form.email || null, qualification: form.qualification || null, joining_date: form.joining_date || null,
+    }).eq("id", selectedTeacher.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Teacher updated"); setEditOpen(false); fetchAll(); }
+    setSaving(false);
+  };
+
+  const openEdit = (t: any) => {
+    setSelectedTeacher(t);
+    setForm({
+      name: t.name || "", gender: t.gender || "", phone: t.phone || "",
+      email: t.email || "", qualification: t.qualification || "", joining_date: t.joining_date || "",
+    });
+    setEditOpen(true);
+  };
+
+  const handleCreateAccount = async () => {
+    if (!accountForm.email.trim() || !accountForm.password.trim()) {
+      toast.error("Email and password are required"); return;
+    }
+    if (accountForm.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    setSaving(true);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: accountForm.email, password: accountForm.password,
+        options: { data: { full_name: selectedTeacher.name } },
+      });
+      if (authError) throw authError;
+      const userId = authData.user?.id;
+      if (!userId) throw new Error("Failed to create user");
+
+      await supabase.from("user_roles").insert({ user_id: userId, role: "teacher" });
+      await supabase.from("teachers").update({ user_id: userId }).eq("id", selectedTeacher.id);
+      await supabase.from("profiles").update({ school_id: schoolId, full_name: selectedTeacher.name }).eq("user_id", userId);
+
+      toast.success("Teacher login account created");
+      setAccountOpen(false);
+      setAccountForm({ email: "", password: "" });
       fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create account");
     }
     setSaving(false);
   };
@@ -81,11 +125,8 @@ export default function Teachers() {
     }
     setSaving(true);
     const { error } = await supabase.from("teacher_assignments").insert({
-      school_id: schoolId!,
-      teacher_id: selectedTeacherId,
-      class_id: assignForm.class_id,
-      subject_id: assignForm.subject_id,
-      academic_year_id: assignForm.academic_year_id,
+      school_id: schoolId!, teacher_id: selectedTeacherId,
+      class_id: assignForm.class_id, subject_id: assignForm.subject_id, academic_year_id: assignForm.academic_year_id,
     });
     if (error) toast.error(error.message);
     else { toast.success("Assignment created"); setAssignOpen(false); setAssignForm({ class_id: "", subject_id: "", academic_year_id: "" }); fetchAll(); }
@@ -104,21 +145,36 @@ export default function Teachers() {
     else { toast.success("Assignment removed"); fetchAll(); }
   };
 
+  const TeacherFormFields = () => (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="space-y-1"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} /></div>
+      <div className="space-y-1">
+        <Label>Gender</Label>
+        <Select value={form.gender} onValueChange={(v) => setForm(p => ({ ...p, gender: v }))}>
+          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+          <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} /></div>
+      <div className="space-y-1"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
+      <div className="space-y-1"><Label>Qualification</Label><Input value={form.qualification} onChange={(e) => setForm(p => ({ ...p, qualification: e.target.value }))} /></div>
+      <div className="space-y-1"><Label>Joining Date</Label><Input type="date" value={form.joining_date} onChange={(e) => setForm(p => ({ ...p, joining_date: e.target.value }))} /></div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Teachers</h1>
-          <p className="text-muted-foreground">Manage teaching staff</p>
+          <p className="text-muted-foreground">Manage teaching staff ({filtered.length} total)</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
+        <Button onClick={() => { setForm(emptyForm); setOpen(true); }}><Plus className="mr-2 h-4 w-4" /> Add Teacher</Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search teachers..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search teachers..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="rounded-lg border bg-card">
@@ -130,15 +186,16 @@ export default function Teachers() {
               <TableHead>Phone</TableHead>
               <TableHead>Qualification</TableHead>
               <TableHead>Assignments</TableHead>
+              <TableHead>Account</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No teachers found</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No teachers found</TableCell></TableRow>
             ) : (
               filtered.map((t) => {
                 const teacherAssignments = assignments.filter((a) => a.teacher_id === t.id);
@@ -163,15 +220,28 @@ export default function Teachers() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {t.user_id ? (
+                        <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground text-xs">No account</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Badge variant="outline" className={t.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}>
                         {t.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => { setSelectedTeacherId(t.id); setAssignOpen(true); }} title="Assign to class">
                           <Link className="h-4 w-4" />
                         </Button>
+                        {!t.user_id && (
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedTeacher(t); setAccountOpen(true); }} title="Create login account">
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)} className="text-destructive hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -189,23 +259,38 @@ export default function Teachers() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Add Teacher</DialogTitle></DialogHeader>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} /></div>
-            <div className="space-y-1">
-              <Label>Gender</Label>
-              <Select value={form.gender} onValueChange={(v) => setForm(p => ({ ...p, gender: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} /></div>
-            <div className="space-y-1"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
-            <div className="space-y-1"><Label>Qualification</Label><Input value={form.qualification} onChange={(e) => setForm(p => ({ ...p, qualification: e.target.value }))} /></div>
-            <div className="space-y-1"><Label>Joining Date</Label><Input type="date" value={form.joining_date} onChange={(e) => setForm(p => ({ ...p, joining_date: e.target.value }))} /></div>
-          </div>
+          <TeacherFormFields />
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Add Teacher</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Teacher Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit Teacher</DialogTitle></DialogHeader>
+          <TeacherFormFields />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleEdit} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Account Dialog */}
+      <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create Teacher Login</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Create a login account for <strong>{selectedTeacher?.name}</strong> so they can access the Teacher Portal.</p>
+          <div className="space-y-3">
+            <div className="space-y-1"><Label>Email</Label><Input type="email" value={accountForm.email} onChange={e => setAccountForm(p => ({ ...p, email: e.target.value }))} placeholder="teacher@email.com" /></div>
+            <div className="space-y-1"><Label>Password</Label><Input type="password" value={accountForm.password} onChange={e => setAccountForm(p => ({ ...p, password: e.target.value }))} placeholder="Min 6 characters" /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAccountOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateAccount} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Create Account</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

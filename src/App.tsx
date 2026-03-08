@@ -9,6 +9,7 @@ import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import { TeacherLayout } from "@/components/TeacherLayout";
 import { useSchool } from "@/hooks/useSchool";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
 import AddSchool from "./pages/AddSchool";
@@ -37,6 +38,8 @@ import Timetable from "./pages/school/Timetable";
 import Notifications from "./pages/school/Notifications";
 import SchoolReports from "./pages/school/SchoolReports";
 import StudentPortal from "./pages/school/StudentPortal";
+import ClassSubjectMapping from "./pages/school/ClassSubjectMapping";
+import ReportCard from "./pages/school/ReportCard";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
@@ -87,6 +90,8 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/academic-years" element={<AcademicYears />} />
         <Route path="/classes" element={<ClassesAndSections />} />
         <Route path="/subjects" element={<Subjects />} />
+        <Route path="/subject-mapping" element={<ClassSubjectMapping />} />
+        <Route path="/report-card" element={<ReportCard />} />
         <Route path="/students" element={<Students />} />
         <Route path="/promotion" element={<StudentPromotion />} />
         <Route path="/teachers" element={<Teachers />} />
@@ -176,6 +181,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );

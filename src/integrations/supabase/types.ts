@@ -909,6 +909,83 @@ export type Database = {
           },
         ]
       }
+      student_master: {
+        Row: {
+          address: string | null
+          admission_date: string | null
+          admission_number: string
+          blood_group: string | null
+          city: string | null
+          created_at: string
+          date_of_birth: string | null
+          father_name: string | null
+          father_phone: string | null
+          gender: string | null
+          id: string
+          mother_name: string | null
+          name: string
+          photo_url: string | null
+          pincode: string | null
+          school_id: string
+          state: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admission_date?: string | null
+          admission_number: string
+          blood_group?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          father_name?: string | null
+          father_phone?: string | null
+          gender?: string | null
+          id?: string
+          mother_name?: string | null
+          name: string
+          photo_url?: string | null
+          pincode?: string | null
+          school_id: string
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admission_date?: string | null
+          admission_number?: string
+          blood_group?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          father_name?: string | null
+          father_phone?: string | null
+          gender?: string | null
+          id?: string
+          mother_name?: string | null
+          name?: string
+          photo_url?: string | null
+          pincode?: string | null
+          school_id?: string
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_master_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           academic_year_id: string
@@ -932,6 +1009,7 @@ export type Database = {
           section_id: string | null
           state: string | null
           status: string
+          student_master_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -957,6 +1035,7 @@ export type Database = {
           section_id?: string | null
           state?: string | null
           status?: string
+          student_master_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -982,6 +1061,7 @@ export type Database = {
           section_id?: string | null
           state?: string | null
           status?: string
+          student_master_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1012,6 +1092,13 @@ export type Database = {
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_student_master_id_fkey"
+            columns: ["student_master_id"]
+            isOneToOne: false
+            referencedRelation: "student_master"
             referencedColumns: ["id"]
           },
         ]

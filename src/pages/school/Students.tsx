@@ -22,7 +22,6 @@ export default function Students() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [detailOpen, setDetailOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [saving, setSaving] = useState(false);
@@ -41,7 +40,7 @@ export default function Students() {
     if (!schoolId) return;
     setLoading(true);
     const [studRes, clsRes, secRes, yrRes] = await Promise.all([
-      supabase.from("students").select("*, classes(name), sections(name), academic_years(name)").eq("school_id", schoolId).order("name"),
+      supabase.from("students").select("*, classes(name), sections(name), academic_years(name), student_master(id, name, father_name, admission_number, gender, date_of_birth, blood_group, mother_name, father_phone, address, city, state, pincode, photo_url, user_id, status)").eq("school_id", schoolId).order("name"),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("sections").select("*").eq("school_id", schoolId),
       supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
@@ -55,8 +54,13 @@ export default function Students() {
 
   useEffect(() => { fetchAll(); }, [schoolId]);
 
+  // Helper to get display values from master or fallback to student record
+  const getMasterField = (s: any, field: string) => s.student_master?.[field] || s[field];
+
   const filteredStudents = students.filter((s) => {
-    if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.admission_number.toLowerCase().includes(search.toLowerCase())) return false;
+    const name = getMasterField(s, "name");
+    const admNo = getMasterField(s, "admission_number");
+    if (search && !name?.toLowerCase().includes(search.toLowerCase()) && !admNo?.toLowerCase().includes(search.toLowerCase())) return false;
     if (classFilter !== "all" && s.class_id !== classFilter) return false;
     return true;
   });
@@ -66,41 +70,89 @@ export default function Students() {
       toast.error("Name, admission number, and academic year are required"); return;
     }
     setSaving(true);
-    const { error } = await supabase.from("students").insert({
-      school_id: schoolId!, admission_number: form.admission_number.trim(), name: form.name.trim(),
-      gender: form.gender || null, date_of_birth: form.date_of_birth || null, blood_group: form.blood_group || null,
-      father_name: form.father_name || null, mother_name: form.mother_name || null, father_phone: form.father_phone || null,
-      address: form.address || null, city: form.city || null, state: form.state || null, pincode: form.pincode || null,
-      admission_date: form.admission_date || null, class_id: form.class_id || null, section_id: form.section_id || null,
-      academic_year_id: form.academic_year_id,
-    });
-    if (error) toast.error(error.message);
-    else { toast.success("Student added"); setOpen(false); setForm(emptyForm); fetchAll(); }
+    try {
+      // First create or find master record
+      const { data: existingMaster } = await supabase.from("student_master" as any)
+        .select("id").eq("school_id", schoolId!).eq("admission_number", form.admission_number.trim()).maybeSingle();
+
+      let masterId: string;
+      if (existingMaster) {
+        masterId = (existingMaster as any).id;
+        // Update master with latest personal info
+        await supabase.from("student_master" as any).update({
+          name: form.name.trim(), gender: form.gender || null, date_of_birth: form.date_of_birth || null,
+          blood_group: form.blood_group || null, father_name: form.father_name || null,
+          mother_name: form.mother_name || null, father_phone: form.father_phone || null,
+          address: form.address || null, city: form.city || null, state: form.state || null,
+          pincode: form.pincode || null, admission_date: form.admission_date || null,
+        } as any).eq("id", masterId);
+      } else {
+        const { data: newMaster, error: masterErr } = await supabase.from("student_master" as any).insert({
+          school_id: schoolId!, admission_number: form.admission_number.trim(), name: form.name.trim(),
+          gender: form.gender || null, date_of_birth: form.date_of_birth || null, blood_group: form.blood_group || null,
+          father_name: form.father_name || null, mother_name: form.mother_name || null,
+          father_phone: form.father_phone || null, address: form.address || null, city: form.city || null,
+          state: form.state || null, pincode: form.pincode || null, admission_date: form.admission_date || null,
+        } as any).select("id").single();
+        if (masterErr) throw masterErr;
+        masterId = (newMaster as any).id;
+      }
+
+      // Create year record
+      const { error } = await supabase.from("students").insert({
+        school_id: schoolId!, admission_number: form.admission_number.trim(), name: form.name.trim(),
+        gender: form.gender || null, date_of_birth: form.date_of_birth || null, blood_group: form.blood_group || null,
+        father_name: form.father_name || null, mother_name: form.mother_name || null, father_phone: form.father_phone || null,
+        address: form.address || null, city: form.city || null, state: form.state || null, pincode: form.pincode || null,
+        admission_date: form.admission_date || null, class_id: form.class_id || null, section_id: form.section_id || null,
+        academic_year_id: form.academic_year_id, student_master_id: masterId,
+      });
+      if (error) throw error;
+      toast.success("Student added"); setOpen(false); setForm(emptyForm); fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add student");
+    }
     setSaving(false);
   };
 
   const handleEdit = async () => {
     if (!selectedStudent || !form.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
-    const { error } = await supabase.from("students").update({
-      admission_number: form.admission_number.trim(), name: form.name.trim(),
-      gender: form.gender || null, date_of_birth: form.date_of_birth || null, blood_group: form.blood_group || null,
-      father_name: form.father_name || null, mother_name: form.mother_name || null, father_phone: form.father_phone || null,
-      address: form.address || null, city: form.city || null, state: form.state || null, pincode: form.pincode || null,
-      class_id: form.class_id || null, section_id: form.section_id || null,
-    }).eq("id", selectedStudent.id);
-    if (error) toast.error(error.message);
-    else { toast.success("Student updated"); setEditOpen(false); fetchAll(); }
+    try {
+      // Update master record personal info
+      if (selectedStudent.student_master_id) {
+        await supabase.from("student_master" as any).update({
+          name: form.name.trim(), gender: form.gender || null, date_of_birth: form.date_of_birth || null,
+          blood_group: form.blood_group || null, father_name: form.father_name || null,
+          mother_name: form.mother_name || null, father_phone: form.father_phone || null,
+          address: form.address || null, city: form.city || null, state: form.state || null, pincode: form.pincode || null,
+        } as any).eq("id", selectedStudent.student_master_id);
+      }
+      // Update year record
+      const { error } = await supabase.from("students").update({
+        admission_number: form.admission_number.trim(), name: form.name.trim(),
+        gender: form.gender || null, date_of_birth: form.date_of_birth || null, blood_group: form.blood_group || null,
+        father_name: form.father_name || null, mother_name: form.mother_name || null, father_phone: form.father_phone || null,
+        address: form.address || null, city: form.city || null, state: form.state || null, pincode: form.pincode || null,
+        class_id: form.class_id || null, section_id: form.section_id || null,
+      }).eq("id", selectedStudent.id);
+      if (error) throw error;
+      toast.success("Student updated"); setEditOpen(false); fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update");
+    }
     setSaving(false);
   };
 
   const openEdit = (s: any) => {
     setSelectedStudent(s);
     setForm({
-      admission_number: s.admission_number || "", name: s.name || "", gender: s.gender || "",
-      date_of_birth: s.date_of_birth || "", blood_group: s.blood_group || "",
-      father_name: s.father_name || "", mother_name: s.mother_name || "", father_phone: s.father_phone || "",
-      address: s.address || "", city: s.city || "", state: s.state || "", pincode: s.pincode || "",
+      admission_number: getMasterField(s, "admission_number") || "", name: getMasterField(s, "name") || "",
+      gender: getMasterField(s, "gender") || "", date_of_birth: getMasterField(s, "date_of_birth") || "",
+      blood_group: getMasterField(s, "blood_group") || "", father_name: getMasterField(s, "father_name") || "",
+      mother_name: getMasterField(s, "mother_name") || "", father_phone: getMasterField(s, "father_phone") || "",
+      address: getMasterField(s, "address") || "", city: getMasterField(s, "city") || "",
+      state: getMasterField(s, "state") || "", pincode: getMasterField(s, "pincode") || "",
       admission_date: s.admission_date || "", class_id: s.class_id || "", section_id: s.section_id || "",
       academic_year_id: s.academic_year_id || "",
     });
@@ -114,20 +166,22 @@ export default function Students() {
     if (accountForm.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setSaving(true);
     try {
+      const studentName = getMasterField(selectedStudent, "name");
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: accountForm.email, password: accountForm.password,
-        options: { data: { full_name: selectedStudent.name } },
+        options: { data: { full_name: studentName } },
       });
       if (authError) throw authError;
       const userId = authData.user?.id;
       if (!userId) throw new Error("Failed to create user");
 
-      // Assign student role
       await supabase.from("user_roles").insert({ user_id: userId, role: "student" });
-      // Link student record
       await supabase.from("students").update({ user_id: userId }).eq("id", selectedStudent.id);
-      // Update profile with school_id
-      await supabase.from("profiles").update({ school_id: schoolId, full_name: selectedStudent.name }).eq("user_id", userId);
+      // Also update master record
+      if (selectedStudent.student_master_id) {
+        await supabase.from("student_master" as any).update({ user_id: userId } as any).eq("id", selectedStudent.student_master_id);
+      }
+      await supabase.from("profiles").update({ school_id: schoolId, full_name: studentName }).eq("user_id", userId);
 
       toast.success("Student login account created");
       setAccountOpen(false);
@@ -261,35 +315,38 @@ export default function Students() {
             ) : filteredStudents.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No students found</TableCell></TableRow>
             ) : (
-              filteredStudents.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-mono text-xs">{s.admission_number}</TableCell>
-                  <TableCell className="font-medium">{s.name}</TableCell>
-                  <TableCell>{s.classes?.name || "—"}</TableCell>
-                  <TableCell>{s.sections?.name || "—"}</TableCell>
-                  <TableCell>{s.father_name || "—"}</TableCell>
-                  <TableCell>
-                    {s.user_id ? (
-                      <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-muted-foreground text-xs">No account</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell><Badge variant="outline" className={statusColor[s.status] || ""}>{s.status}</Badge></TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
-                      {!s.user_id && (
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
+              filteredStudents.map((s) => {
+                const masterUserId = s.student_master?.user_id || s.user_id;
+                return (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-mono text-xs">{getMasterField(s, "admission_number")}</TableCell>
+                    <TableCell className="font-medium">{getMasterField(s, "name")}</TableCell>
+                    <TableCell>{s.classes?.name || "—"}</TableCell>
+                    <TableCell>{s.sections?.name || "—"}</TableCell>
+                    <TableCell>{getMasterField(s, "father_name") || "—"}</TableCell>
+                    <TableCell>
+                      {masterUserId ? (
+                        <Badge variant="outline" className="bg-success/10 text-success text-xs">Linked</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground text-xs">No account</Badge>
                       )}
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell><Badge variant="outline" className={statusColor[s.status] || ""}>{s.status}</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                        {!masterUserId && (
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -323,10 +380,10 @@ export default function Students() {
       <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Create Student Login</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Create a login account for <strong>{selectedStudent?.name}</strong> so they can access the Student Portal.</p>
+          <p className="text-sm text-muted-foreground">Create a login account for <strong>{getMasterField(selectedStudent, "name")}</strong> so they can access the Student Portal.</p>
           <div className="space-y-3">
-            <div className="space-y-1"><Label>Email</Label><Input type="email" value={accountForm.email} onChange={e => setAccountForm(p => ({ ...p, email: e.target.value }))} placeholder="student@email.com" /></div>
-            <div className="space-y-1"><Label>Password</Label><Input type="password" value={accountForm.password} onChange={e => setAccountForm(p => ({ ...p, password: e.target.value }))} placeholder="Min 6 characters" /></div>
+            <div className="space-y-1"><Label>Email</Label><Input value={accountForm.email} onChange={e => setAccountForm(p => ({ ...p, email: e.target.value }))} /></div>
+            <div className="space-y-1"><Label>Password</Label><Input type="password" value={accountForm.password} onChange={e => setAccountForm(p => ({ ...p, password: e.target.value }))} /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAccountOpen(false)}>Cancel</Button>
@@ -334,43 +391,6 @@ export default function Students() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Student Detail Dialog */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Student Details</DialogTitle></DialogHeader>
-          {selectedStudent && (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <Detail label="Adm. No." value={selectedStudent.admission_number} />
-                <Detail label="Name" value={selectedStudent.name} />
-                <Detail label="Gender" value={selectedStudent.gender} />
-                <Detail label="DOB" value={selectedStudent.date_of_birth} />
-                <Detail label="Blood Group" value={selectedStudent.blood_group} />
-                <Detail label="Class" value={selectedStudent.classes?.name} />
-                <Detail label="Section" value={selectedStudent.sections?.name} />
-                <Detail label="Academic Year" value={selectedStudent.academic_years?.name} />
-                <Detail label="Father" value={selectedStudent.father_name} />
-                <Detail label="Mother" value={selectedStudent.mother_name} />
-                <Detail label="Father Phone" value={selectedStudent.father_phone} />
-                <Detail label="Status" value={selectedStudent.status} />
-              </div>
-              {selectedStudent.address && (
-                <div><span className="text-muted-foreground">Address: </span><span>{[selectedStudent.address, selectedStudent.city, selectedStudent.state, selectedStudent.pincode].filter(Boolean).join(", ")}</span></div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function Detail({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <span className="text-muted-foreground">{label}: </span>
-      <span className="font-medium">{value || "—"}</span>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Upload, Download, Loader2, AlertTriangle, CheckCircle } from "lucide-react";
-import { useEffect } from "react";
 
 interface ParsedRow {
   admission_number: string;
@@ -58,10 +57,7 @@ export default function BulkStudentImport() {
     const sample = "ADM-2025-001,Rahul Kumar,male,2015-06-15,Ravi Kumar,9876543210,Priya Kumar,123 Main St,Hyderabad,Telangana,500001";
     const blob = new Blob([headers + "\n" + sample], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "student_import_template.csv";
-    a.click();
+    const a = document.createElement("a"); a.href = url; a.download = "student_import_template.csv"; a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -73,7 +69,6 @@ export default function BulkStudentImport() {
       const vals = line.split(",").map(v => v.trim());
       const row: any = {};
       headers.forEach((h, i) => { row[h] = vals[i] || ""; });
-      // Validate
       if (!row.admission_number) row.error = "Missing admission number";
       else if (!row.name) row.error = "Missing name";
       return row as ParsedRow;
@@ -85,8 +80,7 @@ export default function BulkStudentImport() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      const parsed = parseCSV(text);
+      const parsed = parseCSV(ev.target?.result as string);
       setRows(parsed);
       setResult(null);
     };
@@ -102,25 +96,40 @@ export default function BulkStudentImport() {
     let success = 0, failed = 0;
 
     for (const row of validRows) {
-      const { error } = await supabase.from("students").insert({
-        school_id: schoolId!,
-        admission_number: row.admission_number,
-        name: row.name,
-        gender: row.gender || null,
-        date_of_birth: row.date_of_birth || null,
-        father_name: row.father_name || null,
-        father_phone: row.father_phone || null,
-        mother_name: row.mother_name || null,
-        address: row.address || null,
-        city: row.city || null,
-        state: row.state || null,
-        pincode: row.pincode || null,
-        class_id: selectedClass,
-        section_id: selectedSection || null,
-        academic_year_id: selectedYear,
-      });
-      if (error) failed++;
-      else success++;
+      try {
+        // Create or find master record
+        const { data: existing } = await supabase.from("student_master" as any)
+          .select("id").eq("school_id", schoolId!).eq("admission_number", row.admission_number).maybeSingle();
+
+        let masterId: string;
+        if (existing) {
+          masterId = (existing as any).id;
+        } else {
+          const { data: newMaster, error: mErr } = await supabase.from("student_master" as any).insert({
+            school_id: schoolId!, admission_number: row.admission_number, name: row.name,
+            gender: row.gender || null, date_of_birth: row.date_of_birth || null,
+            father_name: row.father_name || null, father_phone: row.father_phone || null,
+            mother_name: row.mother_name || null, address: row.address || null,
+            city: row.city || null, state: row.state || null, pincode: row.pincode || null,
+          } as any).select("id").single();
+          if (mErr) { failed++; continue; }
+          masterId = (newMaster as any).id;
+        }
+
+        // Create year record
+        const { error } = await supabase.from("students").insert({
+          school_id: schoolId!, admission_number: row.admission_number, name: row.name,
+          gender: row.gender || null, date_of_birth: row.date_of_birth || null,
+          father_name: row.father_name || null, father_phone: row.father_phone || null,
+          mother_name: row.mother_name || null, address: row.address || null,
+          city: row.city || null, state: row.state || null, pincode: row.pincode || null,
+          class_id: selectedClass, section_id: selectedSection || null,
+          academic_year_id: selectedYear, student_master_id: masterId,
+        });
+        if (error) failed++; else success++;
+      } catch {
+        failed++;
+      }
     }
 
     setResult({ success, failed });

@@ -32,15 +32,12 @@ export default function FeeDues() {
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, cRes, yRes] = await Promise.all([
+      const [sRes, cRes] = await Promise.all([
         supabase.from("students").select("id, name, admission_number, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
-        supabase.from("academic_years").select("*").eq("school_id", schoolId!).eq("status", "active"),
       ]);
       setStudents(sRes.data || []);
       setClasses(cRes.data || []);
-      setAcademicYears(yRes.data || []);
-      if (yRes.data?.[0]) setSelectedYear(yRes.data[0].id);
       setLoading(false);
     }
     fetch();

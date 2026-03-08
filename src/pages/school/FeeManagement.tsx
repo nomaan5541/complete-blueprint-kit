@@ -40,26 +40,24 @@ export default function FeeManagement() {
   const [collectForm, setCollectForm] = useState({ student_id: "", academic_year_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
 
   const fetchAll = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !selectedYearId) return;
     setLoading(true);
-    const [ftRes, fsRes, fpRes, cRes, yRes, sRes] = await Promise.all([
+    const [ftRes, fsRes, fpRes, cRes, sRes] = await Promise.all([
       supabase.from("fee_types").select("*").eq("school_id", schoolId).order("name"),
-      supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId),
-      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).order("payment_date", { ascending: false }).limit(100),
+      supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
+      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
-      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("status", "active").order("name"),
+      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setFeeTypes(ftRes.data || []);
     setStructures(fsRes.data || []);
     setPayments(fpRes.data || []);
     setClasses(cRes.data || []);
-    setAcademicYears(yRes.data || []);
     setStudents(sRes.data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [schoolId]);
+  useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   const handleAddFeeType = async () => {
     if (!feeTypeName.trim()) { toast.error("Name is required"); return; }

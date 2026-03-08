@@ -40,6 +40,10 @@ import SchoolReports from "./pages/school/SchoolReports";
 import StudentPortal from "./pages/school/StudentPortal";
 import ClassSubjectMapping from "./pages/school/ClassSubjectMapping";
 import ReportCard from "./pages/school/ReportCard";
+import StudentProfile from "./pages/school/StudentProfile";
+import BulkStudentImport from "./pages/school/BulkStudentImport";
+import FeeDues from "./pages/school/FeeDues";
+import StudentTransfer from "./pages/school/StudentTransfer";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";

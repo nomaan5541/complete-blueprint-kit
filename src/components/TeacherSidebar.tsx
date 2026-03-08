@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine,
+  LayoutDashboard, User, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine, Bell, BarChart3, Monitor,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -13,12 +13,16 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Dashboard", url: "/teacher", icon: LayoutDashboard },
+  { title: "My Profile", url: "/teacher/profile", icon: User },
   { title: "Attendance", url: "/teacher/attendance", icon: ClipboardCheck },
   { title: "My Exams", url: "/teacher/exams", icon: FileText },
   { title: "Enter Marks", url: "/teacher/marks", icon: PenLine },
+  { title: "Exam Monitor", url: "/teacher/exam-monitor", icon: Monitor },
   { title: "Homework", url: "/teacher/homework", icon: BookOpen },
   { title: "My Students", url: "/teacher/students", icon: GraduationCap },
   { title: "Timetable", url: "/teacher/timetable", icon: Clock },
+  { title: "Notifications", url: "/teacher/notifications", icon: Bell },
+  { title: "Analytics", url: "/teacher/analytics", icon: BarChart3 },
 ];
 
 export function TeacherSidebar() {
@@ -36,8 +40,8 @@ export function TeacherSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight"><span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight">EDUPRIMEX</span></span>
-              <span className="text-[11px] text-sidebar-foreground/50 font-medium">Teacher</span>
+              <span className="text-sm font-bold text-sidebar-primary-foreground tracking-tight">EDUPRIMEX</span>
+              <span className="text-[11px] text-sidebar-foreground/50 font-medium">Teacher Portal</span>
             </div>
           )}
         </div>

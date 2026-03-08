@@ -119,6 +119,18 @@ export default function SchoolSettings() {
     setSaving(false);
   };
 
+  const saveSmsSettings = async () => {
+    if (!schoolId) return;
+    setSavingSms(true);
+    const { error } = await supabase.from("schools").update({
+      msg91_auth_key: smsForm.msg91_auth_key || null,
+      msg91_sender_id: smsForm.msg91_sender_id || null,
+      msg91_whatsapp_template_id: smsForm.msg91_whatsapp_template_id || null,
+    } as any).eq("id", schoolId);
+    if (error) toast.error(error.message);
+    else toast.success("SMS settings saved");
+    setSavingSms(false);
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
 
   return (

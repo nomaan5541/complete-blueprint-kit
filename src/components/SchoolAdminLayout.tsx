@@ -5,6 +5,7 @@ import { AcademicYearProvider } from "@/hooks/useAcademicYear";
 import { AcademicYearSwitcher } from "@/components/AcademicYearSwitcher";
 import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ReadOnlyOverlay } from "@/components/ReadOnlyGuard";
 
 export function SchoolAdminLayout({ children }: { children: ReactNode }) {
   return (

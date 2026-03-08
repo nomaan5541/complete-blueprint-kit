@@ -202,9 +202,12 @@ export default function Teachers() {
                 const teacherAssignments = assignments.filter((a) => a.teacher_id === t.id);
                 return (
                   <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.name}</TableCell>
-                    <TableCell>{t.email || "—"}</TableCell>
-                    <TableCell>{t.phone || "—"}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{t.name}</div>
+                      <div className="text-xs text-muted-foreground md:hidden">{t.email || ""}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{t.email || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{t.phone || "—"}</TableCell>
                     <TableCell>{t.qualification || "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">

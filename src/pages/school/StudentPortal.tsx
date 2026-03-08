@@ -12,6 +12,7 @@ import { format } from "date-fns";
 
 export default function StudentPortal() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [student, setStudent] = useState<any>(null);
   const [attendance, setAttendance] = useState<any[]>([]);

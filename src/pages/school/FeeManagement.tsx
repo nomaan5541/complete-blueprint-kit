@@ -260,7 +260,6 @@ export default function FeeManagement() {
         <DialogContent>
           <DialogHeader><DialogTitle>Add Fee Structure</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            </div>
             <div className="space-y-1">
               <Label>Class</Label>
               <Select value={structForm.class_id} onValueChange={(v) => setStructForm(p => ({ ...p, class_id: v }))}>

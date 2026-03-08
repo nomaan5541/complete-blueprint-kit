@@ -81,21 +81,30 @@ export default function Subscriptions() {
     const currentEnd = new Date(sub.end_date);
     const baseDate = isBefore(currentEnd, new Date()) ? new Date() : currentEnd;
     const newEnd = addMonths(baseDate, parseInt(renewMonths));
+    const newEndStr = format(newEnd, "yyyy-MM-dd");
 
     const { error } = await supabase.from("subscriptions").update({
-      end_date: format(newEnd, "yyyy-MM-dd"),
+      end_date: newEndStr,
       payment_status: "paid",
     }).eq("id", renewId);
 
     if (!error) {
+      // Record payment history
       await supabase.from("payment_history").insert({
         school_id: sub.school_id,
         subscription_id: renewId,
         amount: sub.payment_amount,
         status: "paid",
-        notes: `Renewal: +${renewMonths} months`,
+        notes: `Renewal: +${renewMonths} months. Old expiry: ${sub.end_date}. New expiry: ${newEndStr}`,
       });
-      toast.success("Subscription renewed");
+
+      // If school was expired/inactive, reactivate it
+      const isNowValid = new Date(newEndStr) > new Date();
+      if (isNowValid) {
+        await supabase.from("schools").update({ status: "active" as any }).eq("id", sub.school_id);
+      }
+
+      toast.success(`Subscription renewed until ${format(newEnd, "dd MMM yyyy")}`);
       setRenewId(null);
       fetchAll();
     } else toast.error(error.message);

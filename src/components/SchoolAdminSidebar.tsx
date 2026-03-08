@@ -21,6 +21,8 @@ const navItems = [
   { title: "Subjects", url: "/school/subjects", icon: BookOpen },
   { title: "Subject Mapping", url: "/school/subject-mapping", icon: BookOpen },
   { title: "Students", url: "/school/students", icon: GraduationCap },
+  { title: "Bulk Import", url: "/school/students/import", icon: GraduationCap },
+  { title: "Transfer/Leaving", url: "/school/students/transfer", icon: GraduationCap },
   { title: "Promotion", url: "/school/promotion", icon: ArrowUpRight },
   { title: "Teachers", url: "/school/teachers", icon: Users },
   { title: "Attendance", url: "/school/attendance", icon: ClipboardCheck },

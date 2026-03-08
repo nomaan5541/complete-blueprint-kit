@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle } from "lucide-react";
+import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle, Monitor, PlayCircle } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentPortal() {

@@ -37,8 +37,8 @@ export default function StudentTransfer() {
 
   useEffect(() => { fetchStudents(); }, [schoolId]);
 
-  const getName = (s: any) => s.student_master?.name || s.name;
-  const getAdmNo = (s: any) => s.student_master?.admission_number || s.admission_number;
+  const getName = (s: any) => s?.student_master?.name || s?.name || "";
+  const getAdmNo = (s: any) => s?.student_master?.admission_number || s?.admission_number || "";
 
   const filtered = students.filter(s => {
     if (!search) return true;

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
@@ -17,12 +18,18 @@ import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
+// School Admin pages
+import SchoolDashboard from "./pages/school/SchoolDashboard";
+import AcademicYears from "./pages/school/AcademicYears";
+import ClassesAndSections from "./pages/school/ClassesAndSections";
+import Subjects from "./pages/school/Subjects";
+import Students from "./pages/school/Students";
+import Teachers from "./pages/school/Teachers";
+import SchoolSettings from "./pages/school/SchoolSettings";
+
 const queryClient = new QueryClient();
 
-function ProtectedRoutes() {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+function SuperAdminRoutes() {
   return (
     <DashboardLayout>
       <Routes>
@@ -38,6 +45,45 @@ function ProtectedRoutes() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>
+  );
+}
+
+function SchoolAdminRoutes() {
+  return (
+    <SchoolAdminLayout>
+      <Routes>
+        <Route path="/" element={<SchoolDashboard />} />
+        <Route path="/academic-years" element={<AcademicYears />} />
+        <Route path="/classes" element={<ClassesAndSections />} />
+        <Route path="/subjects" element={<Subjects />} />
+        <Route path="/students" element={<Students />} />
+        <Route path="/teachers" element={<Teachers />} />
+        <Route path="/settings" element={<SchoolSettings />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </SchoolAdminLayout>
+  );
+}
+
+function ProtectedRoutes() {
+  const { user, loading, role } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (role === "school_admin") {
+    return (
+      <Routes>
+        <Route path="/school/*" element={<SchoolAdminRoutes />} />
+        <Route path="*" element={<Navigate to="/school" replace />} />
+      </Routes>
+    );
+  }
+
+  // Default: super_admin
+  return (
+    <Routes>
+      <Route path="/*" element={<SuperAdminRoutes />} />
+    </Routes>
   );
 }
 

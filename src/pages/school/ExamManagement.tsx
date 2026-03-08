@@ -35,7 +35,7 @@ export default function ExamManagement() {
   const [resultExamId, setResultExamId] = useState("");
   const [resultClassId, setResultClassId] = useState("");
 
-  const [examForm, setExamForm] = useState({ name: "", exam_type: "exam", academic_year_id: "", start_date: "", end_date: "" });
+  const [examForm, setExamForm] = useState({ name: "", exam_type: "exam", start_date: "", end_date: "" });
 
   const fetchAll = async () => {
     if (!schoolId || !selectedYearId) return;

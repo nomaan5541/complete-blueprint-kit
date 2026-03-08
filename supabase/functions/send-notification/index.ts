@@ -30,19 +30,28 @@ Deno.serve(async (req) => {
       .single();
     if (nErr || !notification) throw new Error("Notification not found");
 
-    // Fetch school MSG91 config
-    const { data: school } = await supabase
+    // Fetch school name
+    const { data: schoolRow } = await supabase
       .from("schools")
-      .select("msg91_auth_key, msg91_sender_id, msg91_whatsapp_template_id, name")
+      .select("name")
       .eq("id", notification.school_id)
       .single();
 
-    if (!school?.msg91_auth_key) {
+    // Fetch MSG91 config from secure table
+    const { data: smsConfig } = await supabase
+      .from("school_sms_config")
+      .select("msg91_auth_key, msg91_sender_id, msg91_whatsapp_template_id")
+      .eq("school_id", notification.school_id)
+      .single();
+
+    if (!smsConfig?.msg91_auth_key) {
       return new Response(JSON.stringify({ error: "MSG91 not configured. Go to School Settings → SMS / WhatsApp to add your credentials." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const school = { ...schoolRow, ...smsConfig };
 
     // Get phone numbers of target audience
     const phones: string[] = [];

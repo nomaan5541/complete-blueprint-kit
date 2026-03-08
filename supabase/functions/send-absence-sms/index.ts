@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     // Verify caller is a teacher or admin of this school
     const { data: school } = await supabase
       .from("schools")
-      .select("admin_id, msg91_auth_key, msg91_sender_id, name")
+      .select("admin_id, name")
       .eq("id", school_id)
       .single();
 
@@ -62,7 +62,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!school.msg91_auth_key) {
+    // Fetch MSG91 config from secure table
+    const { data: smsConfig } = await supabase
+      .from("school_sms_config")
+      .select("msg91_auth_key, msg91_sender_id")
+      .eq("school_id", school_id)
+      .single();
+
+    if (!smsConfig?.msg91_auth_key) {
       return new Response(JSON.stringify({ skipped: true, reason: "MSG91 not configured" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -92,11 +99,11 @@ Deno.serve(async (req) => {
       await fetch("https://control.msg91.com/api/v5/flow/", {
         method: "POST",
         headers: {
-          "authkey": school.msg91_auth_key,
+          "authkey": smsConfig.msg91_auth_key,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sender: school.msg91_sender_id || "SCHOOL",
+          sender: smsConfig.msg91_sender_id || "SCHOOL",
           route: "4",
           country: "91",
           sms: [{ message, to: [mobile] }],

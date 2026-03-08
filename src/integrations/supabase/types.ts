@@ -1047,6 +1047,41 @@ export type Database = {
           },
         ]
       }
+      school_sms_config: {
+        Row: {
+          created_at: string
+          msg91_auth_key: string | null
+          msg91_sender_id: string | null
+          msg91_whatsapp_template_id: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          msg91_auth_key?: string | null
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          msg91_auth_key?: string | null
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_sms_config_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schools: {
         Row: {
           address: string | null

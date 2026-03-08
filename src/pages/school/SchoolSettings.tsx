@@ -47,12 +47,14 @@ export default function SchoolSettings() {
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, gRes, subRes] = await Promise.all([
+      const [sRes, gRes, subRes, smsRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
         supabase.from("subscriptions").select("*, subscription_plans(name, price, duration_months)").eq("school_id", schoolId!).order("end_date", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
       ]);
       const s = sRes.data as any;
+      const smsData = smsRes.data as any;
       if (s) {
         setForm({
           name: s.name || "",
@@ -70,9 +72,9 @@ export default function SchoolSettings() {
           receipt_prefix: s.receipt_prefix || "RCPT",
         });
         setSmsForm({
-          msg91_auth_key: s.msg91_auth_key || "",
-          msg91_sender_id: s.msg91_sender_id || "",
-          msg91_whatsapp_template_id: s.msg91_whatsapp_template_id || "",
+          msg91_auth_key: smsData?.msg91_auth_key || "",
+          msg91_sender_id: smsData?.msg91_sender_id || "",
+          msg91_whatsapp_template_id: smsData?.msg91_whatsapp_template_id || "",
         });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);
@@ -140,11 +142,13 @@ export default function SchoolSettings() {
   const saveSmsSettings = async () => {
     if (!schoolId) return;
     setSavingSms(true);
-    const { error } = await supabase.from("schools").update({
+    const smsData = {
+      school_id: schoolId!,
       msg91_auth_key: smsForm.msg91_auth_key || null,
       msg91_sender_id: smsForm.msg91_sender_id || null,
       msg91_whatsapp_template_id: smsForm.msg91_whatsapp_template_id || null,
-    } as any).eq("id", schoolId);
+    };
+    const { error } = await supabase.from("school_sms_config").upsert(smsData as any, { onConflict: "school_id" });
     if (error) toast.error(error.message);
     else toast.success("SMS settings saved");
     setSavingSms(false);

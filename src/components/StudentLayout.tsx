@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export function StudentLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full overflow-x-hidden max-w-[100vw]">
         <StudentSidebar />
         <SidebarInset className="flex-1">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/80 backdrop-blur-lg px-4">

@@ -11,10 +11,10 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
   return (
     <AcademicYearProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full relative">
+        <div className="min-h-screen flex w-full relative overflow-x-hidden max-w-[100vw]">
           <div className="animated-bg" />
           <SchoolAdminSidebar />
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0">
             <SubscriptionBanner />
             <header className="h-14 flex items-center justify-between border-b border-border/50 glass-subtle px-4 gap-4 sticky top-0 z-30">
               <div className="flex items-center gap-4">

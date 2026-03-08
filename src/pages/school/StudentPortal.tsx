@@ -74,6 +74,14 @@ export default function StudentPortal() {
   const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : "0";
   const totalFees = fees.reduce((sum, f) => sum + Number(f.amount), 0);
 
+  // Calculate fee dues
+  const feeDues = feeStructures.map((fs: any) => {
+    const paid = fees.filter((f: any) => f.fee_type_id === fs.fee_type_id).reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+    const due = Number(fs.amount) - paid;
+    return { ...fs, paid, due: due > 0 ? due : 0 };
+  });
+  const totalDue = feeDues.reduce((sum, d) => sum + d.due, 0);
+
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   return (

@@ -15,6 +15,7 @@ export default function StudentPortal() {
   const [attendance, setAttendance] = useState<any[]>([]);
   const [marks, setMarks] = useState<any[]>([]);
   const [fees, setFees] = useState<any[]>([]);
+  const [feeStructures, setFeeStructures] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [timetable, setTimetable] = useState<any[]>([]);
   const [slots, setSlots] = useState<any[]>([]);

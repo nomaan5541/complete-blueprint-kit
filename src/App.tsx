@@ -112,6 +112,9 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/timetable" element={<Timetable />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/reports" element={<SchoolReports />} />
+        <Route path="/documents" element={<StudentDocuments />} />
+        <Route path="/calendar" element={<SchoolCalendar />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/settings" element={<SchoolSettings />} />
         <Route path="/setup" element={<SetupWizard />} />
         <Route path="*" element={<NotFound />} />

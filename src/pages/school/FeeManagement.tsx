@@ -36,8 +36,8 @@ export default function FeeManagement() {
   // Forms
   const [feeTypeName, setFeeTypeName] = useState("");
   const [feeTypeDesc, setFeeTypeDesc] = useState("");
-  const [structForm, setStructForm] = useState({ academic_year_id: "", class_id: "", fee_type_id: "", amount: "" });
-  const [collectForm, setCollectForm] = useState({ student_id: "", academic_year_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
+  const [structForm, setStructForm] = useState({ class_id: "", fee_type_id: "", amount: "" });
+  const [collectForm, setCollectForm] = useState({ student_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
 
   const fetchAll = async () => {
     if (!schoolId || !selectedYearId) return;

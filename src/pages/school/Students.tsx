@@ -38,22 +38,21 @@ export default function Students() {
   const [form, setForm] = useState(emptyForm);
 
   const fetchAll = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !selectedYearId) return;
     setLoading(true);
-    const [studRes, clsRes, secRes, yrRes] = await Promise.all([
-      supabase.from("students").select("*, classes(name), sections(name), academic_years(name), student_master(id, name, father_name, admission_number, gender, date_of_birth, blood_group, mother_name, father_phone, address, city, state, pincode, photo_url, user_id, status)").eq("school_id", schoolId).order("name"),
+    let studQuery = supabase.from("students").select("*, classes(name), sections(name), academic_years(name), student_master(id, name, father_name, admission_number, gender, date_of_birth, blood_group, mother_name, father_phone, address, city, state, pincode, photo_url, user_id, status)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("name");
+    const [studRes, clsRes, secRes] = await Promise.all([
+      studQuery,
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("sections").select("*").eq("school_id", schoolId),
-      supabase.from("academic_years").select("*").eq("school_id", schoolId).order("start_date", { ascending: false }),
     ]);
     setStudents(studRes.data || []);
     setClasses(clsRes.data || []);
     setSections(secRes.data || []);
-    setAcademicYears(yrRes.data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [schoolId]);
+  useEffect(() => { fetchAll(); }, [schoolId, selectedYearId]);
 
   // Helper to get display values from master or fallback to student record
   const getMasterField = (s: any, field: string) => s.student_master?.[field] || s[field];

@@ -93,7 +93,7 @@ export default function Attendance() {
   };
 
   const saveAttendance = async () => {
-    if (!schoolId || !selectedClass || !selectedYear) return;
+    if (!schoolId || !selectedClass || !selectedYearId) return;
     setSaving(true);
 
     const toInsert = studentAttendance.filter((s) => !s.existingId).map((s) => ({
@@ -101,7 +101,7 @@ export default function Attendance() {
       student_id: s.studentId,
       class_id: selectedClass,
       section_id: selectedSection || null,
-      academic_year_id: selectedYear,
+      academic_year_id: selectedYearId,
       date: selectedDate,
       status: s.status,
       marked_by: user?.id,

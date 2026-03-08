@@ -9,11 +9,12 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
   return (
     <AcademicYearProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full relative">
+          <div className="animated-bg" />
           <SchoolAdminSidebar />
           <div className="flex-1 flex flex-col">
             <SubscriptionBanner />
-            <header className="h-14 flex items-center border-b bg-card px-4 gap-4">
+            <header className="h-14 flex items-center border-b border-border/50 glass-subtle px-4 gap-4 sticky top-0 z-30">
               <SidebarTrigger />
               <AcademicYearSwitcher />
             </header>

@@ -61,6 +61,13 @@ export default function StudentDocuments() {
     if (!selectedFile || !selectedStudent) {
       toast.error("Select student and file"); return;
     }
+    // Validate file type and size
+    const { validateFileUpload } = await import("@/lib/fileValidation");
+    const validationError = validateFileUpload(selectedFile);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
     setUploading(true);
     const ext = selectedFile.name.split(".").pop();
     const path = `${schoolId}/${selectedStudent}/${Date.now()}.${ext}`;

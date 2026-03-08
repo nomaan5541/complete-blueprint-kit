@@ -26,10 +26,10 @@ interface StudentAttendance {
 
 export default function Attendance() {
   const { schoolId } = useSchool();
+  const { selectedYearId } = useAcademicYear();
   const { user } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
-  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 

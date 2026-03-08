@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, User, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, BookOpen, LogOut, GraduationCap, Monitor, IdCard, FolderOpen, Video,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";

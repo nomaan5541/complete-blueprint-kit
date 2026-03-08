@@ -9,6 +9,8 @@ import { SchoolAdminLayout } from "@/components/SchoolAdminLayout";
 import { TeacherLayout } from "@/components/TeacherLayout";
 import { StudentLayout } from "@/components/StudentLayout";
 import { useSchool } from "@/hooks/useSchool";
+import OfflineBanner from "@/components/OfflineBanner";
+import InstallApp from "@/pages/InstallApp";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
@@ -238,6 +240,7 @@ function AppRoutes() {
       <Route path="/" element={user ? <ProtectedRedirect /> : <LandingPage />} />
       <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/install" element={<InstallApp />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );
@@ -257,6 +260,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <OfflineBanner />
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />

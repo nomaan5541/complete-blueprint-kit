@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, Loader2, Trash2, IndianRupee, Receipt } from "lucide-react";
 import { format } from "date-fns";
+import { FeeReceipt } from "@/components/FeeReceipt";
 
 export default function FeeManagement() {
   const { schoolId } = useSchool();

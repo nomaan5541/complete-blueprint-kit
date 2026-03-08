@@ -8,7 +8,7 @@ import { ReadOnlyOverlay } from "@/components/ReadOnlyGuard";
 export function TeacherLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full relative">
+      <div className="min-h-screen flex w-full relative overflow-x-hidden max-w-[100vw]">
         <div className="animated-bg" />
         <TeacherSidebar />
         <div className="flex-1 flex flex-col">

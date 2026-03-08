@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
-  Layers, Settings, LogOut, School,
+  Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
+  FileText, ArrowUpRight,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -19,7 +20,11 @@ const navItems = [
   { title: "Classes & Sections", url: "/school/classes", icon: Layers },
   { title: "Subjects", url: "/school/subjects", icon: BookOpen },
   { title: "Students", url: "/school/students", icon: GraduationCap },
+  { title: "Promotion", url: "/school/promotion", icon: ArrowUpRight },
   { title: "Teachers", url: "/school/teachers", icon: Users },
+  { title: "Attendance", url: "/school/attendance", icon: ClipboardCheck },
+  { title: "Exams & Results", url: "/school/exams", icon: FileText },
+  { title: "Fee Management", url: "/school/fees", icon: IndianRupee },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
 

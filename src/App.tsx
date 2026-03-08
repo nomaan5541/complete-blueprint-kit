@@ -26,6 +26,10 @@ import Subjects from "./pages/school/Subjects";
 import Students from "./pages/school/Students";
 import Teachers from "./pages/school/Teachers";
 import SchoolSettings from "./pages/school/SchoolSettings";
+import FeeManagement from "./pages/school/FeeManagement";
+import Attendance from "./pages/school/Attendance";
+import ExamManagement from "./pages/school/ExamManagement";
+import StudentPromotion from "./pages/school/StudentPromotion";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +61,11 @@ function SchoolAdminRoutes() {
         <Route path="/classes" element={<ClassesAndSections />} />
         <Route path="/subjects" element={<Subjects />} />
         <Route path="/students" element={<Students />} />
+        <Route path="/promotion" element={<StudentPromotion />} />
         <Route path="/teachers" element={<Teachers />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/exams" element={<ExamManagement />} />
+        <Route path="/fees" element={<FeeManagement />} />
         <Route path="/settings" element={<SchoolSettings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -79,7 +87,6 @@ function ProtectedRoutes() {
     );
   }
 
-  // Default: super_admin
   return (
     <Routes>
       <Route path="/*" element={<SuperAdminRoutes />} />

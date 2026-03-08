@@ -118,6 +118,15 @@ export default function TeacherAttendance() {
     else {
       toast.success("Attendance saved successfully");
       setExistingRecords(true);
+      // Auto-send absence SMS
+      const absentIds = students.filter(s => attendance[s.id] === "absent").map(s => s.id);
+      if (absentIds.length > 0) {
+        supabase.functions.invoke("send-absence-sms", {
+          body: { school_id: teacher.school_id, absent_student_ids: absentIds, date: selectedDate },
+        }).then(({ error: smsErr }) => {
+          if (!smsErr) toast.info(`Absence SMS sent to ${absentIds.length} parents`);
+        });
+      }
     }
     setSaving(false);
   };

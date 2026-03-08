@@ -120,7 +120,18 @@ export default function Attendance() {
       if (error) { toast.error(error.message); hasError = true; break; }
     }
 
-    if (!hasError) toast.success("Attendance saved");
+    if (!hasError) {
+      toast.success("Attendance saved");
+      // Auto-send absence SMS
+      const absentIds = studentAttendance.filter(s => s.status === "absent").map(s => s.studentId);
+      if (absentIds.length > 0) {
+        supabase.functions.invoke("send-absence-sms", {
+          body: { school_id: schoolId, absent_student_ids: absentIds, date: selectedDate },
+        }).then(({ error }) => {
+          if (!error) toast.info(`Absence SMS sent to ${absentIds.length} parents`);
+        });
+      }
+    }
     setSaving(false);
   };
 

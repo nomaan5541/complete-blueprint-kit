@@ -147,6 +147,7 @@ function StudentPortalWrapper() {
     <SchoolAdminLayout>
       <Routes>
         <Route path="/" element={<StudentPortal />} />
+        <Route path="/exam" element={<StudentExamTake />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </SchoolAdminLayout>

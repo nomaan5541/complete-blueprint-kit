@@ -48,32 +48,37 @@ export function SchoolAdminSidebar() {
   const { schoolName } = useSchool();
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
+    <Sidebar collapsible="icon" className="border-r-0">
+      <SidebarHeader className="border-b border-sidebar-border/50 px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sidebar-primary to-blue-400 text-sidebar-primary-foreground shadow-soft">
             <School className="h-5 w-5" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-sidebar-primary-foreground truncate max-w-[140px]">
+              <span className="text-sm font-bold text-sidebar-primary-foreground truncate max-w-[140px] tracking-tight">
                 {schoolName || "My School"}
               </span>
-              <span className="text-xs text-sidebar-foreground/60">School Admin</span>
+              <span className="text-[11px] text-sidebar-foreground/50 font-medium">School Admin</span>
             </div>
           )}
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-sidebar-foreground/40 font-semibold">Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <NavLink to={item.url} end className="hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
-                      <item.icon className="h-4 w-4" />
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="rounded-xl transition-all duration-200 hover:bg-sidebar-accent/60 group"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-soft"
+                    >
+                      <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -83,14 +88,14 @@ export function SchoolAdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border p-3">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-3">
         {!collapsed && user && (
-          <p className="mb-2 truncate text-xs text-sidebar-foreground/60 px-1">{user.email}</p>
+          <p className="mb-2 truncate text-[11px] text-sidebar-foreground/40 px-1 font-medium">{user.email}</p>
         )}
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "sm"}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-xl transition-all duration-200"
           onClick={signOut}
         >
           <LogOut className="h-4 w-4" />

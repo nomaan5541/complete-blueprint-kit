@@ -49,6 +49,7 @@ import StudentTransfer from "./pages/school/StudentTransfer";
 import StudentDocuments from "./pages/school/StudentDocuments";
 import SchoolCalendar from "./pages/school/SchoolCalendar";
 import AuditLogs from "./pages/school/AuditLogs";
+import StudentExamTake from "./pages/school/StudentExamTake";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
@@ -146,6 +147,7 @@ function StudentPortalWrapper() {
     <SchoolAdminLayout>
       <Routes>
         <Route path="/" element={<StudentPortal />} />
+        <Route path="/exam" element={<StudentExamTake />} />
         <Route path="*" element={<Navigate to="/student" replace />} />
       </Routes>
     </SchoolAdminLayout>

@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle } from "lucide-react";
+import { GraduationCap, ClipboardCheck, FileText, IndianRupee, Bell, Calendar, AlertCircle, Monitor, PlayCircle } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentPortal() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [student, setStudent] = useState<any>(null);
   const [attendance, setAttendance] = useState<any[]>([]);
@@ -20,6 +23,8 @@ export default function StudentPortal() {
   const [timetable, setTimetable] = useState<any[]>([]);
   const [slots, setSlots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [onlineExams, setOnlineExams] = useState<any[]>([]);
+  const [attempts, setAttempts] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -36,7 +41,7 @@ export default function StudentPortal() {
       if (!stud) { setLoading(false); return; }
 
       // Fetch all data
-      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes, feeStructRes] = await Promise.all([
+      const results = await Promise.all([
         supabase.from("attendance").select("*").eq("student_id", stud.id).order("date", { ascending: false }).limit(60),
         supabase.from("exam_marks").select("*, subjects(name), exams(name)").eq("student_id", stud.id),
         supabase.from("fee_payments").select("*, fee_types(name)").eq("student_id", stud.id).order("payment_date", { ascending: false }),
@@ -44,15 +49,19 @@ export default function StudentPortal() {
         stud.class_id ? supabase.from("timetable_entries").select("*, subjects(name), teachers(name), timetable_slots(name, start_time, end_time, slot_order, is_break)").eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("timetable_slots").select("*").eq("school_id", prof.school_id).order("slot_order"),
         stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
+        stud.class_id ? supabase.from("exams").select("*, subjects(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
+        supabase.from("student_exam_attempts" as any).select("*").eq("student_id", stud.id),
       ]);
 
-      setAttendance(attRes.data || []);
-      setMarks(marksRes.data || []);
-      setFees(feesRes.data || []);
-      setNotifications(notifRes.data || []);
-      setTimetable(ttRes.data || []);
-      setSlots(slotsRes.data || []);
-      setFeeStructures(feeStructRes.data || []);
+      setAttendance((results[0] as any).data || []);
+      setMarks((results[1] as any).data || []);
+      setFees((results[2] as any).data || []);
+      setNotifications((results[3] as any).data || []);
+      setTimetable((results[4] as any).data || []);
+      setSlots((results[5] as any).data || []);
+      setFeeStructures((results[6] as any).data || []);
+      setOnlineExams((results[7] as any).data || []);
+      setAttempts((results[8] as any).data || []);
       setLoading(false);
     }
     fetch();
@@ -109,6 +118,7 @@ export default function StudentPortal() {
           <TabsTrigger value="dues">Fee Dues</TabsTrigger>
           <TabsTrigger value="fees">Payments</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
+          <TabsTrigger value="online-exams"><Monitor className="mr-1 h-3 w-3" /> Online Exams</TabsTrigger>
           <TabsTrigger value="notices">Notices</TabsTrigger>
         </TabsList>
 
@@ -281,6 +291,39 @@ export default function StudentPortal() {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="online-exams">
+          <Card>
+            <CardHeader><CardTitle>Online Exams</CardTitle></CardHeader>
+            <CardContent>
+              {onlineExams.filter((e: any) => (e as any).exam_mode === "online").length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No online exams available</p>
+              ) : (
+                <div className="space-y-3">
+                  {onlineExams.filter((e: any) => (e as any).exam_mode === "online").map((exam: any) => {
+                    const attempt = attempts.find((a: any) => a.exam_id === exam.id);
+                    const isCompleted = attempt?.status === "completed";
+                    return (
+                      <div key={exam.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">{exam.name}</p>
+                          <p className="text-sm text-muted-foreground">{exam.subjects?.name} · {(exam as any).total_marks} marks · {(exam as any).duration_minutes} min</p>
+                        </div>
+                        {isCompleted ? (
+                          <Badge variant="outline" className="bg-success/10 text-success">Score: {attempt.score}</Badge>
+                        ) : (
+                          <Button size="sm" onClick={() => navigate(`/student/exam?examId=${exam.id}`)}>
+                            <PlayCircle className="mr-1 h-4 w-4" /> Take Exam
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

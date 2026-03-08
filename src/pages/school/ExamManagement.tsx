@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Trash2, PenLine, FileQuestion, Monitor, BookOpen, Eye } from "lucide-react";
+import { Plus, Trash2, PenLine, FileQuestion, Monitor, BookOpen, Eye, BarChart3 } from "lucide-react";
 import ExamCreateDialog from "@/components/exams/ExamCreateDialog";
 import QuestionBuilder from "@/components/exams/QuestionBuilder";
 import OfflineMarksEntry from "@/components/exams/OfflineMarksEntry";
+import ExamAnalytics from "@/components/exams/ExamAnalytics";
 
 export default function ExamManagement() {
   const { schoolId } = useSchool();
@@ -115,6 +116,7 @@ export default function ExamManagement() {
         <TabsList>
           <TabsTrigger value="exams">Exams</TabsTrigger>
           <TabsTrigger value="results">View Results</TabsTrigger>
+          <TabsTrigger value="analytics"><BarChart3 className="mr-1 h-3 w-3" /> Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="exams" className="space-y-4">
@@ -267,6 +269,10 @@ export default function ExamManagement() {
           {resultsOpen && Object.keys(resultsByStudent).length === 0 && (
             <p className="text-center text-muted-foreground py-8">No results found for this selection</p>
           )}
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <ExamAnalytics />
         </TabsContent>
       </Tabs>
 

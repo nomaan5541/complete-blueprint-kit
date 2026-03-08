@@ -410,12 +410,14 @@ export type Database = {
           created_at: string
           duration_minutes: number | null
           end_date: string | null
+          exam_date: string | null
           exam_mode: string
           exam_type: string
           id: string
           instructions: string | null
           name: string
           school_id: string
+          section_id: string | null
           start_date: string | null
           status: string
           subject_id: string | null
@@ -427,12 +429,14 @@ export type Database = {
           created_at?: string
           duration_minutes?: number | null
           end_date?: string | null
+          exam_date?: string | null
           exam_mode?: string
           exam_type?: string
           id?: string
           instructions?: string | null
           name: string
           school_id: string
+          section_id?: string | null
           start_date?: string | null
           status?: string
           subject_id?: string | null
@@ -444,12 +448,14 @@ export type Database = {
           created_at?: string
           duration_minutes?: number | null
           end_date?: string | null
+          exam_date?: string | null
           exam_mode?: string
           exam_type?: string
           id?: string
           instructions?: string | null
           name?: string
           school_id?: string
+          section_id?: string | null
           start_date?: string | null
           status?: string
           subject_id?: string | null
@@ -475,6 +481,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
             referencedColumns: ["id"]
           },
           {

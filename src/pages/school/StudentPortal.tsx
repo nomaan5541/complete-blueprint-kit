@@ -334,6 +334,38 @@ export default function StudentPortal() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="homework">
+          <Card>
+            <CardHeader><CardTitle>Homework & Assignments</CardTitle></CardHeader>
+            <CardContent>
+              {homeworkList.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No homework assigned</p>
+              ) : (
+                <div className="space-y-3">
+                  {homeworkList.map((hw: any) => {
+                    const isPast = new Date(hw.due_date) < new Date();
+                    return (
+                      <div key={hw.id} className="p-4 rounded-lg border">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium">{hw.title}</p>
+                            <p className="text-sm text-muted-foreground mt-0.5">{hw.subjects?.name} · by {hw.teachers?.name}</p>
+                            {hw.description && <p className="text-sm text-muted-foreground mt-1">{hw.description}</p>}
+                          </div>
+                          <Badge variant={isPast ? "destructive" : "outline"} className="text-xs shrink-0 ml-2">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {format(new Date(hw.due_date), "dd MMM yyyy")}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="notices">
           <Card>
             <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>

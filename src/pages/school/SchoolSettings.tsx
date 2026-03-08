@@ -11,7 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle, Download, HardDrive } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { exportSchoolBackup, type ExportFormat, type BackupProgress } from "@/lib/schoolBackup";
 import { format } from "date-fns";
 
 export default function SchoolSettings() {

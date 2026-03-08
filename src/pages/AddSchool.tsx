@@ -148,7 +148,7 @@ export default function AddSchool() {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate("/schools")}>Cancel</Button>
+          <Button variant="outline" type="button" onClick={() => navigate("/admin/schools")}>Cancel</Button>
           <Button type="submit" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create School

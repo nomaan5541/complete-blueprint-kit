@@ -64,6 +64,7 @@ export default function StudentPortal() {
       setFeeStructures((results[6] as any).data || []);
       setOnlineExams((results[7] as any).data || []);
       setAttempts((results[8] as any).data || []);
+      setHomeworkList((results[9] as any).data || []);
       setLoading(false);
     }
     fetch();

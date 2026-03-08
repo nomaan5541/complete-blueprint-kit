@@ -66,14 +66,7 @@ serve(async (req) => {
       await supabaseAdmin.from("student_master").update({ user_id: userId }).eq("id", studentId);
     }
 
-    // Save credentials for school admin reference
-    await supabaseAdmin.from("school_credentials").insert({
-      school_id: schoolId,
-      account_type: role,
-      person_name: fullName || email,
-      email,
-      password_plain: password,
-    });
+    // No longer storing plaintext passwords - Supabase Auth manages credentials securely
 
     return new Response(JSON.stringify({ userId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

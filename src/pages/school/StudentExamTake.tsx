@@ -54,13 +54,13 @@ export default function StudentExamTake() {
         return;
       }
 
-      // Load questions with options
+      // Load questions with options (using view that hides is_correct)
       const { data: qData } = await supabase.from("exam_questions" as any)
-        .select("*, exam_options(*)").eq("exam_id", examId).order("order_number");
+        .select("*, exam_options_student(*)").eq("exam_id", examId).order("order_number");
       
       // Shuffle questions and options for anti-cheat
       const shuffled = shuffleArray(qData || []).map((q: any) => ({
-        ...q, exam_options: shuffleArray(q.exam_options || []),
+        ...q, exam_options: shuffleArray(q.exam_options_student || q.exam_options || []),
       }));
       setQuestions(shuffled);
 
@@ -149,46 +149,24 @@ export default function StudentExamTake() {
     if (timerRef.current) clearInterval(timerRef.current);
 
     try {
-      // Calculate score
-      let totalScore = 0;
+      // Save any remaining answers
       for (const q of questions) {
         const selectedOptionId = answers[q.id];
-        const correctOption = q.exam_options?.find((o: any) => o.is_correct);
-        const isCorrect = selectedOptionId === correctOption?.id;
-        if (isCorrect) totalScore += Number(q.marks);
-
-        // Update answer record
         if (selectedOptionId) {
           await supabase.from("student_answers" as any).upsert({
             attempt_id: (attempt as any).id,
             question_id: q.id,
             selected_option_id: selectedOptionId,
-            is_correct: isCorrect,
-            marks_awarded: isCorrect ? q.marks : 0,
           } as any, { onConflict: "attempt_id,question_id" } as any);
         }
       }
 
-      // Update attempt
-      await supabase.from("student_exam_attempts" as any).update({
-        end_time: new Date().toISOString(),
-        score: totalScore,
-        status: "completed",
-      } as any).eq("id", (attempt as any).id);
+      // Submit exam via server-side scoring function
+      const { data: result, error } = await supabase.rpc("submit_exam", {
+        p_attempt_id: (attempt as any).id,
+      });
 
-      // Also insert into exam_marks for unified reporting
-      if (exam?.subject_id && exam?.class_id) {
-        const totalMax = questions.reduce((s: number, q: any) => s + Number(q.marks), 0);
-        await supabase.from("exam_marks").upsert({
-          school_id: exam.school_id,
-          exam_id: exam.id,
-          student_id: student.id,
-          subject_id: exam.subject_id,
-          class_id: exam.class_id,
-          marks_obtained: totalScore,
-          max_marks: totalMax,
-        } as any, { onConflict: "exam_id,student_id,subject_id" });
-      }
+      if (error) throw error;
 
       await loadResult(student.id, (attempt as any).id);
       toast.success(autoSubmit ? "Time's up! Exam auto-submitted" : "Exam submitted successfully");

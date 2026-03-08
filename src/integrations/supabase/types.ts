@@ -1220,6 +1220,13 @@ export type Database = {
             referencedRelation: "exam_options"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "student_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "exam_options_student"
+            referencedColumns: ["id"]
+          },
         ]
       }
       student_documents: {
@@ -2095,7 +2102,38 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      exam_options_student: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          option_image: string | null
+          option_text: string | null
+          question_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          option_image?: string | null
+          option_text?: string | null
+          question_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          option_image?: string | null
+          option_text?: string | null
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "exam_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       generate_receipt_number: {
@@ -2110,6 +2148,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      submit_exam: { Args: { p_attempt_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "super_admin" | "school_admin" | "teacher" | "student"

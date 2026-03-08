@@ -36,13 +36,14 @@ export default function StudentPortal() {
       if (!stud) { setLoading(false); return; }
 
       // Fetch all data
-      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes] = await Promise.all([
+      const [attRes, marksRes, feesRes, notifRes, ttRes, slotsRes, feeStructRes] = await Promise.all([
         supabase.from("attendance").select("*").eq("student_id", stud.id).order("date", { ascending: false }).limit(60),
         supabase.from("exam_marks").select("*, subjects(name), exams(name)").eq("student_id", stud.id),
         supabase.from("fee_payments").select("*, fee_types(name)").eq("student_id", stud.id).order("payment_date", { ascending: false }),
         supabase.from("notifications").select("*").eq("school_id", prof.school_id).order("created_at", { ascending: false }).limit(20),
         stud.class_id ? supabase.from("timetable_entries").select("*, subjects(name), teachers(name), timetable_slots(name, start_time, end_time, slot_order, is_break)").eq("class_id", stud.class_id) : Promise.resolve({ data: [] }),
         supabase.from("timetable_slots").select("*").eq("school_id", prof.school_id).order("slot_order"),
+        stud.class_id ? supabase.from("fee_structures").select("*, fee_types(name)").eq("school_id", prof.school_id).eq("class_id", stud.class_id).eq("academic_year_id", stud.academic_year_id) : Promise.resolve({ data: [] }),
       ]);
 
       setAttendance(attRes.data || []);

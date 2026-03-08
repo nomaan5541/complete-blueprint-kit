@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School,
+  LayoutDashboard, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";

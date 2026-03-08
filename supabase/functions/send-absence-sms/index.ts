@@ -99,11 +99,11 @@ Deno.serve(async (req) => {
       await fetch("https://control.msg91.com/api/v5/flow/", {
         method: "POST",
         headers: {
-          "authkey": school.msg91_auth_key,
+          "authkey": smsConfig.msg91_auth_key,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sender: school.msg91_sender_id || "SCHOOL",
+          sender: smsConfig.msg91_sender_id || "SCHOOL",
           route: "4",
           country: "91",
           sms: [{ message, to: [mobile] }],

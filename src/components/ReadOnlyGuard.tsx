@@ -1,4 +1,5 @@
 import { ReactNode, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { useSchool } from "@/hooks/useSchool";
 import { toast } from "sonner";
 

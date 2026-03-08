@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
-  FileText, ArrowUpRight, Clock, Bell, BarChart3,
+  FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
+  CalendarDays, Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";

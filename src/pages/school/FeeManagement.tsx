@@ -291,15 +291,42 @@ export default function FeeManagement() {
       </Dialog>
 
       {/* Collect Fee Dialog */}
-      <Dialog open={collectOpen} onOpenChange={setCollectOpen}>
-        <DialogContent>
+      <Dialog open={collectOpen} onOpenChange={(open) => { setCollectOpen(open); if (!open) setStudentSearch(""); }}>
+        <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Collect Fee Payment</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
+              <Label>Search Student</Label>
+              <Input 
+                placeholder="Search by name or admission number..." 
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="mb-2"
+              />
               <Label>Student</Label>
               <Select value={collectForm.student_id} onValueChange={(v) => setCollectForm(p => ({ ...p, student_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select student" /></SelectTrigger>
-                <SelectContent>{students.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.admission_number})</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {students
+                    .filter((s) => {
+                      if (!studentSearch) return true;
+                      const search = studentSearch.toLowerCase();
+                      return (
+                        s.name?.toLowerCase().includes(search) ||
+                        s.admission_number?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{s.name} ({s.admission_number})</span>
+                          <span className="text-xs text-muted-foreground">
+                            {(s as any).classes?.name || "—"} • {(s as any).academic_years?.name || "—"}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">

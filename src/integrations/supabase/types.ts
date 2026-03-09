@@ -1145,7 +1145,6 @@ export type Database = {
           payment_enabled: boolean
           school_id: string
           stripe_publishable_key: string | null
-          stripe_secret_key_encrypted: string | null
           updated_at: string
         }
         Insert: {
@@ -1153,7 +1152,6 @@ export type Database = {
           payment_enabled?: boolean
           school_id: string
           stripe_publishable_key?: string | null
-          stripe_secret_key_encrypted?: string | null
           updated_at?: string
         }
         Update: {
@@ -1161,7 +1159,6 @@ export type Database = {
           payment_enabled?: boolean
           school_id?: string
           stripe_publishable_key?: string | null
-          stripe_secret_key_encrypted?: string | null
           updated_at?: string
         }
         Relationships: [

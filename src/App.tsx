@@ -71,6 +71,7 @@ import TeacherAnalytics from "./pages/teacher/TeacherAnalytics";
 import TeacherExamMonitor from "./pages/teacher/TeacherExamMonitor";
 import TeacherMeetings from "./pages/teacher/TeacherMeetings";
 import TeacherIDCard from "./pages/teacher/TeacherIDCard";
+import TeacherStudyMaterials from "./pages/teacher/TeacherStudyMaterials";
 
 // Student pages
 import StudentDashboardPage from "./pages/student/StudentDashboard";

@@ -26,6 +26,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [faceOpen, setFaceOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");

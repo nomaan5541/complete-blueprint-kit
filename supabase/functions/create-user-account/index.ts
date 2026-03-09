@@ -32,6 +32,19 @@ serve(async (req) => {
     }
 
     const { email, password, fullName, role, schoolId, teacherId, studentId } = await req.json();
+
+    // Verify school_admin owns the specified school (super_admins bypass)
+    if (!callerRoles.includes("super_admin")) {
+      const { data: ownedSchool } = await supabaseAdmin
+        .from("schools")
+        .select("id")
+        .eq("id", schoolId)
+        .eq("admin_id", caller.id)
+        .maybeSingle();
+      if (!ownedSchool) {
+        throw new Error("Forbidden: you do not own this school");
+      }
+    }
     if (!email || !password || !role || !schoolId) {
       throw new Error("email, password, role, and schoolId are required");
     }

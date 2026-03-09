@@ -82,6 +82,7 @@ import StudentIDCardPage from "./pages/student/StudentIDCard";
 import StudentStudyMaterialsPage from "./pages/student/StudentStudyMaterials";
 import StudentOnlineExamsPage from "./pages/student/StudentOnlineExams";
 import StudentMeetings from "./pages/student/StudentMeetings";
+import StudentAIChatPage from "./pages/student/StudentAIChat";
 
 const queryClient = new QueryClient();
 
@@ -182,6 +183,7 @@ function StudentPortalWrapper() {
       <Routes>
         <Route path="/" element={<StudentDashboardPage />} />
         <Route path="/profile" element={<StudentProfilePage />} />
+        <Route path="/chat" element={<StudentAIChatPage />} />
         <Route path="/attendance" element={<StudentAttendancePage />} />
         <Route path="/results" element={<StudentResultsPage />} />
         <Route path="/exam" element={<StudentOnlineExamsPage />} />

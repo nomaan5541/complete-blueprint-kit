@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle, Download, HardDrive, KeyRound } from "lucide-react";
+import { Loader2, Save, School, Upload, X, MessageSquare, CreditCard, Lock, CheckCircle2, AlertTriangle, Download, HardDrive, KeyRound, Wallet, Eye, EyeOff, QrCode, ExternalLink } from "lucide-react";
 import CredentialsTab from "@/components/settings/CredentialsTab";
 import { Progress } from "@/components/ui/progress";
 import { exportSchoolBackup, type ExportFormat, type BackupProgress } from "@/lib/schoolBackup";
@@ -43,18 +43,30 @@ export default function SchoolSettings() {
   const [backupProgress, setBackupProgress] = useState<BackupProgress | null>(null);
   const [renewalSent, setRenewalSent] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
+  
+  // Payment config state
+  const [paymentConfig, setPaymentConfig] = useState({ stripe_publishable_key: "", stripe_secret_key: "", payment_enabled: false });
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [platformPayment, setPlatformPayment] = useState<any>(null);
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, gRes, subRes, smsRes] = await Promise.all([
+      const [sRes, gRes, subRes, smsRes, payRes, platPayRes, plansRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
         supabase.from("subscriptions").select("*, subscription_plans(name, price, duration_months)").eq("school_id", schoolId!).order("end_date", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
+        supabase.from("school_payment_config").select("*").eq("school_id", schoolId!).maybeSingle(),
+        supabase.from("platform_payment_settings").select("*").limit(1).maybeSingle(),
+        supabase.from("subscription_plans").select("*").eq("is_active", true).order("price"),
       ]);
       const s = sRes.data as any;
       const smsData = smsRes.data as any;
+      const payData = payRes.data as any;
       if (s) {
         setForm({
           name: s.name || "",
@@ -76,11 +88,18 @@ export default function SchoolSettings() {
           msg91_sender_id: smsData?.msg91_sender_id || "",
           msg91_whatsapp_template_id: smsData?.msg91_whatsapp_template_id || "",
         });
+        setPaymentConfig({
+          stripe_publishable_key: payData?.stripe_publishable_key || "",
+          stripe_secret_key: payData?.stripe_secret_key_encrypted || "",
+          payment_enabled: payData?.payment_enabled || false,
+        });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);
       }
       setGrades(gRes.data || []);
       setSubscription(subRes.data);
+      setPlatformPayment(platPayRes.data || null);
+      setAvailablePlans(plansRes.data || []);
       setLoading(false);
     }
     fetch();
@@ -154,6 +173,22 @@ export default function SchoolSettings() {
     setSavingSms(false);
   };
 
+  const savePaymentConfig = async () => {
+    if (!schoolId) return;
+    setSavingPayment(true);
+    const payData = {
+      school_id: schoolId!,
+      stripe_publishable_key: paymentConfig.stripe_publishable_key || null,
+      stripe_secret_key_encrypted: paymentConfig.stripe_secret_key || null,
+      payment_enabled: paymentConfig.payment_enabled,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("school_payment_config").upsert(payData as any, { onConflict: "school_id" });
+    if (error) toast.error(error.message);
+    else toast.success("Payment settings saved");
+    setSavingPayment(false);
+  };
+
   const handleRenewalRequest = async () => {
     if (!schoolId || !user) return;
     setSendingRenewal(true);
@@ -186,10 +221,11 @@ export default function SchoolSettings() {
       </div>
 
       <Tabs defaultValue={subscriptionExpired ? "subscription" : "info"}>
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
           <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
+          <TabsTrigger value="payment"><Wallet className="mr-2 h-4 w-4" />Payment API</TabsTrigger>
           <TabsTrigger value="backup"><HardDrive className="mr-2 h-4 w-4" />Data Backup</TabsTrigger>
           <TabsTrigger value="credentials"><KeyRound className="mr-2 h-4 w-4" />Credentials</TabsTrigger>
           <TabsTrigger value="subscription" className={subscriptionExpired ? "text-destructive" : ""}>
@@ -344,6 +380,71 @@ export default function SchoolSettings() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="payment">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" /> Payment API Configuration
+              </CardTitle>
+              <CardDescription>Configure Stripe API keys to enable online fee collection from students</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                <p className="font-medium mb-1">How to get Stripe API keys:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Sign up at <span className="font-mono text-primary">stripe.com</span></li>
+                  <li>Go to Developers → API Keys</li>
+                  <li>Copy the Publishable key and Secret key</li>
+                  <li>For production, ensure your Stripe account is activated</li>
+                </ol>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Stripe Publishable Key</Label>
+                  <Input
+                    value={paymentConfig.stripe_publishable_key}
+                    onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_publishable_key: e.target.value }))}
+                    placeholder="pk_live_... or pk_test_..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Stripe Secret Key</Label>
+                  <div className="relative">
+                    <Input
+                      type={showSecretKey ? "text" : "password"}
+                      value={paymentConfig.stripe_secret_key}
+                      onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_secret_key: e.target.value }))}
+                      placeholder="sk_live_... or sk_test_..."
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                    >
+                      {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">This key is stored securely and never exposed to students</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="payment-enabled"
+                    checked={paymentConfig.payment_enabled}
+                    onChange={(e) => setPaymentConfig((p) => ({ ...p, payment_enabled: e.target.checked }))}
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  <Label htmlFor="payment-enabled" className="cursor-pointer">Enable online payment collection</Label>
+                </div>
+              </div>
+              <Button onClick={savePaymentConfig} disabled={savingPayment}>
+                {savingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Payment Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="backup">
           <Card>
             <CardHeader>
@@ -467,72 +568,171 @@ export default function SchoolSettings() {
               </CardContent>
             </Card>
 
-            {/* Renewal Request Form */}
-            {subscriptionExpired && (
+            {/* Pay via Stripe */}
+            {availablePlans.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" /> Request Subscription Renewal
+                    <CreditCard className="h-5 w-5" /> Pay Online via Stripe
                   </CardTitle>
-                  <CardDescription>
-                    Submit a renewal request to the platform administrator. They will process your request and activate your subscription.
-                  </CardDescription>
+                  <CardDescription>Choose a plan and pay securely using Stripe checkout</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {renewalSent ? (
-                    <div className="rounded-lg border border-success/30 bg-success/10 p-6 text-center">
-                      <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-3" />
-                      <p className="font-semibold text-lg">Renewal Request Submitted!</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        The platform administrator will review your request and contact you shortly. Once approved, all sections will be unlocked automatically.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                        <div className="grid gap-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">School:</span>
-                            <span className="font-medium">{form.name}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Contact:</span>
-                            <span className="font-medium">{user?.email || form.email}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Current Plan:</span>
-                            <span className="font-medium">{subscription?.subscription_plans?.name || "—"}</span>
-                          </div>
-                          {subscription?.subscription_plans?.price && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Price:</span>
-                              <span className="font-medium">₹{Number(subscription.subscription_plans.price).toLocaleString()} / {subscription.subscription_plans.duration_months} months</span>
-                            </div>
-                          )}
+                <CardContent>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {availablePlans.map((plan) => (
+                      <div key={plan.id} className={`rounded-xl border p-4 space-y-3 ${subscription?.plan_id === plan.id ? "border-primary bg-primary/5" : ""}`}>
+                        <div>
+                          <p className="font-semibold text-lg">{plan.name}</p>
+                          {plan.description && <p className="text-xs text-muted-foreground">{plan.description}</p>}
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Message (optional)</Label>
-                        <Textarea
-                          value={renewalMessage}
-                          onChange={(e) => setRenewalMessage(e.target.value)}
-                          placeholder="Any additional notes for the administrator (e.g., preferred plan, payment method, etc.)"
-                          rows={3}
-                        />
-                      </div>
-                      <Button onClick={handleRenewalRequest} disabled={sendingRenewal} size="lg" className="w-full">
-                        {sendingRenewal ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <p className="text-2xl font-bold">₹{Number(plan.price).toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/{plan.duration_months}mo</span></p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>Students: {plan.max_students || "Unlimited"}</p>
+                          <p>Teachers: {plan.max_teachers || "Unlimited"}</p>
+                        </div>
+                        {subscription?.plan_id === plan.id && !subscriptionExpired ? (
+                          <Badge className="w-full justify-center bg-success text-success-foreground">Current Plan</Badge>
                         ) : (
-                          <CreditCard className="mr-2 h-4 w-4" />
+                          <Button
+                            className="w-full"
+                            size="sm"
+                            disabled={checkingOut === plan.id}
+                            onClick={async () => {
+                              if (!schoolId) return;
+                              setCheckingOut(plan.id);
+                              try {
+                                const { data, error } = await supabase.functions.invoke("create-plan-checkout", {
+                                  body: { planId: plan.id, schoolId },
+                                });
+                                if (error) throw error;
+                                if (data?.url) {
+                                  window.open(data.url, "_blank");
+                                } else {
+                                  throw new Error("No checkout URL returned");
+                                }
+                              } catch (err: any) {
+                                toast.error("Checkout failed: " + (err?.message || "Unknown error"));
+                              } finally {
+                                setCheckingOut(null);
+                              }
+                            }}
+                          >
+                            {checkingOut === plan.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                            )}
+                            Pay with Stripe
+                          </Button>
                         )}
-                        Submit Renewal Request
-                      </Button>
-                    </>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
+
+            {/* QR / UPI Payment */}
+            {(platformPayment?.qr_code_url || platformPayment?.upi_id) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <QrCode className="h-5 w-5" /> Pay via UPI / QR Code
+                  </CardTitle>
+                  <CardDescription>Scan the QR code or use the UPI ID to pay manually, then submit a renewal request</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-6 items-start">
+                    {platformPayment?.qr_code_url && (
+                      <div className="shrink-0">
+                        <img src={platformPayment.qr_code_url} alt="Payment QR" className="h-48 w-48 rounded-xl object-contain border bg-white p-2" />
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {platformPayment?.upi_id && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">UPI ID</p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="font-mono text-base px-3 py-1">{platformPayment.upi_id}</Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText(platformPayment.upi_id);
+                                toast.success("UPI ID copied!");
+                              }}
+                            >
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {platformPayment?.payment_instructions && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Instructions</p>
+                          <p className="text-sm">{platformPayment.payment_instructions}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Renewal Request Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" /> Request Subscription Renewal
+                </CardTitle>
+                <CardDescription>
+                  Submit a renewal request to the platform administrator. They will process your request and activate your subscription.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {renewalSent ? (
+                  <div className="rounded-lg border border-success/30 bg-success/10 p-6 text-center">
+                    <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-3" />
+                    <p className="font-semibold text-lg">Renewal Request Submitted!</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      The platform administrator will review your request and contact you shortly.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">School:</span>
+                          <span className="font-medium">{form.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Contact:</span>
+                          <span className="font-medium">{user?.email || form.email}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Current Plan:</span>
+                          <span className="font-medium">{subscription?.subscription_plans?.name || "—"}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Message (optional)</Label>
+                      <Textarea
+                        value={renewalMessage}
+                        onChange={(e) => setRenewalMessage(e.target.value)}
+                        placeholder="Any additional notes (e.g., payment reference number, preferred plan)"
+                        rows={3}
+                      />
+                    </div>
+                    <Button onClick={handleRenewalRequest} disabled={sendingRenewal} size="lg" className="w-full">
+                      {sendingRenewal ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                      Submit Renewal Request
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 

@@ -992,6 +992,33 @@ export type Database = {
           },
         ]
       }
+      platform_payment_settings: {
+        Row: {
+          id: string
+          payment_instructions: string | null
+          qr_code_url: string | null
+          updated_at: string
+          updated_by: string | null
+          upi_id: string | null
+        }
+        Insert: {
+          id?: string
+          payment_instructions?: string | null
+          qr_code_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          upi_id?: string | null
+        }
+        Update: {
+          id?: string
+          payment_instructions?: string | null
+          qr_code_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1107,6 +1134,41 @@ export type Database = {
             foreignKeyName: "school_events_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_payment_config: {
+        Row: {
+          created_at: string
+          payment_enabled: boolean
+          school_id: string
+          stripe_publishable_key: string | null
+          stripe_secret_key_encrypted: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          payment_enabled?: boolean
+          school_id: string
+          stripe_publishable_key?: string | null
+          stripe_secret_key_encrypted?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          payment_enabled?: boolean
+          school_id?: string
+          stripe_publishable_key?: string | null
+          stripe_secret_key_encrypted?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_payment_config_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },

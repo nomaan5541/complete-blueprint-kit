@@ -146,7 +146,7 @@ export default function Teachers() {
     else { toast.success("Assignment removed"); fetchAll(); }
   };
 
-  const TeacherFormFields = () => (
+  const teacherFormFields = (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} /></div>
       <div className="space-y-1">

@@ -48,6 +48,9 @@ export default function SchoolSettings() {
   const [paymentConfig, setPaymentConfig] = useState({ stripe_publishable_key: "", stripe_secret_key: "", payment_enabled: false });
   const [savingPayment, setSavingPayment] = useState(false);
   const [showSecretKey, setShowSecretKey] = useState(false);
+  const [platformPayment, setPlatformPayment] = useState<any>(null);
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;

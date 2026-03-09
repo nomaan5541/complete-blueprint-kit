@@ -41,7 +41,7 @@ export default function StudentArchive() {
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
         supabase.from("students").select("*, classes(name), sections(name), academic_years(name)")
           .eq("school_id", schoolId!)
-          .in("status", ["promoted", "transferred", "left", "inactive"])
+          .in("status", ["promoted", "transferred", "left", "inactive", "completed"])
           .order("name"),
       ]);
       setAcademicYears(yRes.data || []);

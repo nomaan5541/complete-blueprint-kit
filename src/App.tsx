@@ -52,6 +52,7 @@ import StudentDocuments from "./pages/school/StudentDocuments";
 import SchoolCalendar from "./pages/school/SchoolCalendar";
 import Meetings from "./pages/school/Meetings";
 import AuditLogs from "./pages/school/AuditLogs";
+import BackupRestore from "./pages/school/BackupRestore";
 import StudentExamTake from "./pages/school/StudentExamTake";
 
 // Teacher pages

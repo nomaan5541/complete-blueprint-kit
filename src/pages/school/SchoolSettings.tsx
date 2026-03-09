@@ -55,12 +55,14 @@ export default function SchoolSettings() {
   useEffect(() => {
     if (!schoolId) return;
     async function fetch() {
-      const [sRes, gRes, subRes, smsRes, payRes] = await Promise.all([
+      const [sRes, gRes, subRes, smsRes, payRes, platPayRes, plansRes] = await Promise.all([
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
         supabase.from("subscriptions").select("*, subscription_plans(name, price, duration_months)").eq("school_id", schoolId!).order("end_date", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
         supabase.from("school_payment_config").select("*").eq("school_id", schoolId!).maybeSingle(),
+        supabase.from("platform_payment_settings").select("*").limit(1).maybeSingle(),
+        supabase.from("subscription_plans").select("*").eq("is_active", true).order("price"),
       ]);
       const s = sRes.data as any;
       const smsData = smsRes.data as any;

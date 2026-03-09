@@ -59,6 +59,7 @@ export default function SchoolSettings() {
         supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
         supabase.from("school_payment_config").select("*").eq("school_id", schoolId!).maybeSingle(),
       ]);
+      const s = sRes.data as any;
       const smsData = smsRes.data as any;
       const payData = payRes.data as any;
       if (s) {
@@ -81,6 +82,11 @@ export default function SchoolSettings() {
           msg91_auth_key: smsData?.msg91_auth_key || "",
           msg91_sender_id: smsData?.msg91_sender_id || "",
           msg91_whatsapp_template_id: smsData?.msg91_whatsapp_template_id || "",
+        });
+        setPaymentConfig({
+          stripe_publishable_key: payData?.stripe_publishable_key || "",
+          stripe_secret_key: payData?.stripe_secret_key_encrypted || "",
+          payment_enabled: payData?.payment_enabled || false,
         });
         setExistingLogo(s.logo_url || null);
         setLogoPreview(s.logo_url || null);

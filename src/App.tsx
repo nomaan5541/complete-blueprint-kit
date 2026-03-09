@@ -25,6 +25,7 @@ import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import AIAnalytics from "./pages/AIAnalytics";
 
 // School Admin pages
 import SchoolDashboard from "./pages/school/SchoolDashboard";
@@ -96,6 +97,7 @@ function SuperAdminRoutes() {
     <DashboardLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/ai-analytics" element={<AIAnalytics />} />
         <Route path="/schools" element={<Schools />} />
         <Route path="/schools/add" element={<AddSchool />} />
         <Route path="/schools/:id" element={<SchoolDetail />} />

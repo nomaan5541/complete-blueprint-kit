@@ -97,6 +97,7 @@ function SuperAdminRoutes() {
     <DashboardLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/ai-analytics" element={<AIAnalytics />} />
         <Route path="/schools" element={<Schools />} />
         <Route path="/schools/add" element={<AddSchool />} />
         <Route path="/schools/:id" element={<SchoolDetail />} />

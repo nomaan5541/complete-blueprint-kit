@@ -25,6 +25,7 @@ const navItems = [
   { title: "Notifications", url: "/teacher/notifications", icon: Bell },
   { title: "Analytics", url: "/teacher/analytics", icon: BarChart3 },
   { title: "Meetings", url: "/teacher/meetings", icon: Video },
+  { title: "ID Card", url: "/teacher/id-card", icon: IdCard },
 ];
 
 export function TeacherSidebar() {

@@ -59,8 +59,8 @@ export default function SchoolSettings() {
         supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
         supabase.from("school_payment_config").select("*").eq("school_id", schoolId!).maybeSingle(),
       ]);
-      const s = sRes.data as any;
       const smsData = smsRes.data as any;
+      const payData = payRes.data as any;
       if (s) {
         setForm({
           name: s.name || "",

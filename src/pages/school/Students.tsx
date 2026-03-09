@@ -412,6 +412,19 @@ export default function Students() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Face Enrollment Dialog */}
+      <FaceEnrollment
+        open={faceOpen}
+        onOpenChange={setFaceOpen}
+        student={selectedStudent ? {
+          id: selectedStudent.id,
+          name: getMasterField(selectedStudent, "name"),
+          photo_url: getMasterField(selectedStudent, "photo_url"),
+          school_id: schoolId!,
+        } : null}
+        onEnrolled={() => setFaceOpen(false)}
+      />
     </div>
   );
 }

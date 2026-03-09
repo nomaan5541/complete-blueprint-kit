@@ -177,7 +177,6 @@ export default function SchoolSettings() {
     const payData = {
       school_id: schoolId!,
       stripe_publishable_key: paymentConfig.stripe_publishable_key || null,
-      stripe_secret_key_encrypted: paymentConfig.stripe_secret_key || null,
       payment_enabled: paymentConfig.payment_enabled,
       updated_at: new Date().toISOString(),
     };

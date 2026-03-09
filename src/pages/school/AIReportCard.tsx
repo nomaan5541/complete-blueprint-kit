@@ -222,7 +222,7 @@ export default function AIReportCard() {
       "Weak Subjects": s.weakSubjects.join(", ") || "None",
       "Strong Subjects": s.strongSubjects.join(", ") || "None",
     }));
-    exportToCSV(data, `rank_list_${selectedExam}.csv`);
+    exportToCsv(data, `rank_list_${selectedExam}.csv`);
     toast.success("Rank list exported");
   };
 

@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles,
+  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -29,6 +29,7 @@ const navItems = [
   { title: "Bulk Import", url: "/school/students/import", icon: GraduationCap },
   { title: "Transfer/Leaving", url: "/school/students/transfer", icon: GraduationCap },
   { title: "Promotion", url: "/school/promotion", icon: ArrowUpRight },
+  { title: "Student Archive", url: "/school/archive", icon: Archive },
   { title: "Teachers", url: "/school/teachers", icon: Users },
   { title: "Attendance", url: "/school/attendance", icon: ClipboardCheck },
   { title: "AI Face Attendance", url: "/school/face-attendance", icon: ScanFace },

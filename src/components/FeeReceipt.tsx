@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Download, Printer } from "lucide-react";
 
@@ -18,6 +20,7 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
   const [totalFee, setTotalFee] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
   const [previousPaid, setPreviousPaid] = useState(0);
+  const [showFullBreakdown, setShowFullBreakdown] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -345,29 +348,35 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
               overflow: "hidden",
               margin: "10px 0",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
-                <span style={{ color: "#b0a48a" }}>Total Fee</span>
-                <span style={{ color: "#e8e0d4", fontWeight: 600 }}>₹{totalFee.toLocaleString()}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
-                <span style={{ color: "#b0a48a" }}>Previous Due</span>
-                <span style={{ color: previousDue > 0 ? "#f87171" : "#e8e0d4", fontWeight: 600 }}>₹{Math.max(0, previousDue).toLocaleString()}</span>
-              </div>
+              {showFullBreakdown && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
+                    <span style={{ color: "#b0a48a" }}>Total Fee</span>
+                    <span style={{ color: "#e8e0d4", fontWeight: 600 }}>₹{totalFee.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
+                    <span style={{ color: "#b0a48a" }}>Previous Due</span>
+                    <span style={{ color: previousDue > 0 ? "#f87171" : "#e8e0d4", fontWeight: 600 }}>₹{Math.max(0, previousDue).toLocaleString()}</span>
+                  </div>
+                </>
+              )}
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "10px 14px",
                 fontSize: 14,
-                borderBottom: "1px solid #2a2015",
+                borderBottom: showFullBreakdown ? "1px solid #2a2015" : "none",
                 background: "rgba(139, 105, 20, 0.15)",
               }}>
                 <span style={{ color: "#e8e0d4", fontWeight: "bold" }}>Amount Paid</span>
                 <span style={{ color: "#4ade80", fontWeight: "bold", fontSize: 16 }}>₹{amountPaid.toLocaleString()}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12 }}>
-                <span style={{ color: "#b0a48a" }}>Remaining Due</span>
-                <span style={{ color: remainingDue > 0 ? "#f87171" : "#4ade80", fontWeight: 600 }}>₹{Math.max(0, remainingDue).toLocaleString()}</span>
-              </div>
+              {showFullBreakdown && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12 }}>
+                  <span style={{ color: "#b0a48a" }}>Remaining Due</span>
+                  <span style={{ color: remainingDue > 0 ? "#f87171" : "#4ade80", fontWeight: 600 }}>₹{Math.max(0, remainingDue).toLocaleString()}</span>
+                </div>
+              )}
             </div>
 
             {/* Notes */}
@@ -398,11 +407,21 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: "flex", gap: 8, padding: "12px 16px", justifyContent: "center" }}>
+        {/* Receipt Options */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "12px 16px" }}>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="showFullBreakdown"
+              checked={showFullBreakdown}
+              onCheckedChange={(checked) => setShowFullBreakdown(checked === true)}
+            />
+            <Label htmlFor="showFullBreakdown" className="text-sm text-muted-foreground cursor-pointer">
+              Show total fee, dues & remaining balance on receipt
+            </Label>
+          </div>
           <Button
             onClick={handlePrint}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
           >
             <Printer className="mr-2 h-4 w-4" />
             PRINT / DOWNLOAD PDF

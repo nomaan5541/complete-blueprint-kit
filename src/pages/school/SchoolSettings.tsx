@@ -404,24 +404,9 @@ export default function SchoolSettings() {
                     placeholder="pk_live_... or pk_test_..."
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Stripe Secret Key</Label>
-                  <div className="relative">
-                    <Input
-                      type={showSecretKey ? "text" : "password"}
-                      value={paymentConfig.stripe_secret_key}
-                      onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_secret_key: e.target.value }))}
-                      placeholder="sk_live_... or sk_test_..."
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowSecretKey(!showSecretKey)}
-                    >
-                      {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">This key is stored securely and never exposed to students</p>
+                <div className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">🔒 Stripe Secret Key</p>
+                  <p>For security, Stripe secret keys are no longer stored in the database. Configure your secret key as a server-side secret through your platform administrator.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input

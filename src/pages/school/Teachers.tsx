@@ -146,7 +146,7 @@ export default function Teachers() {
     else { toast.success("Assignment removed"); fetchAll(); }
   };
 
-  const TeacherFormFields = () => (
+  const teacherFormFields = (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} /></div>
       <div className="space-y-1">
@@ -263,7 +263,7 @@ export default function Teachers() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Add Teacher</DialogTitle></DialogHeader>
-          <TeacherFormFields />
+          {teacherFormFields}
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Add Teacher</Button>
@@ -275,7 +275,7 @@ export default function Teachers() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Edit Teacher</DialogTitle></DialogHeader>
-          <TeacherFormFields />
+          {teacherFormFields}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
             <Button onClick={handleEdit} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button>

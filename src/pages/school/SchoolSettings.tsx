@@ -89,7 +89,6 @@ export default function SchoolSettings() {
         });
         setPaymentConfig({
           stripe_publishable_key: payData?.stripe_publishable_key || "",
-          stripe_secret_key: payData?.stripe_secret_key_encrypted || "",
           payment_enabled: payData?.payment_enabled || false,
         });
         setExistingLogo(s.logo_url || null);

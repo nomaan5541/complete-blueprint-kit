@@ -132,6 +132,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/subjects" element={<Subjects />} />
         <Route path="/subject-mapping" element={<ClassSubjectMapping />} />
         <Route path="/report-card" element={<ReportCard />} />
+        <Route path="/ai-report-card" element={<AIReportCard />} />
         <Route path="/students" element={<Students />} />
         <Route path="/students/profile" element={<StudentProfile />} />
         <Route path="/students/import" element={<BulkStudentImport />} />

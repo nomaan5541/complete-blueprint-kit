@@ -42,7 +42,7 @@ export default function StudentPromotion() {
   const loadStudents = async () => {
     if (!fromYear || !fromClass) { toast.error("Select source year and class"); return; }
     const { data } = await supabase.from("students")
-      .select("id, name, admission_number, student_master_id, sections(name)")
+      .select("id, name, admission_number, student_master_id, user_id, sections(name)")
       .eq("school_id", schoolId!).eq("academic_year_id", fromYear).eq("class_id", fromClass).eq("status", "active").order("name");
     setStudents(data || []);
     setSelectedStudents(new Set((data || []).map((s: any) => s.id)));

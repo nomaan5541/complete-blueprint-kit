@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace,
+  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -34,6 +34,7 @@ const navItems = [
   { title: "AI Face Attendance", url: "/school/face-attendance", icon: ScanFace },
   { title: "Exams & Results", url: "/school/exams", icon: FileText },
   { title: "Report Card", url: "/school/report-card", icon: FileText },
+  { title: "AI Report Card", url: "/school/ai-report-card", icon: Sparkles },
   { title: "Fee Management", url: "/school/fees", icon: IndianRupee },
   { title: "Fee Dues", url: "/school/fees/dues", icon: IndianRupee },
   { title: "Timetable", url: "/school/timetable", icon: Clock },

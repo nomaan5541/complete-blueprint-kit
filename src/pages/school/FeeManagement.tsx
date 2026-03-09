@@ -39,6 +39,7 @@ export default function FeeManagement() {
   const [feeTypeDesc, setFeeTypeDesc] = useState("");
   const [structForm, setStructForm] = useState({ class_id: "", fee_type_id: "", amount: "" });
   const [collectForm, setCollectForm] = useState({ student_id: "", fee_type_id: "", amount: "", payment_mode: "cash", notes: "" });
+  const [studentSearch, setStudentSearch] = useState("");
 
   const fetchAll = async () => {
     if (!schoolId || !selectedYearId) return;
@@ -48,7 +49,7 @@ export default function FeeManagement() {
       supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
       supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
-      supabase.from("students").select("id, name, admission_number, class_id").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
+      supabase.from("students").select("id, name, admission_number, class_id, classes(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setFeeTypes(ftRes.data || []);
     setStructures(fsRes.data || []);
@@ -290,15 +291,42 @@ export default function FeeManagement() {
       </Dialog>
 
       {/* Collect Fee Dialog */}
-      <Dialog open={collectOpen} onOpenChange={setCollectOpen}>
-        <DialogContent>
+      <Dialog open={collectOpen} onOpenChange={(open) => { setCollectOpen(open); if (!open) setStudentSearch(""); }}>
+        <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Collect Fee Payment</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
+              <Label>Search Student</Label>
+              <Input 
+                placeholder="Search by name or admission number..." 
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="mb-2"
+              />
               <Label>Student</Label>
               <Select value={collectForm.student_id} onValueChange={(v) => setCollectForm(p => ({ ...p, student_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select student" /></SelectTrigger>
-                <SelectContent>{students.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.admission_number})</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {students
+                    .filter((s) => {
+                      if (!studentSearch) return true;
+                      const search = studentSearch.toLowerCase();
+                      return (
+                        s.name?.toLowerCase().includes(search) ||
+                        s.admission_number?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{s.name} ({s.admission_number})</span>
+                          <span className="text-xs text-muted-foreground">
+                            {(s as any).classes?.name || "—"} • {(s as any).academic_years?.name || "—"}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">

@@ -178,6 +178,7 @@ function TeacherRoutesWrapper() {
         <Route path="/analytics" element={<TeacherAnalytics />} />
         <Route path="/meetings" element={<TeacherMeetings />} />
         <Route path="/id-card" element={<TeacherIDCard />} />
+        <Route path="/materials" element={<TeacherStudyMaterials />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TeacherLayout>

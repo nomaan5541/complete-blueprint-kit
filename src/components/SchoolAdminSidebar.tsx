@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles,
+  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";

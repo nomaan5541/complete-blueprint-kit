@@ -293,25 +293,17 @@ export default function FaceAttendance() {
         marked_by: user?.id || null,
       }));
 
-      // Upsert attendance
-      const { error } = await supabase.from("attendance").upsert(records, {
-        onConflict: "student_id,date,school_id",
-        ignoreDuplicates: false,
-      });
+      // Delete existing then insert fresh records
+      await supabase
+        .from("attendance")
+        .delete()
+        .eq("school_id", schoolId)
+        .eq("class_id", selectedClass)
+        .eq("date", selectedDate)
+        .eq("academic_year_id", selectedYearId);
 
-      if (error) {
-        // If unique constraint doesn't exist, do delete + insert
-        await supabase
-          .from("attendance")
-          .delete()
-          .eq("school_id", schoolId)
-          .eq("class_id", selectedClass)
-          .eq("date", selectedDate)
-          .eq("academic_year_id", selectedYearId);
-
-        const { error: insertErr } = await supabase.from("attendance").insert(records);
-        if (insertErr) throw insertErr;
-      }
+      const { error } = await supabase.from("attendance").insert(records);
+      if (error) throw error;
 
       toast.success(
         `Attendance saved! ${detectedStudents.length} present, ${(allStudents?.length || 0) - detectedStudents.length} absent`

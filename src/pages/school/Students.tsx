@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus } from "lucide-react";
+import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus, ScanFace } from "lucide-react";
 import StudentFormTabs, { emptyStudentForm, type StudentFormData } from "@/components/students/StudentFormTabs";
+import { FaceEnrollment } from "@/components/FaceEnrollment";
 
 export default function Students() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [faceOpen, setFaceOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
@@ -342,6 +344,9 @@ export default function Students() {
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setFaceOpen(true); }} title="Enroll face for AI attendance">
+                          <ScanFace className="h-4 w-4" />
+                        </Button>
                         {!masterUserId && (
                           <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
                             <UserPlus className="h-4 w-4" />
@@ -407,6 +412,19 @@ export default function Students() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Face Enrollment Dialog */}
+      <FaceEnrollment
+        open={faceOpen}
+        onOpenChange={setFaceOpen}
+        student={selectedStudent ? {
+          id: selectedStudent.id,
+          name: getMasterField(selectedStudent, "name"),
+          photo_url: getMasterField(selectedStudent, "photo_url"),
+          school_id: schoolId!,
+        } : null}
+        onEnrolled={() => setFaceOpen(false)}
+      />
     </div>
   );
 }

@@ -54,6 +54,7 @@ import Meetings from "./pages/school/Meetings";
 import AuditLogs from "./pages/school/AuditLogs";
 import BackupRestore from "./pages/school/BackupRestore";
 import StudentExamTake from "./pages/school/StudentExamTake";
+import FaceAttendance from "./pages/school/FaceAttendance";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
@@ -138,6 +139,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/fees/dues" element={<FeeDues />} />
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/attendance" element={<Attendance />} />
+        <Route path="/face-attendance" element={<FaceAttendance />} />
         <Route path="/exams" element={<ExamManagement />} />
         <Route path="/fees" element={<FeeManagement />} />
         <Route path="/timetable" element={<Timetable />} />

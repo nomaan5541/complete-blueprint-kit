@@ -139,6 +139,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/fees/dues" element={<FeeDues />} />
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/attendance" element={<Attendance />} />
+        <Route path="/face-attendance" element={<FaceAttendance />} />
         <Route path="/exams" element={<ExamManagement />} />
         <Route path="/fees" element={<FeeManagement />} />
         <Route path="/timetable" element={<Timetable />} />

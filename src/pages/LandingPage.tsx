@@ -632,6 +632,9 @@ export default function LandingPage() {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-2 font-semibold text-foreground">Feature</th>
+                  <th className="text-center py-3 px-2 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <div className="flex flex-col items-center gap-1"><Gift className="h-4 w-4" />Trial</div>
+                  </th>
                   <th className="text-center py-3 px-2 font-semibold text-foreground">
                     <div className="flex flex-col items-center gap-1"><Zap className="h-4 w-4 text-emerald-500" />Starter</div>
                   </th>
@@ -647,6 +650,9 @@ export default function LandingPage() {
                 {PLAN_FEATURE_LABELS.map((feature, idx) => (
                   <tr key={idx} className={`border-b border-border/50 ${idx % 2 === 0 ? "bg-muted/20" : ""}`}>
                     <td className="py-2.5 px-2 text-foreground">{feature.label}</td>
+                    <td className="text-center py-2.5 px-2">
+                      {feature.trial ? <CheckCircle className="h-4 w-4 text-emerald-500 mx-auto" /> : <Lock className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
+                    </td>
                     <td className="text-center py-2.5 px-2">
                       {feature.starter ? <CheckCircle className="h-4 w-4 text-emerald-500 mx-auto" /> : <Lock className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
                     </td>

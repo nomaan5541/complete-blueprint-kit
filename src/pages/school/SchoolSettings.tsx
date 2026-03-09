@@ -166,6 +166,22 @@ export default function SchoolSettings() {
     setSavingSms(false);
   };
 
+  const savePaymentConfig = async () => {
+    if (!schoolId) return;
+    setSavingPayment(true);
+    const payData = {
+      school_id: schoolId!,
+      stripe_publishable_key: paymentConfig.stripe_publishable_key || null,
+      stripe_secret_key_encrypted: paymentConfig.stripe_secret_key || null,
+      payment_enabled: paymentConfig.payment_enabled,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("school_payment_config").upsert(payData as any, { onConflict: "school_id" });
+    if (error) toast.error(error.message);
+    else toast.success("Payment settings saved");
+    setSavingPayment(false);
+  };
+
   const handleRenewalRequest = async () => {
     if (!schoolId || !user) return;
     setSendingRenewal(true);

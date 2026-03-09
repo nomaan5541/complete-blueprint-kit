@@ -98,6 +98,8 @@ export default function SchoolSettings() {
       }
       setGrades(gRes.data || []);
       setSubscription(subRes.data);
+      setPlatformPayment(platPayRes.data || null);
+      setAvailablePlans(plansRes.data || []);
       setLoading(false);
     }
     fetch();

@@ -8,14 +8,14 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full overflow-x-hidden max-w-[100vw]">
         <StudentSidebar />
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1 relative">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/80 backdrop-blur-lg px-4">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+          <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -45,9 +45,8 @@ export default function SchoolSettings() {
   const [subscription, setSubscription] = useState<any>(null);
   
   // Payment config state
-  const [paymentConfig, setPaymentConfig] = useState({ stripe_publishable_key: "", stripe_secret_key: "", payment_enabled: false });
+  const [paymentConfig, setPaymentConfig] = useState({ stripe_publishable_key: "", payment_enabled: false });
   const [savingPayment, setSavingPayment] = useState(false);
-  const [showSecretKey, setShowSecretKey] = useState(false);
   const [platformPayment, setPlatformPayment] = useState<any>(null);
   const [availablePlans, setAvailablePlans] = useState<any[]>([]);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
@@ -90,7 +89,6 @@ export default function SchoolSettings() {
         });
         setPaymentConfig({
           stripe_publishable_key: payData?.stripe_publishable_key || "",
-          stripe_secret_key: payData?.stripe_secret_key_encrypted || "",
           payment_enabled: payData?.payment_enabled || false,
         });
         setExistingLogo(s.logo_url || null);
@@ -179,7 +177,6 @@ export default function SchoolSettings() {
     const payData = {
       school_id: schoolId!,
       stripe_publishable_key: paymentConfig.stripe_publishable_key || null,
-      stripe_secret_key_encrypted: paymentConfig.stripe_secret_key || null,
       payment_enabled: paymentConfig.payment_enabled,
       updated_at: new Date().toISOString(),
     };
@@ -407,24 +404,9 @@ export default function SchoolSettings() {
                     placeholder="pk_live_... or pk_test_..."
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Stripe Secret Key</Label>
-                  <div className="relative">
-                    <Input
-                      type={showSecretKey ? "text" : "password"}
-                      value={paymentConfig.stripe_secret_key}
-                      onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_secret_key: e.target.value }))}
-                      placeholder="sk_live_... or sk_test_..."
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowSecretKey(!showSecretKey)}
-                    >
-                      {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">This key is stored securely and never exposed to students</p>
+                <div className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">🔒 Stripe Secret Key</p>
+                  <p>For security, Stripe secret keys are no longer stored in the database. Configure your secret key as a server-side secret through your platform administrator.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input

@@ -683,8 +683,8 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-foreground mb-3">Contact Us</h4>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Mail className="h-4 w-4" /> support@eduprimex.com</div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Phone className="h-4 w-4" /> +91 98765 43210</div>
+                <a href="mailto:Nomaankhangta@gmail.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><Mail className="h-4 w-4" /> Nomaankhangta@gmail.com</a>
+                <a href="tel:+918977397763" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><Phone className="h-4 w-4" /> +91 89773 97763</a>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> India</div>
               </div>
             </div>

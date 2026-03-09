@@ -24,7 +24,7 @@ const navItems = [
   { title: "Notifications", url: "/student/notifications", icon: Bell },
   { title: "Study Materials", url: "/student/materials", icon: FolderOpen },
   { title: "ID Card", url: "/student/id-card", icon: IdCard },
-  { title: "Meetings", url: "/student/meetings", icon: Video, comingSoon: true },
+  { title: "Meetings", url: "/student/meetings", icon: Video },
 ];
 
 export function StudentSidebar() {

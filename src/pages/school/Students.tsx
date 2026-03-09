@@ -344,6 +344,9 @@ export default function Students() {
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/school/students/profile?id=${s.id}`)}><Eye className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setFaceOpen(true); }} title="Enroll face for AI attendance">
+                          <ScanFace className="h-4 w-4" />
+                        </Button>
                         {!masterUserId && (
                           <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => { setSelectedStudent(s); setAccountOpen(true); }} title="Create login account">
                             <UserPlus className="h-4 w-4" />

@@ -134,11 +134,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
       <div className="animated-bg" />
-      <div className="absolute top-4 left-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-        </Button>
-      </div>
+      {role !== "student" && role !== "teacher" && (
+        <div className="absolute top-4 left-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+          </Button>
+        </div>
+      )}
       <div className="absolute top-4 right-4"><ThemeToggle /></div>
       <Card className="w-full max-w-md glass-strong border-0 animate-scale-in">
         <CardHeader className="text-center space-y-3">

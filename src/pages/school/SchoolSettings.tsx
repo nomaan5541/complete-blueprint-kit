@@ -373,6 +373,71 @@ export default function SchoolSettings() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="payment">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" /> Payment API Configuration
+              </CardTitle>
+              <CardDescription>Configure Stripe API keys to enable online fee collection from students</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                <p className="font-medium mb-1">How to get Stripe API keys:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Sign up at <span className="font-mono text-primary">stripe.com</span></li>
+                  <li>Go to Developers → API Keys</li>
+                  <li>Copy the Publishable key and Secret key</li>
+                  <li>For production, ensure your Stripe account is activated</li>
+                </ol>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Stripe Publishable Key</Label>
+                  <Input
+                    value={paymentConfig.stripe_publishable_key}
+                    onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_publishable_key: e.target.value }))}
+                    placeholder="pk_live_... or pk_test_..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Stripe Secret Key</Label>
+                  <div className="relative">
+                    <Input
+                      type={showSecretKey ? "text" : "password"}
+                      value={paymentConfig.stripe_secret_key}
+                      onChange={(e) => setPaymentConfig((p) => ({ ...p, stripe_secret_key: e.target.value }))}
+                      placeholder="sk_live_... or sk_test_..."
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                    >
+                      {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">This key is stored securely and never exposed to students</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="payment-enabled"
+                    checked={paymentConfig.payment_enabled}
+                    onChange={(e) => setPaymentConfig((p) => ({ ...p, payment_enabled: e.target.checked }))}
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  <Label htmlFor="payment-enabled" className="cursor-pointer">Enable online payment collection</Label>
+                </div>
+              </div>
+              <Button onClick={savePaymentConfig} disabled={savingPayment}>
+                {savingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Payment Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="backup">
           <Card>
             <CardHeader>

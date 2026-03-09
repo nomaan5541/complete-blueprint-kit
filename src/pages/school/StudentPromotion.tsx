@@ -99,11 +99,17 @@ export default function StudentPromotion() {
         city: personalData.city || null,
         state: personalData.state || null,
         pincode: personalData.pincode || null,
+        photo_url: personalData.photo_url || null,
         class_id: toClass,
         student_master_id: s.student_master_id,
+        user_id: s.user_id || null,
         status: "active",
       });
-      if (!error) successCount++;
+      if (error) {
+        console.error(`Failed to promote ${s.name}:`, error.message);
+      } else {
+        successCount++;
+      }
     }
 
     toast.success(`${successCount} students promoted`);

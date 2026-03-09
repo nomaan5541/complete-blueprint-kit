@@ -183,6 +183,7 @@ function StudentPortalWrapper() {
       <Routes>
         <Route path="/" element={<StudentDashboardPage />} />
         <Route path="/profile" element={<StudentProfilePage />} />
+        <Route path="/chat" element={<StudentAIChatPage />} />
         <Route path="/attendance" element={<StudentAttendancePage />} />
         <Route path="/results" element={<StudentResultsPage />} />
         <Route path="/exam" element={<StudentOnlineExamsPage />} />

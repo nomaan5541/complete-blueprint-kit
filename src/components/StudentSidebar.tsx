@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { title: "Dashboard", url: "/student", icon: LayoutDashboard },
   { title: "My Profile", url: "/student/profile", icon: User },
+  { title: "AI Assistant", url: "/student/chat", icon: MessageCircle },
   { title: "Attendance", url: "/student/attendance", icon: ClipboardCheck },
   { title: "Exam Results", url: "/student/results", icon: FileText },
   { title: "Online Exams", url: "/student/exam", icon: Monitor },

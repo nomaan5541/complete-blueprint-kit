@@ -43,7 +43,7 @@ export default function StudentAIChatPage() {
         .eq("student_id", student.id)
         .order("created_at", { ascending: true });
 
-      setMessages(data || []);
+      setMessages((data || []).map(m => ({ role: m.role as "user" | "assistant", content: m.content })));
       setLoadingHistory(false);
     }
     loadHistory();

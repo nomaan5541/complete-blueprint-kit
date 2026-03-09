@@ -42,7 +42,7 @@ export default function StudentPromotion() {
   const loadStudents = async () => {
     if (!fromYear || !fromClass) { toast.error("Select source year and class"); return; }
     const { data } = await supabase.from("students")
-      .select("id, name, admission_number, student_master_id, sections(name)")
+      .select("id, name, admission_number, student_master_id, user_id, sections(name)")
       .eq("school_id", schoolId!).eq("academic_year_id", fromYear).eq("class_id", fromClass).eq("status", "active").order("name");
     setStudents(data || []);
     setSelectedStudents(new Set((data || []).map((s: any) => s.id)));
@@ -99,11 +99,17 @@ export default function StudentPromotion() {
         city: personalData.city || null,
         state: personalData.state || null,
         pincode: personalData.pincode || null,
+        photo_url: personalData.photo_url || null,
         class_id: toClass,
         student_master_id: s.student_master_id,
+        user_id: s.user_id || null,
         status: "active",
       });
-      if (!error) successCount++;
+      if (error) {
+        console.error(`Failed to promote ${s.name}:`, error.message);
+      } else {
+        successCount++;
+      }
     }
 
     toast.success(`${successCount} students promoted`);

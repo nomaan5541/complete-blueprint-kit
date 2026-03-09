@@ -408,7 +408,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Simple, Transparent Pricing</h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Choose the plan that fits your school. All plans include free setup & onboarding.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {plans.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-3" />

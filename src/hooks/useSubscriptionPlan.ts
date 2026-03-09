@@ -132,6 +132,7 @@ function getPlanTier(planName: string | null): PlanTier {
   const lower = planName.toLowerCase();
   if (lower.includes("ultimate")) return "ultimate";
   if (lower.includes("professional") || lower.includes("pro")) return "professional";
+  if (lower.includes("trial") || lower.includes("free")) return "trial";
   if (lower.includes("starter") || lower.includes("basic")) return "starter";
   return "starter";
 }

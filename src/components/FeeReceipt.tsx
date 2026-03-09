@@ -348,29 +348,35 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
               overflow: "hidden",
               margin: "10px 0",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
-                <span style={{ color: "#b0a48a" }}>Total Fee</span>
-                <span style={{ color: "#e8e0d4", fontWeight: 600 }}>₹{totalFee.toLocaleString()}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
-                <span style={{ color: "#b0a48a" }}>Previous Due</span>
-                <span style={{ color: previousDue > 0 ? "#f87171" : "#e8e0d4", fontWeight: 600 }}>₹{Math.max(0, previousDue).toLocaleString()}</span>
-              </div>
+              {showFullBreakdown && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
+                    <span style={{ color: "#b0a48a" }}>Total Fee</span>
+                    <span style={{ color: "#e8e0d4", fontWeight: 600 }}>₹{totalFee.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12, borderBottom: "1px solid #2a2015" }}>
+                    <span style={{ color: "#b0a48a" }}>Previous Due</span>
+                    <span style={{ color: previousDue > 0 ? "#f87171" : "#e8e0d4", fontWeight: 600 }}>₹{Math.max(0, previousDue).toLocaleString()}</span>
+                  </div>
+                </>
+              )}
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "10px 14px",
                 fontSize: 14,
-                borderBottom: "1px solid #2a2015",
+                borderBottom: showFullBreakdown ? "1px solid #2a2015" : "none",
                 background: "rgba(139, 105, 20, 0.15)",
               }}>
                 <span style={{ color: "#e8e0d4", fontWeight: "bold" }}>Amount Paid</span>
                 <span style={{ color: "#4ade80", fontWeight: "bold", fontSize: 16 }}>₹{amountPaid.toLocaleString()}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12 }}>
-                <span style={{ color: "#b0a48a" }}>Remaining Due</span>
-                <span style={{ color: remainingDue > 0 ? "#f87171" : "#4ade80", fontWeight: 600 }}>₹{Math.max(0, remainingDue).toLocaleString()}</span>
-              </div>
+              {showFullBreakdown && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 14px", fontSize: 12 }}>
+                  <span style={{ color: "#b0a48a" }}>Remaining Due</span>
+                  <span style={{ color: remainingDue > 0 ? "#f87171" : "#4ade80", fontWeight: 600 }}>₹{Math.max(0, remainingDue).toLocaleString()}</span>
+                </div>
+              )}
             </div>
 
             {/* Notes */}

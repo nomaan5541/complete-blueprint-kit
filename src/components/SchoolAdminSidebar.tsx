@@ -42,7 +42,7 @@ const navItems = [
   { title: "Calendar", url: "/school/calendar", icon: CalendarDays },
   { title: "Meetings", url: "/school/meetings", icon: Video, comingSoon: true },
   { title: "Audit Logs", url: "/school/audit-logs", icon: Shield },
-  { title: "Restore Backup", url: "/school/backup-restore", icon: DatabaseBackup },
+  { title: "Restore Backup", url: "/school/backup-restore", icon: HardDriveUpload },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
 

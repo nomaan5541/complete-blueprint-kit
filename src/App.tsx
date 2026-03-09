@@ -82,6 +82,7 @@ import StudentIDCardPage from "./pages/student/StudentIDCard";
 import StudentStudyMaterialsPage from "./pages/student/StudentStudyMaterials";
 import StudentOnlineExamsPage from "./pages/student/StudentOnlineExams";
 import StudentMeetings from "./pages/student/StudentMeetings";
+import StudentAIChatPage from "./pages/student/StudentAIChat";
 
 const queryClient = new QueryClient();
 

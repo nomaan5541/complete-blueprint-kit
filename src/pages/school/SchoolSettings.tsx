@@ -43,6 +43,11 @@ export default function SchoolSettings() {
   const [backupProgress, setBackupProgress] = useState<BackupProgress | null>(null);
   const [renewalSent, setRenewalSent] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
+  
+  // Payment config state
+  const [paymentConfig, setPaymentConfig] = useState({ stripe_publishable_key: "", stripe_secret_key: "", payment_enabled: false });
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
 
   useEffect(() => {
     if (!schoolId) return;

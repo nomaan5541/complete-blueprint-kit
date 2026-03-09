@@ -214,10 +214,11 @@ export default function SchoolSettings() {
       </div>
 
       <Tabs defaultValue={subscriptionExpired ? "subscription" : "info"}>
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="info"><School className="mr-2 h-4 w-4" />School Info</TabsTrigger>
           <TabsTrigger value="grades">Grade System</TabsTrigger>
           <TabsTrigger value="sms"><MessageSquare className="mr-2 h-4 w-4" />SMS / WhatsApp</TabsTrigger>
+          <TabsTrigger value="payment"><Wallet className="mr-2 h-4 w-4" />Payment API</TabsTrigger>
           <TabsTrigger value="backup"><HardDrive className="mr-2 h-4 w-4" />Data Backup</TabsTrigger>
           <TabsTrigger value="credentials"><KeyRound className="mr-2 h-4 w-4" />Credentials</TabsTrigger>
           <TabsTrigger value="subscription" className={subscriptionExpired ? "text-destructive" : ""}>

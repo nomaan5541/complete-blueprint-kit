@@ -57,11 +57,40 @@ serve(async (req) => {
       .update({ school_id: schoolId, full_name: fullName || "" })
       .eq("user_id", userId);
 
-    // Link to teacher or student record
+    // Link to teacher or student record - with school ownership validation
     if (role === "teacher" && teacherId) {
+      // Validate teacher belongs to the specified school
+      const { data: teacher, error: teacherErr } = await supabaseAdmin
+        .from("teachers")
+        .select("school_id")
+        .eq("id", teacherId)
+        .single();
+      
+      if (teacherErr || !teacher) {
+        throw new Error("Teacher not found");
+      }
+      if (teacher.school_id !== schoolId) {
+        throw new Error("Teacher does not belong to this school");
+      }
+      
       await supabaseAdmin.from("teachers").update({ user_id: userId }).eq("id", teacherId);
     }
+    
     if (role === "student" && studentId) {
+      // Validate student belongs to the specified school
+      const { data: student, error: studentErr } = await supabaseAdmin
+        .from("students")
+        .select("school_id")
+        .eq("id", studentId)
+        .single();
+      
+      if (studentErr || !student) {
+        throw new Error("Student not found");
+      }
+      if (student.school_id !== schoolId) {
+        throw new Error("Student does not belong to this school");
+      }
+      
       await supabaseAdmin.from("students").update({ user_id: userId }).eq("id", studentId);
       await supabaseAdmin.from("student_master").update({ user_id: userId }).eq("id", studentId);
     }

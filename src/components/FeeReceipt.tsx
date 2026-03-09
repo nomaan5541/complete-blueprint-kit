@@ -407,11 +407,21 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: "flex", gap: 8, padding: "12px 16px", justifyContent: "center" }}>
+        {/* Receipt Options */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "12px 16px" }}>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="showFullBreakdown"
+              checked={showFullBreakdown}
+              onCheckedChange={(checked) => setShowFullBreakdown(checked === true)}
+            />
+            <Label htmlFor="showFullBreakdown" className="text-sm text-muted-foreground cursor-pointer">
+              Show total fee, dues & remaining balance on receipt
+            </Label>
+          </div>
           <Button
             onClick={handlePrint}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
           >
             <Printer className="mr-2 h-4 w-4" />
             PRINT / DOWNLOAD PDF

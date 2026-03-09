@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus } from "lucide-react";
+import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus, ScanFace } from "lucide-react";
 import StudentFormTabs, { emptyStudentForm, type StudentFormData } from "@/components/students/StudentFormTabs";
+import { FaceEnrollment } from "@/components/FaceEnrollment";
 
 export default function Students() {
   const navigate = useNavigate();

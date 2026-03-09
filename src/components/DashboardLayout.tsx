@@ -9,12 +9,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <div className="min-h-screen flex w-full relative overflow-x-hidden max-w-[100vw]">
         <div className="animated-bg" />
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 relative">
           <header className="h-14 flex items-center justify-between border-b border-border/50 glass-subtle px-4 sticky top-0 z-30">
             <SidebarTrigger className="mr-4" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden">
             {children}
           </main>
         </div>

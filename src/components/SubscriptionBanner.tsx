@@ -28,7 +28,7 @@ export function SubscriptionBanner() {
   }
 
   return (
-    <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2.5 flex items-center gap-3 text-sm">
+    <div className="sticky top-0 z-40 bg-destructive/10 border-b border-destructive/30 text-destructive px-4 py-2.5 flex items-center gap-3 text-sm">
       {icon}
       <span className="font-medium">{message}</span>
     </div>

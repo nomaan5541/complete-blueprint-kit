@@ -140,6 +140,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/students/import" element={<BulkStudentImport />} />
         <Route path="/students/transfer" element={<StudentTransfer />} />
         <Route path="/promotion" element={<StudentPromotion />} />
+        <Route path="/archive" element={<StudentArchive />} />
         <Route path="/fees/dues" element={<FeeDues />} />
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/attendance" element={<Attendance />} />

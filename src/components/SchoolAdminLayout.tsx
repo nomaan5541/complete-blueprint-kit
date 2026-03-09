@@ -29,7 +29,6 @@ export function SchoolAdminLayout({ children }: { children: ReactNode }) {
               </ReadOnlyOverlay>
             </main>
           </div>
-          </div>
         </div>
       </SidebarProvider>
     </AcademicYearProvider>

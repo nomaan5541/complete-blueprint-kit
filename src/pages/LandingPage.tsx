@@ -418,15 +418,16 @@ export default function LandingPage() {
               plans.map((plan, planIndex) => {
                 const isUltimate = plan.name?.toLowerCase() === "ultimate";
                 const isProfessional = plan.name?.toLowerCase() === "professional";
+                const isTrial = plan.name?.toLowerCase().includes("trial") || plan.name?.toLowerCase().includes("free");
                 const planFeatures = Array.isArray(plan.features) ? plan.features : [];
                 
-                const offerTag = isUltimate ? "BEST VALUE" : isProfessional ? "MOST POPULAR" : "GREAT START";
-                const originalPrice = isUltimate ? 29999 : isProfessional ? 14999 : 7999;
+                const offerTag = isTrial ? "FREE 30 DAYS" : isUltimate ? "BEST VALUE" : isProfessional ? "MOST POPULAR" : "GREAT START";
+                const originalPrice = isTrial ? 0 : isUltimate ? 29999 : isProfessional ? 14999 : 7999;
                 const savings = originalPrice - Number(plan.price);
-                const discount = Math.round((savings / originalPrice) * 100);
-                const monthlyPrice = Math.round(Number(plan.price) / (plan.duration_months || 12));
+                const discount = originalPrice > 0 ? Math.round((savings / originalPrice) * 100) : 0;
+                const monthlyPrice = isTrial ? 0 : Math.round(Number(plan.price) / (plan.duration_months || 12));
 
-                const tierKey = isUltimate ? "ultimate" : isProfessional ? "professional" : "starter";
+                const tierKey = isTrial ? "trial" : isUltimate ? "ultimate" : isProfessional ? "professional" : "starter";
                 const includedCount = PLAN_FEATURE_LABELS.filter(f => f[tierKey as keyof typeof f]).length;
                 const lockedCount = PLAN_FEATURE_LABELS.length - includedCount;
 
@@ -434,7 +435,9 @@ export default function LandingPage() {
                   <Card
                     key={plan.id}
                     className={`relative overflow-hidden transition-all duration-500 hover:-translate-y-2 group ${
-                      isUltimate
+                      isTrial
+                        ? "border-2 border-emerald-400/60 shadow-lg bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-cyan-950/20"
+                        : isUltimate
                         ? "border-2 border-amber-400/60 shadow-2xl scale-[1.04] bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:via-yellow-950/30 dark:to-orange-950/20 glow-amber"
                         : isProfessional
                         ? "border-2 border-primary shadow-xl scale-[1.02] glow-primary"
@@ -444,109 +447,153 @@ export default function LandingPage() {
                   >
                     {/* Animated bg pattern */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                      <div className={`absolute inset-0 ${isUltimate ? "bg-gradient-to-br from-amber-500/5 to-orange-500/5" : "bg-gradient-to-br from-primary/5 to-accent/5"}`} />
+                      <div className={`absolute inset-0 ${isTrial ? "bg-gradient-to-br from-emerald-500/5 to-teal-500/5" : isUltimate ? "bg-gradient-to-br from-amber-500/5 to-orange-500/5" : "bg-gradient-to-br from-primary/5 to-accent/5"}`} />
                     </div>
 
                     {/* Offer ribbon */}
-                    <div className={`absolute top-0 right-0 px-4 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1.5 shadow-lg ${
-                      isUltimate
+                    <div className={`absolute top-0 right-0 px-3 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1 shadow-lg ${
+                      isTrial
+                        ? "bg-gradient-to-l from-emerald-500 to-teal-500 text-white"
+                        : isUltimate
                         ? "bg-gradient-to-l from-yellow-500 to-amber-500 text-white"
                         : isProfessional
                         ? "bg-primary text-primary-foreground"
                         : "bg-emerald-500 text-white"
                     }`}>
+                      {isTrial && <Gift className="h-3 w-3" />}
                       {isUltimate && <Crown className="h-3.5 w-3.5" />}
                       {isProfessional && <Star className="h-3 w-3" />}
-                      {!isUltimate && !isProfessional && <Zap className="h-3 w-3" />}
+                      {!isTrial && !isUltimate && !isProfessional && <Zap className="h-3 w-3" />}
                       {offerTag}
                     </div>
 
-                    <CardHeader className="pb-4 pt-8 relative">
-                      <CardTitle className={`text-xl ${isUltimate ? "text-amber-700 dark:text-amber-400 flex items-center gap-2" : ""}`}>
+                    <CardHeader className="pb-3 pt-8 relative">
+                      <CardTitle className={`text-lg ${
+                        isTrial ? "text-emerald-700 dark:text-emerald-400 flex items-center gap-2" :
+                        isUltimate ? "text-amber-700 dark:text-amber-400 flex items-center gap-2" : ""
+                      }`}>
+                        {isTrial && <Gift className="h-5 w-5" />}
                         {isUltimate && <Crown className="h-5 w-5" />}
                         {plan.name}
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground">{plan.description}</p>
+                      <p className="text-xs text-muted-foreground">{plan.description}</p>
                     </CardHeader>
-                    <CardContent className="space-y-6 relative">
+                    <CardContent className="space-y-4 relative">
                       {/* Pricing */}
                       <div>
-                        <div className="flex items-baseline gap-2">
-                          <span className={`text-4xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
-                            ₹{Number(plan.price).toLocaleString("en-IN")}
-                          </span>
-                          <span className="text-muted-foreground">/year</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-muted-foreground line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
-                          <Badge variant="secondary" className={`text-xs font-semibold ${
-                            isUltimate ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                          }`}>
-                            SAVE {discount}%
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">Just ₹{monthlyPrice.toLocaleString("en-IN")}/month</p>
+                        {isTrial ? (
+                          <>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">FREE</span>
+                            </div>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1 flex items-center gap-1">
+                              <Timer className="h-3 w-3" /> 30 days · No credit card needed
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-baseline gap-2">
+                              <span className={`text-3xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
+                                ₹{Number(plan.price).toLocaleString("en-IN")}
+                              </span>
+                              <span className="text-muted-foreground text-sm">/yr</span>
+                            </div>
+                            {discount > 0 && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-muted-foreground line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
+                                <Badge variant="secondary" className={`text-[10px] font-semibold ${
+                                  isUltimate ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                }`}>
+                                  SAVE {discount}%
+                                </Badge>
+                              </div>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">₹{monthlyPrice.toLocaleString("en-IN")}/mo</p>
+                          </>
+                        )}
                       </div>
 
                       {/* Limits */}
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-1.5 text-xs">
                         {plan.max_students ? (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isTrial ? "text-emerald-500" : isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_students.toLocaleString()} students
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                          <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                            <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Unlimited students
                           </div>
                         )}
                         {plan.max_teachers ? (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isTrial ? "text-emerald-500" : isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_teachers} teachers
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                          <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                            <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Unlimited teachers
                           </div>
                         )}
                       </div>
 
                       {/* Feature summary */}
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-foreground font-medium">
-                          <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex items-center gap-1.5 text-foreground font-medium">
+                          <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isTrial ? "text-emerald-500" : isUltimate ? "text-amber-500" : "text-primary"}`} />
                           {includedCount} features included
                         </div>
                         {lockedCount > 0 && (
-                          <div className="flex items-center gap-2 text-muted-foreground/60">
-                            <Lock className="h-4 w-4 shrink-0" />
+                          <div className="flex items-center gap-1.5 text-muted-foreground/60">
+                            <Lock className="h-3.5 w-3.5 shrink-0" />
                             {lockedCount} features locked
                           </div>
                         )}
-                        {planFeatures.slice(0, 4).map((feat: string, fi: number) => (
-                          <div key={fi} className="flex items-center gap-2 text-muted-foreground">
-                            <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                        {planFeatures.slice(0, 3).map((feat: string, fi: number) => (
+                          <div key={fi} className="flex items-center gap-1.5 text-muted-foreground">
+                            <CheckCircle className={`h-3.5 w-3.5 shrink-0 ${isTrial ? "text-emerald-500" : isUltimate ? "text-amber-500" : "text-primary"}`} />
                             {feat}
                           </div>
                         ))}
-                        {planFeatures.length > 4 && (
-                          <p className="text-xs text-muted-foreground pl-6">+ {planFeatures.length - 4} more...</p>
+                        {planFeatures.length > 3 && (
+                          <p className="text-[10px] text-muted-foreground pl-5">+ {planFeatures.length - 3} more...</p>
                         )}
                       </div>
 
+                      {isTrial && (
+                        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-2.5 space-y-1.5">
+                          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                            <Sparkles className="h-3 w-3" /> Bonus Trial Features
+                          </p>
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 space-y-1">
+                            <div className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Teacher Management</div>
+                            <div className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Exams & Results</div>
+                            <div className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Report Card Generation</div>
+                          </div>
+                        </div>
+                      )}
+
                       <Button
-                        className={`w-full group/btn hover:scale-[1.02] transition-all duration-300 ${isUltimate ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white border-0 shadow-lg" : ""}`}
-                        variant={isUltimate ? "default" : isProfessional ? "default" : "outline"}
+                        className={`w-full group/btn hover:scale-[1.02] transition-all duration-300 text-sm ${
+                          isTrial ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg" :
+                          isUltimate ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white border-0 shadow-lg" : ""
+                        }`}
+                        variant={isTrial ? "default" : isUltimate ? "default" : isProfessional ? "default" : "outline"}
                         onClick={() => { setSelectedPlan(plan); setRequestOpen(true); }}
                       >
-                        {isUltimate ? "Get Ultimate Access" : isProfessional ? "Choose Professional" : "Get Started"} <ChevronRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                        {isTrial ? "Start Free Trial" : isUltimate ? "Get Ultimate" : isProfessional ? "Choose Pro" : "Get Started"} 
+                        <ChevronRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
 
+                      {isTrial && (
+                        <p className="text-center text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                          🚀 Auto-expires after 30 days · Upgrade anytime
+                        </p>
+                      )}
                       {isUltimate && (
-                        <p className="text-center text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        <p className="text-center text-[10px] text-amber-600 dark:text-amber-400 font-medium">
                           ⚡ Most schools choose this plan
                         </p>
                       )}

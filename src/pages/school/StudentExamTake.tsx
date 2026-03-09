@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Loader2, Clock, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Clock, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, XCircle, Camera, CameraOff, Eye, ShieldAlert } from "lucide-react";
+
+const MAX_TAB_SWITCHES = 3;
 
 export default function StudentExamTake() {
   const { user } = useAuth();
@@ -27,38 +29,42 @@ export default function StudentExamTake() {
   const [student, setStudent] = useState<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Anti-cheat state
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showTabWarning, setShowTabWarning] = useState(false);
+  const [webcamActive, setWebcamActive] = useState(false);
+  const [webcamDenied, setWebcamDenied] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const tabSwitchRef = useRef(0);
+
   // Load exam data
   useEffect(() => {
     if (!examId || !user) return;
     async function load() {
-      // Get student record
       const { data: stud } = await supabase.from("students")
         .select("id").eq("user_id", user!.id).eq("status", "active").maybeSingle();
       if (!stud) { toast.error("No student record found"); setLoading(false); return; }
       setStudent(stud);
 
-      // Get exam
       const { data: examData } = await supabase.from("exams")
         .select("*, subjects(name), classes(name)").eq("id", examId).single();
       if (!examData) { toast.error("Exam not found"); setLoading(false); return; }
       setExam(examData);
 
-      // Check for existing attempt
       const { data: existingAttempt } = await supabase.from("student_exam_attempts" as any)
         .select("*").eq("exam_id", examId).eq("student_id", stud.id).maybeSingle();
 
       if (existingAttempt && (existingAttempt as any).status === "completed") {
-        // Show results
         await loadResult(stud.id, (existingAttempt as any).id);
         setLoading(false);
         return;
       }
 
-      // Load questions with options (using view that hides is_correct)
       const { data: qData } = await supabase.from("exam_questions" as any)
         .select("*, exam_options_student(*)").eq("exam_id", examId).order("order_number");
       
-      // Shuffle questions and options for anti-cheat
       const shuffled = shuffleArray(qData || []).map((q: any) => ({
         ...q, exam_options: shuffleArray(q.exam_options_student || q.exam_options || []),
       }));
@@ -66,13 +72,11 @@ export default function StudentExamTake() {
 
       if (existingAttempt) {
         setAttempt(existingAttempt);
-        // Load existing answers
         const { data: ansData } = await supabase.from("student_answers" as any)
           .select("*").eq("attempt_id", (existingAttempt as any).id);
         const ansMap: Record<string, string> = {};
         (ansData || []).forEach((a: any) => { ansMap[a.question_id] = a.selected_option_id; });
         setAnswers(ansMap);
-        // Calculate remaining time
         const elapsed = (Date.now() - new Date((existingAttempt as any).start_time).getTime()) / 1000;
         const duration = ((examData as any).duration_minutes || 60) * 60;
         setTimeLeft(Math.max(0, Math.floor(duration - elapsed)));
@@ -112,6 +116,84 @@ export default function StudentExamTake() {
     };
   }, []);
 
+  // Tab switching detection
+  useEffect(() => {
+    if (!attempt || result) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        tabSwitchRef.current += 1;
+        const count = tabSwitchRef.current;
+        setTabSwitchCount(count);
+        setShowTabWarning(true);
+
+        if (count >= MAX_TAB_SWITCHES) {
+          toast.error("Maximum tab switches exceeded! Exam auto-submitted.");
+          handleSubmit(true);
+        } else {
+          toast.error(`Warning: Tab switch detected (${count}/${MAX_TAB_SWITCHES}). Exam will auto-submit after ${MAX_TAB_SWITCHES} switches.`);
+        }
+      }
+    };
+
+    const handleBlur = () => {
+      if (attempt && !result) {
+        // Additional blur detection for cases where visibilitychange doesn't fire
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [attempt, result]);
+
+  // Webcam setup
+  const startWebcam = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240, facingMode: "user" },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setWebcamActive(true);
+      setCameraReady(true);
+      setWebcamDenied(false);
+    } catch (err) {
+      console.error("Webcam access denied:", err);
+      setWebcamDenied(true);
+      setWebcamActive(false);
+      toast.error("Camera access denied. Your exam session will still be monitored for tab switches.");
+    }
+  };
+
+  const stopWebcam = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setWebcamActive(false);
+    setCameraReady(false);
+  };
+
+  // Cleanup webcam on unmount
+  useEffect(() => {
+    return () => { stopWebcam(); };
+  }, []);
+
+  // Start webcam when exam starts
+  useEffect(() => {
+    if (attempt && !result) {
+      startWebcam();
+    }
+  }, [attempt, result]);
+
   const shuffleArray = (arr: any[]) => {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -134,7 +216,6 @@ export default function StudentExamTake() {
   const selectOption = async (questionId: string, optionId: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: optionId }));
     if (!attempt) return;
-    // Save answer
     await supabase.from("student_answers" as any).upsert({
       attempt_id: (attempt as any).id,
       question_id: questionId,
@@ -147,9 +228,9 @@ export default function StudentExamTake() {
     if (!autoSubmit && !confirm("Are you sure you want to submit? You cannot change answers after submission.")) return;
     setSubmitting(true);
     if (timerRef.current) clearInterval(timerRef.current);
+    stopWebcam();
 
     try {
-      // Save any remaining answers
       for (const q of questions) {
         const selectedOptionId = answers[q.id];
         if (selectedOptionId) {
@@ -161,7 +242,6 @@ export default function StudentExamTake() {
         }
       }
 
-      // Submit exam via server-side scoring function
       const { data: result, error } = await supabase.rpc("submit_exam", {
         p_attempt_id: (attempt as any).id,
       });
@@ -235,6 +315,12 @@ export default function StudentExamTake() {
               <Badge variant="outline" className="bg-destructive/10 text-destructive px-3 py-1">✗ Wrong: {result.wrong}</Badge>
               <Badge variant="outline" className="px-3 py-1">Unanswered: {questions.length - result.totalQuestions}</Badge>
             </div>
+            {tabSwitchCount > 0 && (
+              <div className="rounded-lg border border-warning/30 bg-warning/5 p-3 text-center text-sm">
+                <ShieldAlert className="h-4 w-4 inline mr-1 text-warning" />
+                Tab switches detected: {tabSwitchCount}
+              </div>
+            )}
             <Button className="w-full" onClick={() => navigate("/student")}>Back to Portal</Button>
           </CardContent>
         </Card>
@@ -274,17 +360,30 @@ export default function StudentExamTake() {
             <div className="p-3 rounded-lg border border-warning/30 bg-warning/5 flex items-start gap-2 text-sm">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium">Important:</p>
+                <p className="font-medium">Anti-Cheat Monitoring Active:</p>
                 <ul className="list-disc list-inside text-muted-foreground space-y-0.5 mt-1">
                   <li>Do not refresh the page during exam</li>
                   <li>Exam will auto-submit when time expires</li>
                   <li>Copy-paste is disabled</li>
+                  <li>Tab switching is monitored — max {MAX_TAB_SWITCHES} switches allowed</li>
+                  <li>Webcam will be activated for proctoring</li>
                   <li>Each question has only one correct answer</li>
                 </ul>
               </div>
             </div>
 
-            <Button className="w-full" size="lg" onClick={startExam}>Start Exam</Button>
+            <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 flex items-center gap-3 text-sm">
+              <Camera className="h-5 w-5 text-primary shrink-0" />
+              <div>
+                <p className="font-medium">Camera Permission Required</p>
+                <p className="text-muted-foreground">Your webcam will be turned on when the exam starts for monitoring. Please allow camera access when prompted.</p>
+              </div>
+            </div>
+
+            <Button className="w-full" size="lg" onClick={startExam}>
+              <Eye className="mr-2 h-4 w-4" />
+              Start Exam
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -299,11 +398,61 @@ export default function StudentExamTake() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 py-4 select-none" onCopy={e => e.preventDefault()}>
-      {/* Header */}
+      {/* Tab Switch Warning Overlay */}
+      {showTabWarning && (
+        <div className="fixed inset-0 z-50 bg-background/95 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full border-destructive">
+            <CardContent className="pt-6 text-center space-y-4">
+              <ShieldAlert className="h-16 w-16 text-destructive mx-auto" />
+              <h2 className="text-xl font-bold text-destructive">Tab Switch Detected!</h2>
+              <p className="text-muted-foreground">
+                You switched away from the exam tab. This is considered a violation of exam integrity.
+              </p>
+              <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-3">
+                <p className="text-lg font-bold text-destructive">{tabSwitchCount} / {MAX_TAB_SWITCHES}</p>
+                <p className="text-xs text-muted-foreground">Tab switches used. Exam auto-submits at {MAX_TAB_SWITCHES}.</p>
+              </div>
+              <Button onClick={() => setShowTabWarning(false)} className="w-full">
+                Return to Exam
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Header with webcam */}
       <div className="flex items-center justify-between p-3 rounded-lg border bg-card sticky top-0 z-10">
-        <div>
-          <p className="font-semibold text-sm">{exam.name}</p>
-          <p className="text-xs text-muted-foreground">Q {currentQ + 1} / {questions.length}</p>
+        <div className="flex items-center gap-3">
+          {/* Webcam feed */}
+          <div className="relative shrink-0">
+            <div className="w-16 h-12 rounded-lg overflow-hidden border-2 border-primary/30 bg-black">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover mirror"
+                style={{ transform: "scaleX(-1)" }}
+              />
+            </div>
+            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border border-background ${webcamActive ? "bg-success animate-pulse" : "bg-destructive"}`} />
+            {webcamDenied && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-lg">
+                <CameraOff className="h-4 w-4 text-destructive" />
+              </div>
+            )}
+          </div>
+          <div>
+            <p className="font-semibold text-sm">{exam.name}</p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Q {currentQ + 1} / {questions.length}</span>
+              {tabSwitchCount > 0 && (
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                  ⚠ {tabSwitchCount} switch{tabSwitchCount > 1 ? "es" : ""}
+                </Badge>
+              )}
+            </div>
+          </div>
         </div>
         <div className={`flex items-center gap-1.5 font-mono text-lg font-bold ${isUrgent ? "text-destructive animate-pulse" : "text-foreground"}`}>
           <Clock className="h-4 w-4" />

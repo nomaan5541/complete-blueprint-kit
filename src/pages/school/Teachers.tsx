@@ -275,7 +275,7 @@ export default function Teachers() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Edit Teacher</DialogTitle></DialogHeader>
-          <TeacherFormFields />
+          {teacherFormFields}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
             <Button onClick={handleEdit} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save Changes</Button>

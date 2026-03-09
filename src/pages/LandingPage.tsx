@@ -13,9 +13,10 @@ import {
   GraduationCap, Users, BookOpen, Calendar, BarChart3, Shield,
   Bell, ClipboardList, CreditCard, Clock, CheckCircle, Star,
   School, UserCheck, Crown, ChevronRight, Loader2, ArrowRight,
-  Smartphone, Globe, Zap, Award, FileText, Settings
+  Smartphone, Globe, Zap, Award, FileText, Settings, X, Lock,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PLAN_FEATURE_LABELS } from "@/hooks/useSubscriptionPlan";
 
 const features = [
   { icon: School, title: "Multi-School Management", desc: "Manage unlimited schools from a single dashboard with complete isolation." },
@@ -40,6 +41,7 @@ export default function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ school_name: "", contact_name: "", email: "", phone: "", message: "" });
   const [crownClicks, setCrownClicks] = useState(0);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     supabase.from("subscription_plans").select("*").eq("is_active", true).order("price").then(({ data }) => {
@@ -190,23 +192,26 @@ export default function LandingPage() {
                 Loading plans...
               </div>
             ) : (
-              plans.map((plan, i) => {
+              plans.map((plan) => {
                 const isUltimate = plan.name?.toLowerCase() === "ultimate";
                 const isProfessional = plan.name?.toLowerCase() === "professional";
                 const planFeatures = Array.isArray(plan.features) ? plan.features : [];
                 
-                // Offer tags
                 const offerTag = isUltimate
                   ? "BEST VALUE"
                   : isProfessional
                   ? "MOST POPULAR"
                   : "GREAT START";
                 
-                // Original prices (for strike-through)
                 const originalPrice = isUltimate ? 29999 : isProfessional ? 14999 : 7999;
                 const savings = originalPrice - Number(plan.price);
                 const discount = Math.round((savings / originalPrice) * 100);
                 const monthlyPrice = Math.round(Number(plan.price) / (plan.duration_months || 12));
+
+                // Get feature counts for this plan tier
+                const tierKey = isUltimate ? "ultimate" : isProfessional ? "professional" : "starter";
+                const includedCount = PLAN_FEATURE_LABELS.filter(f => f[tierKey as keyof typeof f]).length;
+                const lockedCount = PLAN_FEATURE_LABELS.length - includedCount;
 
                 return (
                   <Card
@@ -262,38 +267,53 @@ export default function LandingPage() {
                         </p>
                       </div>
 
-                      {/* Features */}
+                      {/* Student/Teacher limits */}
                       <div className="space-y-2 text-sm">
-                        {plan.max_students && (
+                        {plan.max_students ? (
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_students.toLocaleString()} students
                           </div>
-                        )}
-                        {!plan.max_students && (
+                        ) : (
                           <div className="flex items-center gap-2 text-muted-foreground font-medium">
                             <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Unlimited students
                           </div>
                         )}
-                        {plan.max_teachers && (
+                        {plan.max_teachers ? (
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Up to {plan.max_teachers} teachers
                           </div>
-                        )}
-                        {!plan.max_teachers && (
+                        ) : (
                           <div className="flex items-center gap-2 text-muted-foreground font-medium">
                             <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             Unlimited teachers
                           </div>
                         )}
-                        {planFeatures.map((feat: string, fi: number) => (
+                      </div>
+
+                      {/* Feature summary */}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-foreground font-medium">
+                          <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
+                          {includedCount} features included
+                        </div>
+                        {lockedCount > 0 && (
+                          <div className="flex items-center gap-2 text-muted-foreground/60">
+                            <Lock className="h-4 w-4 shrink-0" />
+                            {lockedCount} features locked
+                          </div>
+                        )}
+                        {planFeatures.slice(0, 4).map((feat: string, fi: number) => (
                           <div key={fi} className="flex items-center gap-2 text-muted-foreground">
                             <CheckCircle className={`h-4 w-4 shrink-0 ${isUltimate ? "text-amber-500" : "text-primary"}`} />
                             {feat}
                           </div>
                         ))}
+                        {planFeatures.length > 4 && (
+                          <p className="text-xs text-muted-foreground pl-6">+ {planFeatures.length - 4} more...</p>
+                        )}
                       </div>
 
                       <Button
@@ -309,9 +329,16 @@ export default function LandingPage() {
               })
             )}
           </div>
+
+          {/* Compare plans button */}
+          <div className="text-center mt-8">
+            <Button variant="outline" size="lg" onClick={() => setShowComparison(true)} className="gap-2">
+              <BarChart3 className="h-4 w-4" /> Compare All Features
+            </Button>
+          </div>
           
           {/* Trust badge */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-8">
             <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
               <Shield className="h-4 w-4 text-primary" />
               30-day money-back guarantee · Free setup & training · No hidden charges
@@ -319,6 +346,78 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Feature Comparison Table */}
+      <Dialog open={showComparison} onOpenChange={setShowComparison}>
+        <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" /> Feature Comparison
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-2 font-semibold text-foreground">Feature</th>
+                  <th className="text-center py-3 px-2 font-semibold text-foreground">
+                    <div className="flex flex-col items-center gap-1">
+                      <Zap className="h-4 w-4 text-emerald-500" />
+                      Starter
+                    </div>
+                  </th>
+                  <th className="text-center py-3 px-2 font-semibold text-primary">
+                    <div className="flex flex-col items-center gap-1">
+                      <Star className="h-4 w-4" />
+                      Professional
+                    </div>
+                  </th>
+                  <th className="text-center py-3 px-2 font-semibold text-amber-600 dark:text-amber-400">
+                    <div className="flex flex-col items-center gap-1">
+                      <Crown className="h-4 w-4" />
+                      Ultimate
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {PLAN_FEATURE_LABELS.map((feature, idx) => (
+                  <tr key={idx} className={`border-b border-border/50 ${idx % 2 === 0 ? "bg-muted/20" : ""}`}>
+                    <td className="py-2.5 px-2 text-foreground">{feature.label}</td>
+                    <td className="text-center py-2.5 px-2">
+                      {feature.starter ? (
+                        <CheckCircle className="h-4 w-4 text-emerald-500 mx-auto" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground/30 mx-auto" />
+                      )}
+                    </td>
+                    <td className="text-center py-2.5 px-2">
+                      {feature.professional ? (
+                        <CheckCircle className="h-4 w-4 text-primary mx-auto" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground/30 mx-auto" />
+                      )}
+                    </td>
+                    <td className="text-center py-2.5 px-2">
+                      {feature.ultimate ? (
+                        <CheckCircle className="h-4 w-4 text-amber-500 mx-auto" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground/30 mx-auto" />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowComparison(false)}>Close</Button>
+            <Button onClick={() => { setShowComparison(false); setSelectedPlan(null); setRequestOpen(true); }}>
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Login Section */}
       <section id="login" className="py-20 sm:py-28">

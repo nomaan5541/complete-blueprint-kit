@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type PlanTier = "none" | "starter" | "professional" | "ultimate";
 
-// Features available per plan tier
+// Features available per plan tier - comprehensive mapping
 const PLAN_FEATURES: Record<PlanTier, string[]> = {
   none: [],
   starter: [
@@ -16,8 +16,8 @@ const PLAN_FEATURES: Record<PlanTier, string[]> = {
     "/school/attendance",
     "/school/fees",
     "/school/fees/dues",
-    "/school/reports",
     "/school/notifications",
+    "/school/reports",
     "/school/settings",
   ],
   professional: [
@@ -29,7 +29,9 @@ const PLAN_FEATURES: Record<PlanTier, string[]> = {
     "/school/students",
     "/school/students/import",
     "/school/students/transfer",
+    "/school/students/profile",
     "/school/promotion",
+    "/school/archive",
     "/school/teachers",
     "/school/attendance",
     "/school/exams",
@@ -41,6 +43,7 @@ const PLAN_FEATURES: Record<PlanTier, string[]> = {
     "/school/reports",
     "/school/documents",
     "/school/calendar",
+    "/school/meetings",
     "/school/settings",
   ],
   ultimate: [
@@ -52,11 +55,15 @@ const PLAN_FEATURES: Record<PlanTier, string[]> = {
     "/school/students",
     "/school/students/import",
     "/school/students/transfer",
+    "/school/students/profile",
     "/school/promotion",
+    "/school/archive",
     "/school/teachers",
     "/school/attendance",
+    "/school/face-attendance",
     "/school/exams",
     "/school/report-card",
+    "/school/ai-report-card",
     "/school/fees",
     "/school/fees/dues",
     "/school/timetable",
@@ -64,10 +71,43 @@ const PLAN_FEATURES: Record<PlanTier, string[]> = {
     "/school/reports",
     "/school/documents",
     "/school/calendar",
+    "/school/meetings",
     "/school/audit-logs",
+    "/school/backup-restore",
     "/school/settings",
+    "/school/setup",
   ],
 };
+
+// Human-readable feature labels for display on landing page
+export const PLAN_FEATURE_LABELS: { label: string; starter: boolean; professional: boolean; ultimate: boolean }[] = [
+  { label: "Academic Year Management", starter: true, professional: true, ultimate: true },
+  { label: "Classes & Sections", starter: true, professional: true, ultimate: true },
+  { label: "Subject Management", starter: true, professional: true, ultimate: true },
+  { label: "Student Management", starter: true, professional: true, ultimate: true },
+  { label: "Manual Attendance", starter: true, professional: true, ultimate: true },
+  { label: "Fee Management & Dues", starter: true, professional: true, ultimate: true },
+  { label: "Notifications", starter: true, professional: true, ultimate: true },
+  { label: "Basic Reports", starter: true, professional: true, ultimate: true },
+  { label: "School Settings", starter: true, professional: true, ultimate: true },
+  { label: "Bulk Student Import", starter: false, professional: true, ultimate: true },
+  { label: "Student Transfer/Leaving", starter: false, professional: true, ultimate: true },
+  { label: "Student Promotion", starter: false, professional: true, ultimate: true },
+  { label: "Student Archive", starter: false, professional: true, ultimate: true },
+  { label: "Teacher Management", starter: false, professional: true, ultimate: true },
+  { label: "Exams & Results", starter: false, professional: true, ultimate: true },
+  { label: "Report Card Generation", starter: false, professional: true, ultimate: true },
+  { label: "Timetable", starter: false, professional: true, ultimate: true },
+  { label: "Document Management", starter: false, professional: true, ultimate: true },
+  { label: "School Calendar", starter: false, professional: true, ultimate: true },
+  { label: "Online Meetings", starter: false, professional: true, ultimate: true },
+  { label: "AI Face Attendance", starter: false, professional: false, ultimate: true },
+  { label: "AI Report Card", starter: false, professional: false, ultimate: true },
+  { label: "Audit Logs", starter: false, professional: false, ultimate: true },
+  { label: "Backup & Restore", starter: false, professional: false, ultimate: true },
+  { label: "Advanced Analytics", starter: false, professional: false, ultimate: true },
+  { label: "Priority Support", starter: false, professional: false, ultimate: true },
+];
 
 // Map plan names to tiers
 function getPlanTier(planName: string | null): PlanTier {

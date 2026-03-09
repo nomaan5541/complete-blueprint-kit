@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, User, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine, Bell, BarChart3, Monitor, Video,
+  LayoutDashboard, User, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine, Bell, BarChart3, Monitor, Video, IdCard,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/NavLink";
@@ -25,6 +25,7 @@ const navItems = [
   { title: "Notifications", url: "/teacher/notifications", icon: Bell },
   { title: "Analytics", url: "/teacher/analytics", icon: BarChart3 },
   { title: "Meetings", url: "/teacher/meetings", icon: Video },
+  { title: "ID Card", url: "/teacher/id-card", icon: IdCard },
 ];
 
 export function TeacherSidebar() {

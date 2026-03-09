@@ -68,6 +68,7 @@ import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 import TeacherAnalytics from "./pages/teacher/TeacherAnalytics";
 import TeacherExamMonitor from "./pages/teacher/TeacherExamMonitor";
 import TeacherMeetings from "./pages/teacher/TeacherMeetings";
+import TeacherIDCard from "./pages/teacher/TeacherIDCard";
 
 // Student pages
 import StudentDashboardPage from "./pages/student/StudentDashboard";
@@ -171,6 +172,7 @@ function TeacherRoutesWrapper() {
         <Route path="/notifications" element={<TeacherNotifications />} />
         <Route path="/analytics" element={<TeacherAnalytics />} />
         <Route path="/meetings" element={<TeacherMeetings />} />
+        <Route path="/id-card" element={<TeacherIDCard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TeacherLayout>

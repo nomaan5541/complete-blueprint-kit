@@ -263,7 +263,7 @@ export default function Teachers() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Add Teacher</DialogTitle></DialogHeader>
-          <TeacherFormFields />
+          {teacherFormFields}
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Add Teacher</Button>

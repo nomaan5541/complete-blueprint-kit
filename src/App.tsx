@@ -54,6 +54,7 @@ import Meetings from "./pages/school/Meetings";
 import AuditLogs from "./pages/school/AuditLogs";
 import BackupRestore from "./pages/school/BackupRestore";
 import StudentExamTake from "./pages/school/StudentExamTake";
+import FaceAttendance from "./pages/school/FaceAttendance";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";

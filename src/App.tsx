@@ -25,6 +25,7 @@ import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import AIAnalytics from "./pages/AIAnalytics";
 
 // School Admin pages
 import SchoolDashboard from "./pages/school/SchoolDashboard";

@@ -1549,6 +1549,48 @@ export type Database = {
           },
         ]
       }
+      student_face_data: {
+        Row: {
+          created_at: string
+          face_descriptor: Json
+          id: string
+          school_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          face_descriptor: Json
+          id?: string
+          school_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          face_descriptor?: Json
+          id?: string
+          school_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_face_data_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_face_data_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_master: {
         Row: {
           address: string | null

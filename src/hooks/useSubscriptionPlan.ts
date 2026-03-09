@@ -6,6 +6,23 @@ export type PlanTier = "none" | "trial" | "starter" | "professional" | "ultimate
 // Features available per plan tier - comprehensive mapping
 const PLAN_FEATURES: Record<PlanTier, string[]> = {
   none: [],
+  trial: [
+    "/school",
+    "/school/academic-years",
+    "/school/classes",
+    "/school/subjects",
+    "/school/subject-mapping",
+    "/school/students",
+    "/school/attendance",
+    "/school/fees",
+    "/school/fees/dues",
+    "/school/notifications",
+    "/school/reports",
+    "/school/settings",
+    "/school/teachers",
+    "/school/exams",
+    "/school/report-card",
+  ],
   starter: [
     "/school",
     "/school/academic-years",

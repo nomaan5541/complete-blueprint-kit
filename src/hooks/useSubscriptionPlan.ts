@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type PlanTier = "none" | "starter" | "professional" | "ultimate";
+export type PlanTier = "none" | "trial" | "starter" | "professional" | "ultimate";
 
 // Features available per plan tier - comprehensive mapping
 const PLAN_FEATURES: Record<PlanTier, string[]> = {

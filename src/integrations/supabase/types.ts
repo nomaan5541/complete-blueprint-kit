@@ -790,6 +790,103 @@ export type Database = {
           },
         ]
       }
+      meetings: {
+        Row: {
+          academic_year_id: string
+          class_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          meet_link: string
+          scheduled_end: string | null
+          scheduled_start: string
+          school_id: string
+          section_id: string | null
+          status: string
+          subject_id: string | null
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id: string
+          class_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          meet_link: string
+          scheduled_end?: string | null
+          scheduled_start: string
+          school_id: string
+          section_id?: string | null
+          status?: string
+          subject_id?: string | null
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string
+          class_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          meet_link?: string
+          scheduled_end?: string | null
+          scheduled_start?: string
+          school_id?: string
+          section_id?: string | null
+          status?: string
+          subject_id?: string | null
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

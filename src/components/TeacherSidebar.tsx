@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, User, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine, Bell, BarChart3, Monitor, Video, IdCard,
+  LayoutDashboard, User, ClipboardCheck, FileText, Clock, GraduationCap, LogOut, School, BookOpen, PenLine, Bell, BarChart3, Monitor, Video, IdCard, FolderOpen,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/NavLink";
@@ -24,6 +24,7 @@ const navItems = [
   { title: "Timetable", url: "/teacher/timetable", icon: Clock },
   { title: "Notifications", url: "/teacher/notifications", icon: Bell },
   { title: "Analytics", url: "/teacher/analytics", icon: BarChart3 },
+  { title: "Study Materials", url: "/teacher/materials", icon: FolderOpen },
   { title: "Meetings", url: "/teacher/meetings", icon: Video },
   { title: "ID Card", url: "/teacher/id-card", icon: IdCard },
 ];

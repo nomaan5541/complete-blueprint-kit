@@ -141,20 +141,24 @@ export default function SetupWizard() {
         });
       }
 
-      // 5. Create default timetable slots
-      const defaultSlots = [
-        { name: "Period 1", start_time: "09:00", end_time: "09:45", slot_order: 0, is_break: false },
-        { name: "Period 2", start_time: "09:45", end_time: "10:30", slot_order: 1, is_break: false },
-        { name: "Period 3", start_time: "10:30", end_time: "11:15", slot_order: 2, is_break: false },
-        { name: "Break", start_time: "11:15", end_time: "11:30", slot_order: 3, is_break: true },
-        { name: "Period 4", start_time: "11:30", end_time: "12:15", slot_order: 4, is_break: false },
-        { name: "Period 5", start_time: "12:15", end_time: "13:00", slot_order: 5, is_break: false },
-        { name: "Lunch", start_time: "13:00", end_time: "13:45", slot_order: 6, is_break: true },
-        { name: "Period 6", start_time: "13:45", end_time: "14:30", slot_order: 7, is_break: false },
-        { name: "Period 7", start_time: "14:30", end_time: "15:15", slot_order: 8, is_break: false },
-      ];
-      for (const slot of defaultSlots) {
-        await supabase.from("timetable_slots").insert({ school_id: schoolId, ...slot });
+      // 5. Create default timetable slots (optional - table may not exist)
+      try {
+        const defaultSlots = [
+          { name: "Period 1", start_time: "09:00", end_time: "09:45", slot_order: 0, is_break: false },
+          { name: "Period 2", start_time: "09:45", end_time: "10:30", slot_order: 1, is_break: false },
+          { name: "Period 3", start_time: "10:30", end_time: "11:15", slot_order: 2, is_break: false },
+          { name: "Break", start_time: "11:15", end_time: "11:30", slot_order: 3, is_break: true },
+          { name: "Period 4", start_time: "11:30", end_time: "12:15", slot_order: 4, is_break: false },
+          { name: "Period 5", start_time: "12:15", end_time: "13:00", slot_order: 5, is_break: false },
+          { name: "Lunch", start_time: "13:00", end_time: "13:45", slot_order: 6, is_break: true },
+          { name: "Period 6", start_time: "13:45", end_time: "14:30", slot_order: 7, is_break: false },
+          { name: "Period 7", start_time: "14:30", end_time: "15:15", slot_order: 8, is_break: false },
+        ];
+        for (const slot of defaultSlots) {
+          await supabase.from("timetable_slots" as any).insert({ school_id: schoolId, ...slot } as any);
+        }
+      } catch {
+        // timetable_slots table may not exist yet - not critical
       }
 
       // 6. Create fee types if opted

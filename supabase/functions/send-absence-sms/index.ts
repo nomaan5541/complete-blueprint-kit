@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
       .from("students")
       .select("name, father_phone, father_name")
       .in("id", absent_student_ids)
+      .eq("school_id", school_id)
       .not("father_phone", "is", null);
 
     if (!students?.length) {

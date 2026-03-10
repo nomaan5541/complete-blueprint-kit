@@ -12,6 +12,11 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    }
+    
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify caller
@@ -49,23 +54,19 @@ serve(async (req) => {
     }
 
     // Get classes and sections for this school
-    const { data: classes } = await supabaseAdmin
-      .from("classes")
-      .select("id, name")
-      .eq("school_id", schoolId);
-    const { data: sections } = await supabaseAdmin
-      .from("sections")
-      .select("id, name, class_id")
-      .eq("school_id", schoolId);
+    const [classesRes, sectionsRes] = await Promise.all([
+      supabaseAdmin.from("classes").select("id, name").eq("school_id", schoolId),
+      supabaseAdmin.from("sections").select("id, name, class_id").eq("school_id", schoolId),
+    ]);
 
     // Build lookup maps
     const classMap = new Map<string, string>();
-    for (const c of classes || []) {
+    for (const c of classesRes.data || []) {
       classMap.set(c.name.toLowerCase(), c.id);
     }
 
     const sectionMap = new Map<string, string>();
-    for (const s of sections || []) {
+    for (const s of sectionsRes.data || []) {
       sectionMap.set(`${s.class_id}_${s.name.toLowerCase()}`, s.id);
     }
 
@@ -73,46 +74,43 @@ serve(async (req) => {
     const udiseClassMap: Record<string, string> = {
       "lkg/kg1/pre-school": "lkg",
       "ukg/kg2/pre-primary": "ukg",
-      "i": "1",
-      "ii": "2",
-      "iii": "3",
-      "iv": "4",
-      "v": "5",
-      "vi": "6",
-      "vii": "7",
-      "viii": "8",
-      "ix": "9",
-      "x": "10",
+      "i": "1", "ii": "2", "iii": "3", "iv": "4", "v": "5",
+      "vi": "6", "vii": "7", "viii": "8", "ix": "9", "x": "10",
+    };
+
+    // Parse dates (DD/MM/YYYY → YYYY-MM-DD)
+    const parseDateDMY = (d: string): string | null => {
+      if (!d) return null;
+      // Already YYYY-MM-DD?
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+      const parts = d.split("/");
+      if (parts.length !== 3) return null;
+      return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
     };
 
     let success = 0;
     let failed = 0;
     const errors: string[] = [];
 
-    for (const student of students) {
-      try {
+    // Process in batches of 25 for efficiency
+    const BATCH_SIZE = 25;
+    for (let batchStart = 0; batchStart < students.length; batchStart += BATCH_SIZE) {
+      const batch = students.slice(batchStart, batchStart + BATCH_SIZE);
+      
+      // Process batch concurrently
+      const results = await Promise.allSettled(batch.map(async (student: any) => {
         // Map class name
         const rawClass = (student.className || "").toLowerCase().trim();
         const mappedClass = udiseClassMap[rawClass] || rawClass;
         const classId = classMap.get(mappedClass);
         
         if (!classId) {
-          errors.push(`${student.name}: class "${student.className}" not found`);
-          failed++;
-          continue;
+          throw new Error(`class "${student.className}" not found`);
         }
 
         // Map section
         const sectionName = (student.section || "a").toLowerCase().trim();
         const sectionId = sectionMap.get(`${classId}_${sectionName}`) || null;
-
-        // Parse dates (DD/MM/YYYY → YYYY-MM-DD)
-        const parseDateDMY = (d: string): string | null => {
-          if (!d) return null;
-          const parts = d.split("/");
-          if (parts.length !== 3) return null;
-          return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
-        };
 
         const admissionNumber = student.admissionNumber || `AUTO-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
         const name = student.name || "";
@@ -151,11 +149,7 @@ serve(async (req) => {
             })
             .select("id")
             .single();
-          if (mErr) {
-            errors.push(`${name}: master insert failed - ${mErr.message}`);
-            failed++;
-            continue;
-          }
+          if (mErr) throw new Error(`master insert failed - ${mErr.message}`);
           masterId = newMaster.id;
         }
 
@@ -168,11 +162,7 @@ serve(async (req) => {
           .eq("academic_year_id", academicYearId)
           .maybeSingle();
 
-        if (existingYear) {
-          // Already exists for this year, skip
-          success++;
-          continue;
-        }
+        if (existingYear) return; // Already exists
 
         // Create year record
         const { error: sErr } = await supabaseAdmin
@@ -196,19 +186,21 @@ serve(async (req) => {
             caste_category: student.casteCategory || null,
           });
 
-        if (sErr) {
-          errors.push(`${name}: student insert failed - ${sErr.message}`);
-          failed++;
-        } else {
+        if (sErr) throw new Error(`student insert failed - ${sErr.message}`);
+      }));
+
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        if (r.status === "fulfilled") {
           success++;
+        } else {
+          failed++;
+          errors.push(`${batch[i].name || "unknown"}: ${r.reason?.message || "unknown error"}`);
         }
-      } catch (e: any) {
-        errors.push(`${student.name || "unknown"}: ${e.message}`);
-        failed++;
       }
     }
 
-    return new Response(JSON.stringify({ success, failed, errors: errors.slice(0, 20) }), {
+    return new Response(JSON.stringify({ success, failed, errors: errors.slice(0, 50) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {

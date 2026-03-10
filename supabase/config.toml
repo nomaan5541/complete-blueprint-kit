@@ -2,3 +2,6 @@ project_id = "difztcszlnsycrjmvash"
 
 [functions.student-chat]
 verify_jwt = false
+
+[functions.bulk-import-students]
+verify_jwt = false

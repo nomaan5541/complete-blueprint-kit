@@ -62,6 +62,7 @@ export default function FeeDues() {
     return {
       id: s.id,
       name: s.name,
+      father_name: s.father_name || "",
       admission_number: s.admission_number,
       className: s.classes?.name || "—",
       totalFee,

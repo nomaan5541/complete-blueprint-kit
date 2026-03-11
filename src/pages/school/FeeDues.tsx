@@ -134,7 +134,10 @@ export default function FeeDues() {
               studentDues.map(s => (
                 <TableRow key={s.id}>
                   <TableCell className="font-mono text-xs">{s.admission_number}</TableCell>
-                  <TableCell className="font-medium">{s.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {s.name}
+                    {s.father_name && <div className="text-xs text-muted-foreground">F: {s.father_name}</div>}
+                  </TableCell>
                   <TableCell>{s.className}</TableCell>
                   <TableCell>₹{s.totalFee.toLocaleString()}</TableCell>
                   <TableCell>₹{s.totalPaid.toLocaleString()}</TableCell>

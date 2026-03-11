@@ -47,7 +47,7 @@ export default function FeeManagement() {
     const [ftRes, fsRes, fpRes, cRes, sRes] = await Promise.all([
       supabase.from("fee_types").select("*").eq("school_id", schoolId).order("name"),
       supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
-      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
+      supabase.from("fee_payments").select("*, students(name, admission_number, father_name, classes(name)), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
       supabase.from("students").select("id, name, admission_number, class_id, classes(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);

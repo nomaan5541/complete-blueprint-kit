@@ -317,7 +317,8 @@ export default function FeeManagement() {
                       const search = studentSearch.toLowerCase();
                       return (
                         s.name?.toLowerCase().includes(search) ||
-                        s.admission_number?.toLowerCase().includes(search)
+                        s.admission_number?.toLowerCase().includes(search) ||
+                        s.father_name?.toLowerCase().includes(search)
                       );
                     })
                     .map((s) => (

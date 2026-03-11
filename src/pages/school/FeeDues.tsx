@@ -33,7 +33,7 @@ export default function FeeDues() {
     if (!schoolId) return;
     async function fetch() {
       const [sRes, cRes] = await Promise.all([
-        supabase.from("students").select("id, name, admission_number, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
+        supabase.from("students").select("id, name, admission_number, father_name, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
       ]);
       setStudents(sRes.data || []);

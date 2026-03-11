@@ -176,7 +176,11 @@ export default function FeeManagement() {
                   payments.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell className="font-mono text-xs">{p.receipt_number || "—"}</TableCell>
-                      <TableCell className="font-medium">{p.students?.name} <span className="text-muted-foreground text-xs">({p.students?.admission_number})</span></TableCell>
+                      <TableCell className="font-medium">
+                        {p.students?.name} <span className="text-muted-foreground text-xs">({p.students?.admission_number})</span>
+                        {p.students?.father_name && <div className="text-xs text-muted-foreground">F: {p.students.father_name}</div>}
+                        {p.students?.classes?.name && <div className="text-xs text-muted-foreground">Class: {p.students.classes.name}</div>}
+                      </TableCell>
                       <TableCell>{p.fee_types?.name || "—"}</TableCell>
                       <TableCell>₹{Number(p.amount).toLocaleString()}</TableCell>
                       <TableCell><Badge variant="secondary">{p.payment_mode}</Badge></TableCell>

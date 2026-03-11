@@ -66,6 +66,22 @@ serve(async (req) => {
       if (fileName === "school_info.csv" || fileName === "school_info.json") continue;
 
       const tableName = fileName.replace(/\.(csv|json)$/, "");
+      
+      // Security: Only allow restoring specific safe tables
+      const ALLOWED_TABLES = new Set([
+        'students', 'student_master', 'attendance', 'exam_marks', 'fee_payments',
+        'fee_structures', 'fee_types', 'homework', 'student_documents',
+        'student_face_data', 'classes', 'sections', 'subjects', 'class_subjects',
+        'academic_years', 'exams', 'exam_questions', 'exam_options',
+        'grade_systems', 'meetings', 'notifications', 'school_events',
+        'school_credentials', 'study_materials', 'student_chat_messages',
+        'student_exam_attempts', 'student_answers'
+      ]);
+      if (!ALLOWED_TABLES.has(tableName)) {
+        console.warn(`Skipping disallowed table: ${tableName}`);
+        continue;
+      }
+      
       console.log(`Processing table: ${tableName}`);
 
       try {

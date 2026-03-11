@@ -12,6 +12,7 @@ import { IndianRupee, AlertTriangle, CheckCircle } from "lucide-react";
 interface StudentDue {
   id: string;
   name: string;
+  father_name: string;
   admission_number: string;
   className: string;
   totalFee: number;

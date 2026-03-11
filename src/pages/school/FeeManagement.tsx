@@ -326,6 +326,7 @@ export default function FeeManagement() {
                           <span className="font-medium">{s.name} ({s.admission_number})</span>
                           <span className="text-xs text-muted-foreground">
                             {(s as any).classes?.name || "—"} • {(s as any).academic_years?.name || "—"}
+                            {s.father_name ? ` • F: ${s.father_name}` : ""}
                           </span>
                         </div>
                       </SelectItem>

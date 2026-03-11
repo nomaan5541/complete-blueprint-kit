@@ -12,6 +12,7 @@ import { IndianRupee, AlertTriangle, CheckCircle } from "lucide-react";
 interface StudentDue {
   id: string;
   name: string;
+  father_name: string;
   admission_number: string;
   className: string;
   totalFee: number;
@@ -33,7 +34,7 @@ export default function FeeDues() {
     if (!schoolId) return;
     async function fetch() {
       const [sRes, cRes] = await Promise.all([
-        supabase.from("students").select("id, name, admission_number, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
+        supabase.from("students").select("id, name, admission_number, father_name, class_id, classes(name)").eq("school_id", schoolId!).eq("status", "active").order("name"),
         supabase.from("classes").select("*").eq("school_id", schoolId!).order("display_order"),
       ]);
       setStudents(sRes.data || []);
@@ -61,6 +62,7 @@ export default function FeeDues() {
     return {
       id: s.id,
       name: s.name,
+      father_name: s.father_name || "",
       admission_number: s.admission_number,
       className: s.classes?.name || "—",
       totalFee,
@@ -132,7 +134,10 @@ export default function FeeDues() {
               studentDues.map(s => (
                 <TableRow key={s.id}>
                   <TableCell className="font-mono text-xs">{s.admission_number}</TableCell>
-                  <TableCell className="font-medium">{s.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {s.name}
+                    {s.father_name && <div className="text-xs text-muted-foreground">F: {s.father_name}</div>}
+                  </TableCell>
                   <TableCell>{s.className}</TableCell>
                   <TableCell>₹{s.totalFee.toLocaleString()}</TableCell>
                   <TableCell>₹{s.totalPaid.toLocaleString()}</TableCell>

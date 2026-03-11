@@ -47,9 +47,9 @@ export default function FeeManagement() {
     const [ftRes, fsRes, fpRes, cRes, sRes] = await Promise.all([
       supabase.from("fee_types").select("*").eq("school_id", schoolId).order("name"),
       supabase.from("fee_structures").select("*, classes(name), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId),
-      supabase.from("fee_payments").select("*, students(name, admission_number), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
+      supabase.from("fee_payments").select("*, students(name, admission_number, father_name, classes(name)), fee_types(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).order("payment_date", { ascending: false }).limit(100),
       supabase.from("classes").select("*").eq("school_id", schoolId).order("display_order"),
-      supabase.from("students").select("id, name, admission_number, class_id, classes(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
+      supabase.from("students").select("id, name, admission_number, father_name, class_id, classes(name), academic_years(name)").eq("school_id", schoolId).eq("academic_year_id", selectedYearId).eq("status", "active").order("name"),
     ]);
     setFeeTypes(ftRes.data || []);
     setStructures(fsRes.data || []);
@@ -176,7 +176,11 @@ export default function FeeManagement() {
                   payments.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell className="font-mono text-xs">{p.receipt_number || "—"}</TableCell>
-                      <TableCell className="font-medium">{p.students?.name} <span className="text-muted-foreground text-xs">({p.students?.admission_number})</span></TableCell>
+                      <TableCell className="font-medium">
+                        {p.students?.name} <span className="text-muted-foreground text-xs">({p.students?.admission_number})</span>
+                        {p.students?.father_name && <div className="text-xs text-muted-foreground">F: {p.students.father_name}</div>}
+                        {p.students?.classes?.name && <div className="text-xs text-muted-foreground">Class: {p.students.classes.name}</div>}
+                      </TableCell>
                       <TableCell>{p.fee_types?.name || "—"}</TableCell>
                       <TableCell>₹{Number(p.amount).toLocaleString()}</TableCell>
                       <TableCell><Badge variant="secondary">{p.payment_mode}</Badge></TableCell>
@@ -313,7 +317,8 @@ export default function FeeManagement() {
                       const search = studentSearch.toLowerCase();
                       return (
                         s.name?.toLowerCase().includes(search) ||
-                        s.admission_number?.toLowerCase().includes(search)
+                        s.admission_number?.toLowerCase().includes(search) ||
+                        s.father_name?.toLowerCase().includes(search)
                       );
                     })
                     .map((s) => (
@@ -322,6 +327,7 @@ export default function FeeManagement() {
                           <span className="font-medium">{s.name} ({s.admission_number})</span>
                           <span className="text-xs text-muted-foreground">
                             {(s as any).classes?.name || "—"} • {(s as any).academic_years?.name || "—"}
+                            {s.father_name ? ` • F: ${s.father_name}` : ""}
                           </span>
                         </div>
                       </SelectItem>

@@ -16,40 +16,75 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+/**
+ * Only student role is allowed to work offline with cached session.
+ * All other roles require online session verification.
+ */
+function isOnline() {
+  return navigator.onLine;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<AppRole | null>(null);
 
-  const fetchRole = async (userId: string) => {
+  const fetchRole = async (userId: string): Promise<AppRole | null> => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
     
     if (!data || data.length === 0) {
-      setRole(null);
-      return;
+      return null;
     }
     
     // Priority: super_admin > school_admin > teacher > student
     const priority: AppRole[] = ["super_admin", "school_admin", "teacher", "student"];
     const roles = data.map((r) => r.role as AppRole);
     const bestRole = priority.find((p) => roles.includes(p)) ?? roles[0];
-    setRole(bestRole);
+    return bestRole;
   };
 
   useEffect(() => {
-    // Restore session from storage first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRole(session.user.id).finally(() => setLoading(false));
+    supabase.auth.getSession().then(async ({ data: { session: restoredSession } }) => {
+      if (restoredSession?.user) {
+        // If we're offline, only allow student role from cache
+        if (!isOnline()) {
+          const cachedRole = localStorage.getItem("app_cached_role") as AppRole | null;
+          if (cachedRole === "student") {
+            setSession(restoredSession);
+            setUser(restoredSession.user);
+            setRole("student");
+          } else {
+            // Non-student roles cannot use cached session offline — force logout state
+            setSession(null);
+            setUser(null);
+            setRole(null);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Online: verify session and fetch role from server
+        setSession(restoredSession);
+        setUser(restoredSession.user);
+        const fetchedRole = await fetchRole(restoredSession.user.id);
+        setRole(fetchedRole);
+        // Cache role for offline student access
+        if (fetchedRole) {
+          localStorage.setItem("app_cached_role", fetchedRole);
+        } else {
+          localStorage.removeItem("app_cached_role");
+        }
       } else {
-        setLoading(false);
+        setSession(null);
+        setUser(null);
+        setRole(null);
+        localStorage.removeItem("app_cached_role");
       }
+      setLoading(false);
     });
 
     // Handle subsequent auth changes (sign in/out) — never await inside callback
@@ -58,18 +93,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchRole(session.user.id);
+          fetchRole(session.user.id).then((r) => {
+            setRole(r);
+            if (r) {
+              localStorage.setItem("app_cached_role", r);
+            }
+          });
         } else {
           setRole(null);
+          localStorage.removeItem("app_cached_role");
         }
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Listen for online/offline changes
+    const handleOnline = async () => {
+      // When coming back online, re-verify session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession?.user) {
+        const freshRole = await fetchRole(currentSession.user.id);
+        setRole(freshRole);
+        setSession(currentSession);
+        setUser(currentSession.user);
+        if (freshRole) {
+          localStorage.setItem("app_cached_role", freshRole);
+        }
+      } else {
+        // Session expired or invalid
+        setSession(null);
+        setUser(null);
+        setRole(null);
+        localStorage.removeItem("app_cached_role");
+      }
+    };
+
+    const handleOffline = () => {
+      // If offline and not a student, clear auth state
+      const cachedRole = localStorage.getItem("app_cached_role") as AppRole | null;
+      if (cachedRole && cachedRole !== "student") {
+        setSession(null);
+        setUser(null);
+        setRole(null);
+      }
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isOnline()) {
+      throw new Error("You must be online to sign in.");
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
@@ -83,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setRole(null);
+    localStorage.removeItem("app_cached_role");
     window.location.href = "/";
   };
 

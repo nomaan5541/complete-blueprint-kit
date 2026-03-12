@@ -40,6 +40,12 @@ serve(async (req) => {
       throw new Error("Unauthorized: School ID mismatch");
     }
 
+    // Validate filePath belongs to the requesting school's storage prefix
+    const expectedPrefix = `${school.id}/backups/`;
+    if (!filePath || typeof filePath !== "string" || !filePath.startsWith(expectedPrefix)) {
+      throw new Error("Invalid file path: must be within your school's backup directory");
+    }
+
     // Download backup file from storage
     const { data: fileData, error: downloadErr } = await supabase.storage
       .from("student-documents")

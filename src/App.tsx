@@ -218,6 +218,9 @@ function ProtectedRoutes() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
   if (!user) return <Navigate to="/" replace />;
 
+  // Wait for role to be fetched before rendering any role-specific routes
+  if (!role) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
+
   if (role === "student") {
     return (
       <Routes>

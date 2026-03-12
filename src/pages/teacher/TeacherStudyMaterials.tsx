@@ -63,7 +63,24 @@ export default function TeacherStudyMaterials() {
       .select("*, classes(name), subjects(name)")
       .eq("teacher_id", teacherId)
       .order("created_at", { ascending: false });
-    setMaterials(data || []);
+    
+    // Generate signed URLs for private bucket
+    const materialsWithSignedUrls = await Promise.all(
+      (data || []).map(async (m: any) => {
+        if (m.file_url) {
+          const pathMatch = m.file_url.match(/study-materials\/(.+)$/);
+          if (pathMatch) {
+            const { data: signedData } = await supabase.storage
+              .from("study-materials")
+              .createSignedUrl(pathMatch[1], 3600);
+            return { ...m, file_url: signedData?.signedUrl || m.file_url };
+          }
+        }
+        return m;
+      })
+    );
+    
+    setMaterials(materialsWithSignedUrls);
   };
 
   const uniqueClasses = assignments.reduce((acc: any[], a) => {
@@ -94,8 +111,11 @@ export default function TeacherStudyMaterials() {
           .upload(path, file);
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from("study-materials").getPublicUrl(path);
-        fileUrl = urlData.publicUrl;
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from("study-materials")
+          .createSignedUrl(path, 3600);
+        if (signedUrlError) throw signedUrlError;
+        fileUrl = signedUrlData.signedUrl;
         fileName = file.name;
       }
 

@@ -94,8 +94,11 @@ export default function TeacherStudyMaterials() {
           .upload(path, file);
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from("study-materials").getPublicUrl(path);
-        fileUrl = urlData.publicUrl;
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from("study-materials")
+          .createSignedUrl(path, 3600);
+        if (signedUrlError) throw signedUrlError;
+        fileUrl = signedUrlData.signedUrl;
         fileName = file.name;
       }
 

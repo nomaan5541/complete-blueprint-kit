@@ -56,6 +56,20 @@ serve(async (req) => {
 
     if (!student) throw new Error("Student not found");
 
+    // Rate limiting: max 10 messages per minute per student
+    const { count: recentCount } = await supabase
+      .from("student_chat_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", student.id)
+      .eq("role", "user")
+      .gte("created_at", new Date(Date.now() - 60_000).toISOString());
+    if ((recentCount ?? 0) >= 10) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please wait a moment before sending more messages." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch student context data
     const [examsRes, homeworkRes, feesRes, attendanceRes] = await Promise.all([
       supabase.from("exams")

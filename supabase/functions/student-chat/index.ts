@@ -11,6 +11,20 @@ serve(async (req) => {
 
   try {
     const { message } = await req.json();
+
+    // Input validation: message length cap
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Message cannot be empty" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (message.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: "Message too long (max 2000 characters)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing authorization header");

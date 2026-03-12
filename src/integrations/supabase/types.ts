@@ -2505,6 +2505,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_school_active: { Args: { p_school_id: string }; Returns: boolean }
       submit_exam: { Args: { p_attempt_id: string }; Returns: Json }
     }
     Enums: {

@@ -95,6 +95,13 @@ export function useSchool() {
     fetch();
   }, [user, role]);
 
+  // Sync schoolId to localStorage for per-school theme persistence
+  useEffect(() => {
+    if (schoolId) {
+      localStorage.setItem("currentSchoolId", schoolId);
+    }
+  }, [schoolId]);
+
   const isReadOnly = schoolStatus === "expired" || schoolStatus === "suspended" || schoolStatus === "inactive";
 
   return { schoolId, schoolName, setupCompleted, loading, schoolStatus, subscriptionExpired, subscriptionEndDate, isReadOnly };

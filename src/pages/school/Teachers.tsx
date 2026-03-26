@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Loader2, Search, Trash2, Link, Pencil, UserPlus } from "lucide-react";
+import { Plus, Loader2, Search, Trash2, Link, Pencil, UserPlus, ScanFace } from "lucide-react";
+import { FaceEnrollment } from "@/components/FaceEnrollment";
 
 export default function Teachers() {
   const { schoolId } = useSchool();
@@ -23,6 +24,7 @@ export default function Teachers() {
   const [editOpen, setEditOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [faceOpen, setFaceOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
@@ -237,6 +239,9 @@ export default function Teachers() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedTeacher(t); setFaceOpen(true); }} title="Enroll for AI Attendance">
+                          <ScanFace className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => { setSelectedTeacherId(t.id); setAssignOpen(true); }} title="Assign to class">
                           <Link className="h-4 w-4" />
@@ -332,6 +337,16 @@ export default function Teachers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Face Enrollment Dialog */}
+      {selectedTeacher && (
+        <FaceEnrollment
+          open={faceOpen}
+          onOpenChange={setFaceOpen}
+          student={{ ...selectedTeacher, school_id: schoolId! }}
+          userType="teacher"
+        />
+      )}
     </div>
   );
 }

@@ -261,6 +261,60 @@
   animation: urgencyPulse 2s ease-in-out infinite;
 }
 
+/* ── Festival Theme Animations ── */
+@keyframes diwaliSparkle {
+  0%, 100% { background-size: 100% 100%; filter: brightness(1); }
+  25% { background-size: 120% 120%; filter: brightness(1.15); }
+  50% { background-size: 100% 100%; filter: brightness(1.05); }
+  75% { background-size: 110% 110%; filter: brightness(1.1); }
+}
+.diwali-sparkle {
+  animation: diwaliSparkle 3s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes holiColors {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  33% { filter: hue-rotate(30deg) brightness(1.05); }
+  66% { filter: hue-rotate(-20deg) brightness(1.1); }
+  100% { filter: hue-rotate(0deg) brightness(1); }
+}
+.holi-colors {
+  animation: holiColors 4s ease-in-out infinite;
+}
+
+@keyframes tricolorWave {
+  0%, 100% { box-shadow: inset 0 3px 0 #FF9933, inset 0 -3px 0 #138808; }
+  50% { box-shadow: inset 0 4px 0 #FF9933, inset 0 -4px 0 #138808; }
+}
+.tricolor-wave {
+  animation: tricolorWave 2s ease-in-out infinite;
+}
+
+@keyframes schoolBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.school-bounce {
+  animation: schoolBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes snowEffect {
+  0%, 100% { background-position: 0% 0%; opacity: 1; }
+  50% { background-position: 100% 100%; opacity: 0.95; }
+}
+.snow-fall {
+  animation: snowEffect 5s ease infinite;
+}
+
+@keyframes crescentGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+  50% { text-shadow: 0 0 20px rgba(255,255,255,0.6); }
+}
+.crescent-glow {
+  animation: crescentGlow 3s ease-in-out infinite;
+}
+
 /* ── Stagger children animation ── */
 .stagger-children > * {
   opacity: 0;
@@ -408,4 +462,43 @@ main > * {
   .no-print {
     display: none !important;
   }
+}
+
+/* ── Festival Overlay Animations ── */
+@keyframes snow {
+  0% { transform: translateY(-10vh) translateX(0); }
+  100% { transform: translateY(110vh) translateX(20px); }
+}
+.animate-snow {
+  animation: snow 5s linear infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+.animate-sparkle {
+  animation: sparkle 2s ease-out infinite;
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(20vh) translateX(-10vw) rotate(-20deg); }
+  50% { transform: translateY(-10vh) translateX(10vw) rotate(20deg); }
+  100% { transform: translateY(20vh) translateX(-10vw) rotate(-20deg); }
+}
+.animate-float-slow {
+  animation: float-slow 15s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

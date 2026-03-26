@@ -30,6 +30,7 @@ export default function StudentDocuments() {
   const [uploading, setUploading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [docType, setDocType] = useState("Birth Certificate");
+  const [filterDocType, setFilterDocType] = useState("all");
   const [search, setSearch] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -114,9 +115,12 @@ export default function StudentDocuments() {
   };
 
   const filtered = documents.filter(d => {
-    if (!search) return true;
-    return d.students?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      d.document_type.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !search || 
+      d.students?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      d.document_type.toLowerCase().includes(search.toLowerCase()) ||
+      d.file_name?.toLowerCase().includes(search.toLowerCase());
+    const matchesType = filterDocType === "all" || d.document_type === filterDocType;
+    return matchesSearch && matchesType;
   });
 
   return (
@@ -129,7 +133,7 @@ export default function StudentDocuments() {
         <Button onClick={() => setUploadOpen(true)}><Upload className="mr-2 h-4 w-4" /> Upload Document</Button>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap">
         <Select value={selectedStudent} onValueChange={setSelectedStudent}>
           <SelectTrigger className="w-64"><SelectValue placeholder="All Students" /></SelectTrigger>
           <SelectContent>
@@ -137,9 +141,16 @@ export default function StudentDocuments() {
             {students.map(s => <SelectItem key={s.id} value={s.id}>{s.name} ({s.admission_number})</SelectItem>)}
           </SelectContent>
         </Select>
+        <Select value={filterDocType} onValueChange={setFilterDocType}>
+          <SelectTrigger className="w-48"><SelectValue placeholder="All Types" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Document Types</SelectItem>
+            {DOC_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search documents..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+          <Input placeholder="Search by name or file..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
       </div>
 

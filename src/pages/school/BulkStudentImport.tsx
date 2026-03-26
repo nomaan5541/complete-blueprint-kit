@@ -9,7 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Upload, Download, Loader2, AlertTriangle, CheckCircle, FileSpreadsheet } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import * as XLSX from "xlsx";
+
+const MAX_IMPORT_ROWS = 2000;
+const BATCH_SIZE = 100;
 
 interface ParsedRow {
   admission_number: string;
@@ -49,6 +53,7 @@ export default function BulkStudentImport() {
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const [result, setResult] = useState<{ success: number; failed: number; errors?: string[] } | null>(null);
   const [isUdiseFormat, setIsUdiseFormat] = useState(false);
 
@@ -79,7 +84,7 @@ export default function BulkStudentImport() {
     const lines = text.trim().split("\n");
     if (lines.length < 2) return [];
     const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/\s+/g, "_"));
-    return lines.slice(1).filter(l => l.trim()).map(line => {
+    const parsed = lines.slice(1).filter(l => l.trim()).map(line => {
       const vals = line.split(",").map(v => v.trim());
       const row: any = {};
       headers.forEach((h, i) => { row[h] = vals[i] || ""; });
@@ -87,6 +92,11 @@ export default function BulkStudentImport() {
       else if (!row.name) row.error = "Missing name";
       return row as ParsedRow;
     });
+    if (parsed.length > MAX_IMPORT_ROWS) {
+      toast.error(`File has ${parsed.length} rows. Maximum allowed is ${MAX_IMPORT_ROWS}.`);
+      return parsed.slice(0, MAX_IMPORT_ROWS);
+    }
+    return parsed;
   };
 
   const parseUDISEExcel = (workbook: XLSX.WorkBook): ParsedRow[] => {
@@ -176,7 +186,11 @@ export default function BulkStudentImport() {
         try {
           const data = new Uint8Array(ev.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: "array" });
-          const parsed = parseUDISEExcel(workbook);
+          let parsed = parseUDISEExcel(workbook);
+          if (parsed.length > MAX_IMPORT_ROWS) {
+            toast.warning(`File has ${parsed.length} rows. Truncating to ${MAX_IMPORT_ROWS}.`);
+            parsed = parsed.slice(0, MAX_IMPORT_ROWS);
+          }
           setRows(parsed);
           setIsUdiseFormat(true);
           setResult(null);
@@ -210,6 +224,7 @@ export default function BulkStudentImport() {
     if (validRows.length === 0) { toast.error("No valid rows to import"); return; }
 
     setImporting(true);
+    setImportProgress(0);
 
     if (isUdiseFormat) {
       // Use edge function for UDISE bulk import (class info is per-row)
@@ -244,35 +259,45 @@ export default function BulkStudentImport() {
       // Original CSV import logic (requires class selection)
       if (!selectedClass) { toast.error("Select class"); setImporting(false); return; }
       let success = 0, failed = 0;
-      for (const row of validRows) {
-        try {
-          const { data: existing } = await supabase.from("student_master" as any)
-            .select("id").eq("school_id", schoolId!).eq("admission_number", row.admission_number).maybeSingle();
-          let masterId: string;
-          if (existing) {
-            masterId = (existing as any).id;
-          } else {
-            const { data: newMaster, error: mErr } = await supabase.from("student_master" as any).insert({
+      const totalRows = validRows.length;
+      
+      // Process in batches of BATCH_SIZE
+      for (let batchStart = 0; batchStart < totalRows; batchStart += BATCH_SIZE) {
+        const batch = validRows.slice(batchStart, batchStart + BATCH_SIZE);
+        
+        for (const row of batch) {
+          try {
+            const { data: existing } = await supabase.from("student_master" as any)
+              .select("id").eq("school_id", schoolId!).eq("admission_number", row.admission_number).maybeSingle();
+            let masterId: string;
+            if (existing) {
+              masterId = (existing as any).id;
+            } else {
+              const { data: newMaster, error: mErr } = await supabase.from("student_master" as any).insert({
+                school_id: schoolId!, admission_number: row.admission_number, name: row.name,
+                gender: row.gender || null, date_of_birth: row.date_of_birth || null,
+                father_name: row.father_name || null, father_phone: row.father_phone || null,
+                mother_name: row.mother_name || null, address: row.address || null,
+                city: row.city || null, state: row.state || null, pincode: row.pincode || null,
+              } as any).select("id").single();
+              if (mErr) { failed++; continue; }
+              masterId = (newMaster as any).id;
+            }
+            const { error } = await supabase.from("students").insert({
               school_id: schoolId!, admission_number: row.admission_number, name: row.name,
               gender: row.gender || null, date_of_birth: row.date_of_birth || null,
               father_name: row.father_name || null, father_phone: row.father_phone || null,
               mother_name: row.mother_name || null, address: row.address || null,
               city: row.city || null, state: row.state || null, pincode: row.pincode || null,
-            } as any).select("id").single();
-            if (mErr) { failed++; continue; }
-            masterId = (newMaster as any).id;
-          }
-          const { error } = await supabase.from("students").insert({
-            school_id: schoolId!, admission_number: row.admission_number, name: row.name,
-            gender: row.gender || null, date_of_birth: row.date_of_birth || null,
-            father_name: row.father_name || null, father_phone: row.father_phone || null,
-            mother_name: row.mother_name || null, address: row.address || null,
-            city: row.city || null, state: row.state || null, pincode: row.pincode || null,
-            class_id: selectedClass, section_id: selectedSection || null,
-            academic_year_id: selectedYear, student_master_id: masterId,
-          });
-          if (error) failed++; else success++;
-        } catch { failed++; }
+              class_id: selectedClass, section_id: selectedSection || null,
+              academic_year_id: selectedYear, student_master_id: masterId,
+            });
+            if (error) failed++; else success++;
+          } catch { failed++; }
+        }
+        
+        // Update progress after each batch
+        setImportProgress(Math.round(((batchStart + batch.length) / totalRows) * 100));
       }
       setResult({ success, failed });
       toast.success(`Imported ${success} students${failed > 0 ? `, ${failed} failed` : ""}`);
@@ -411,11 +436,22 @@ export default function BulkStudentImport() {
             )}
 
             {!result && (
-              <div className="flex justify-end">
-                <Button onClick={handleImport} disabled={importing || validCount === 0} size="lg">
-                  {importing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Import {validCount} Students
-                </Button>
+              <div className="space-y-3">
+                {importing && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>Importing students...</span>
+                      <span>{importProgress}%</span>
+                    </div>
+                    <Progress value={importProgress} className="h-2" />
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <Button onClick={handleImport} disabled={importing || validCount === 0} size="lg">
+                    {importing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Import {validCount} Students
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

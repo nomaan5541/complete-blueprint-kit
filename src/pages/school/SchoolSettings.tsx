@@ -103,6 +103,86 @@ export default function SchoolSettings() {
     fetch();
   }, [schoolId]);
 
+  // Handle payment success/cancel from Stripe redirect
+  useEffect(() => {
+    if (!schoolId || !user) return;
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment");
+    const planId = params.get("plan");
+
+    if (paymentStatus === "success" && planId) {
+      (async () => {
+        try {
+          // Get plan details
+          const { data: plan } = await supabase
+            .from("subscription_plans")
+            .select("*")
+            .eq("id", planId)
+            .single();
+
+          if (!plan) {
+            toast.error("Plan not found");
+            return;
+          }
+
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + (plan.duration_months || 12));
+
+          // Deactivate existing subscriptions
+          await supabase
+            .from("subscriptions")
+            .update({ is_active: false })
+            .eq("school_id", schoolId)
+            .eq("is_active", true);
+
+          // Create new active subscription
+          const { error: subError } = await supabase
+            .from("subscriptions")
+            .insert({
+              school_id: schoolId,
+              plan_id: planId,
+              start_date: startDate.toISOString(),
+              end_date: endDate.toISOString(),
+              is_active: true,
+              payment_amount: plan.price,
+              payment_status: "paid" as any,
+            });
+
+          if (subError) throw subError;
+
+          // Record payment history
+          await supabase.from("payment_history").insert({
+            school_id: schoolId,
+            amount: plan.price,
+            payment_method: "stripe",
+            status: "paid" as any,
+            notes: `Stripe payment for ${plan.name}`,
+          });
+
+          // Reactivate school
+          await supabase
+            .from("schools")
+            .update({ status: "active" as any })
+            .eq("id", schoolId);
+
+          toast.success("Payment successful! Your subscription has been activated.");
+
+          // Clean URL params
+          window.history.replaceState({}, "", window.location.pathname);
+          // Reload to refresh subscription state
+          window.location.reload();
+        } catch (err: any) {
+          console.error("Subscription activation error:", err);
+          toast.error("Payment was received but subscription activation failed. Please contact support.");
+        }
+      })();
+    } else if (paymentStatus === "cancelled") {
+      toast.info("Payment was cancelled.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [schoolId, user]);
+
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

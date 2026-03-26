@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PLAN_FEATURE_LABELS } from "@/hooks/useSubscriptionPlan";
+import { useFestivalTheme } from "@/hooks/useFestivalTheme";
+import { FestivalOverlay } from "@/components/FestivalOverlay";
 
 const features = [
   { icon: School, title: "Multi-School Management", desc: "Manage unlimited schools from a single dashboard with complete isolation." },
@@ -133,6 +135,7 @@ export default function LandingPage() {
   const [crownClicks, setCrownClicks] = useState(0);
   const [showComparison, setShowComparison] = useState(false);
   const [heroTextIndex, setHeroTextIndex] = useState(0);
+  const { activeTheme: festivalTheme } = useFestivalTheme();
 
   const heroTexts = ["Made Simple", "Made Powerful", "Made Smart", "Made for You"];
 
@@ -185,7 +188,11 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div 
+      className={`min-h-screen relative ${festivalTheme?.apply_to_whole_page ? `theme-active festival-${festivalTheme.animation_class}` : ''}`}
+      style={festivalTheme?.apply_to_whole_page && festivalTheme.css_overrides ? (festivalTheme.css_overrides as React.CSSProperties) : {}}
+    >
+      {festivalTheme?.apply_to_whole_page && <FestivalOverlay theme={festivalTheme} />}
       <div className="animated-bg" />
       <div className="texture-overlay" />
 
@@ -194,15 +201,29 @@ export default function LandingPage() {
       <div className="floating-orb floating-orb-2" />
       <div className="floating-orb floating-orb-3" />
 
-      {/* Top urgency banner */}
-      <div className="bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground py-2.5 text-center text-sm font-medium urgency-pulse relative overflow-hidden">
-        <div className="flex items-center justify-center gap-2">
-          <Gift className="h-4 w-4" />
-          <span>🎉 Limited Offer: <strong>Get 3 months FREE</strong> on yearly plans! </span>
-          <Timer className="h-4 w-4" />
-          <span className="hidden sm:inline font-bold">Offer ends soon!</span>
+      {/* Top urgency banner — dynamic from festival theme */}
+      {festivalTheme ? (
+        <div className={`bg-gradient-to-r ${festivalTheme.gradient} text-white py-3 text-center font-medium relative overflow-hidden ${festivalTheme.animation_class}`}>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg">{festivalTheme.emoji}</span>
+            <span>{festivalTheme.offer_text.replace("{discount}", String(festivalTheme.discount_percent))}</span>
+            <Timer className="h-4 w-4" />
+            <span className="hidden sm:inline font-bold">Limited Time!</span>
+          </div>
+          {festivalTheme.bonus_text && (
+            <div className="text-xs opacity-90 mt-0.5">{festivalTheme.bonus_text}</div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground py-2.5 text-center text-sm font-medium urgency-pulse relative overflow-hidden">
+          <div className="flex items-center justify-center gap-2">
+            <Gift className="h-4 w-4" />
+            <span>🎉 Limited Offer: <strong>Get 3 months FREE</strong> on yearly plans! </span>
+            <Timer className="h-4 w-4" />
+            <span className="hidden sm:inline font-bold">Offer ends soon!</span>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass-subtle">
@@ -421,11 +442,18 @@ export default function LandingPage() {
                 const isTrial = plan.name?.toLowerCase().includes("trial") || plan.name?.toLowerCase().includes("free");
                 const planFeatures = Array.isArray(plan.features) ? plan.features : [];
                 
-                const offerTag = isTrial ? "FREE 30 DAYS" : isUltimate ? "BEST VALUE" : isProfessional ? "MOST POPULAR" : "GREAT START";
-                const originalPrice = isTrial ? 0 : isUltimate ? 29999 : isProfessional ? 14999 : 7999;
-                const savings = originalPrice - Number(plan.price);
-                const discount = originalPrice > 0 ? Math.round((savings / originalPrice) * 100) : 0;
-                const monthlyPrice = isTrial ? 0 : Math.round(Number(plan.price) / (plan.duration_months || 12));
+                const baseOriginalPrice = isTrial ? 0 : isUltimate ? 29999 : isProfessional ? 14999 : 7999;
+                let displayPrice = Number(plan.price);
+                let displayDiscount = baseOriginalPrice > 0 ? Math.round(((baseOriginalPrice - displayPrice) / baseOriginalPrice) * 100) : 0;
+                
+                // Dynamically apply festival discounts
+                if (festivalTheme && festivalTheme.discount_percent > 0 && !isTrial) {
+                  displayDiscount = festivalTheme.discount_percent;
+                  displayPrice = Math.round(baseOriginalPrice * (1 - displayDiscount / 100));
+                }
+
+                const monthlyPrice = isTrial ? 0 : Math.round(displayPrice / (plan.duration_months || 12));
+                const offerTag = festivalTheme && !isTrial ? `${festivalTheme.name.toUpperCase()} SPECIAL` : isTrial ? "FREE 30 DAYS" : isUltimate ? "BEST VALUE" : isProfessional ? "MOST POPULAR" : "GREAT START";
 
                 const tierKey = isTrial ? "trial" : isUltimate ? "ultimate" : isProfessional ? "professional" : "starter";
                 const includedCount = PLAN_FEATURE_LABELS.filter(f => f[tierKey as keyof typeof f]).length;
@@ -437,6 +465,8 @@ export default function LandingPage() {
                     className={`relative overflow-hidden transition-all duration-500 hover:-translate-y-2 group ${
                       isTrial
                         ? "border-2 border-emerald-400/60 shadow-lg bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-cyan-950/20"
+                        : festivalTheme && !isTrial
+                        ? `border-2 border-[var(--primary)] shadow-2xl scale-[1.04] festival-${festivalTheme.animation_class}`
                         : isUltimate
                         ? "border-2 border-amber-400/60 shadow-2xl scale-[1.04] bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:via-yellow-950/30 dark:to-orange-950/20 glow-amber"
                         : isProfessional
@@ -452,7 +482,9 @@ export default function LandingPage() {
 
                     {/* Offer ribbon */}
                     <div className={`absolute top-0 right-0 px-3 py-1.5 text-xs font-bold rounded-bl-xl flex items-center gap-1 shadow-lg ${
-                      isTrial
+                      festivalTheme && !isTrial
+                        ? `bg-gradient-to-l ${festivalTheme.gradient} text-white`
+                        : isTrial
                         ? "bg-gradient-to-l from-emerald-500 to-teal-500 text-white"
                         : isUltimate
                         ? "bg-gradient-to-l from-yellow-500 to-amber-500 text-white"
@@ -460,10 +492,7 @@ export default function LandingPage() {
                         ? "bg-primary text-primary-foreground"
                         : "bg-emerald-500 text-white"
                     }`}>
-                      {isTrial && <Gift className="h-3 w-3" />}
-                      {isUltimate && <Crown className="h-3.5 w-3.5" />}
-                      {isProfessional && <Star className="h-3 w-3" />}
-                      {!isTrial && !isUltimate && !isProfessional && <Zap className="h-3 w-3" />}
+                      {festivalTheme && !isTrial ? <Sparkles className="h-3.5 w-3.5" /> : isTrial ? <Gift className="h-3 w-3" /> : isUltimate ? <Crown className="h-3.5 w-3.5" /> : isProfessional ? <Star className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
                       {offerTag}
                     </div>
 
@@ -494,17 +523,21 @@ export default function LandingPage() {
                           <>
                             <div className="flex items-baseline gap-2">
                               <span className={`text-3xl font-extrabold ${isUltimate ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
-                                ₹{Number(plan.price).toLocaleString("en-IN")}
+                                ₹{displayPrice.toLocaleString("en-IN")}
                               </span>
                               <span className="text-muted-foreground text-sm">/yr</span>
                             </div>
-                            {discount > 0 && (
+                            {displayDiscount > 0 && (
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-muted-foreground line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
+                                <span className="text-xs text-muted-foreground line-through">₹{baseOriginalPrice.toLocaleString("en-IN")}</span>
                                 <Badge variant="secondary" className={`text-[10px] font-semibold ${
-                                  isUltimate ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                  festivalTheme
+                                    ? `bg-gradient-to-r ${festivalTheme.gradient} text-white border-0`
+                                    : isUltimate 
+                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400" 
+                                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
                                 }`}>
-                                  SAVE {discount}%
+                                  SAVE {displayDiscount}%
                                 </Badge>
                               </div>
                             )}
@@ -512,6 +545,19 @@ export default function LandingPage() {
                           </>
                         )}
                       </div>
+
+                      {/* Festival Bonus Text injection */}
+                      {festivalTheme && festivalTheme.bonus_text && !isTrial && (
+                        <div className={`rounded-lg bg-gradient-to-r ${festivalTheme.gradient} p-2.5 text-white shadow-sm ring-1 ring-inset ring-white/20 relative overflow-hidden`}>
+                          <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
+                          <p className="text-xs font-semibold flex items-center gap-1 relative z-10">
+                            <Gift className="h-3 w-3" /> Festival Bonus
+                          </p>
+                          <p className="text-[11px] mt-1 relative z-10">
+                            {festivalTheme.bonus_text}
+                          </p>
+                        </div>
+                      )}
 
                       {/* Limits */}
                       <div className="space-y-1.5 text-xs">
@@ -763,11 +809,31 @@ export default function LandingPage() {
               {selectedPlan ? `Request ${selectedPlan.name} Plan` : "Start Your Free Trial"}
             </DialogTitle>
           </DialogHeader>
-          {selectedPlan && (
-            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-sm">
-              <span className="font-semibold text-primary">{selectedPlan.name}</span> — ₹{Number(selectedPlan.price).toLocaleString()}/{selectedPlan.duration_months} months
-            </div>
-          )}
+          {selectedPlan && (() => {
+            const isTrial = selectedPlan.name?.toLowerCase().includes("trial") || selectedPlan.name?.toLowerCase().includes("free");
+            const isUltimate = selectedPlan.name?.toLowerCase() === "ultimate";
+            const isProfessional = selectedPlan.name?.toLowerCase() === "professional";
+            const baseOriginalPrice = isTrial ? 0 : isUltimate ? 29999 : isProfessional ? 14999 : 7999;
+            let displayPrice = Number(selectedPlan.price);
+            
+            if (festivalTheme && festivalTheme.discount_percent > 0 && !isTrial) {
+              displayPrice = Math.round(baseOriginalPrice * (1 - festivalTheme.discount_percent / 100));
+            }
+
+            return (
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-sm flex items-center flex-wrap gap-2">
+                <div>
+                  <span className="font-semibold text-primary">{selectedPlan.name}</span> — 
+                  <span className="font-medium ml-1">₹{displayPrice.toLocaleString("en-IN")}</span>/{selectedPlan.duration_months} months
+                </div>
+                {festivalTheme && festivalTheme.discount_percent > 0 && !isTrial && (
+                  <Badge variant="secondary" className={`bg-gradient-to-r ${festivalTheme.gradient} text-white border-0 text-[10px] px-1.5 py-0 h-4`}>
+                    {festivalTheme.name} Price!
+                  </Badge>
+                )}
+              </div>
+            );
+          })()}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

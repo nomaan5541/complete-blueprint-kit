@@ -409,3 +409,18 @@ main > * {
     display: none !important;
   }
 }
+
+/* ── Mobile safe area for status bar ── */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Festival theme decorative elements ── */
+@keyframes festivalGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.festival-glow {
+  animation: festivalGlow 2s ease-in-out infinite;
+}

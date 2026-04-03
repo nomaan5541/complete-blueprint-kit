@@ -661,6 +661,57 @@ export type Database = {
           },
         ]
       }
+      festival_themes: {
+        Row: {
+          animation_type: string
+          colors: Json | null
+          created_at: string
+          description: string | null
+          discount_percent: number | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          offer_text: string | null
+          pricing_override: Json | null
+          start_date: string | null
+          theme_key: string
+          updated_at: string
+        }
+        Insert: {
+          animation_type?: string
+          colors?: Json | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          offer_text?: string | null
+          pricing_override?: Json | null
+          start_date?: string | null
+          theme_key: string
+          updated_at?: string
+        }
+        Update: {
+          animation_type?: string
+          colors?: Json | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          offer_text?: string | null
+          pricing_override?: Json | null
+          start_date?: string | null
+          theme_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       grade_systems: {
         Row: {
           created_at: string
@@ -2493,6 +2544,11 @@ export type Database = {
       }
     }
     Functions: {
+      activate_festival_theme: {
+        Args: { p_theme_id: string }
+        Returns: undefined
+      }
+      deactivate_all_festival_themes: { Args: never; Returns: undefined }
       generate_receipt_number: {
         Args: { p_school_id: string }
         Returns: string

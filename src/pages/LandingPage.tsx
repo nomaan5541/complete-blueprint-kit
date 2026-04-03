@@ -135,6 +135,7 @@ export default function LandingPage() {
   const [crownClicks, setCrownClicks] = useState(0);
   const [showComparison, setShowComparison] = useState(false);
   const [heroTextIndex, setHeroTextIndex] = useState(0);
+  const { theme: festivalTheme } = useFestivalTheme();
 
   const heroTexts = ["Made Simple", "Made Powerful", "Made Smart", "Made for You"];
 

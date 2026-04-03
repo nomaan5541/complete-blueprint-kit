@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Inbox,
   Sparkles,
+  PartyPopper,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,6 +33,7 @@ const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "AI Analytics", url: "/admin/ai-analytics", icon: Sparkles },
   { title: "Schools", url: "/admin/schools", icon: School },
+  { title: "Festival Themes", url: "/admin/festival-themes", icon: PartyPopper },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: CreditCard },
   { title: "Requests", url: "/admin/subscription-requests", icon: Inbox },
   { title: "Payment History", url: "/admin/payments", icon: Receipt },

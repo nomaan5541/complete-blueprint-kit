@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 import AIAnalytics from "./pages/AIAnalytics";
+import FestivalThemes from "./pages/FestivalThemes";
 
 // School Admin pages
 import SchoolDashboard from "./pages/school/SchoolDashboard";
@@ -102,6 +103,7 @@ function SuperAdminRoutes() {
         <Route path="/schools/add" element={<AddSchool />} />
         <Route path="/schools/:id" element={<SchoolDetail />} />
         <Route path="/schools/:id/edit" element={<EditSchool />} />
+        <Route path="/festival-themes" element={<FestivalThemes />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/subscription-requests" element={<SubscriptionRequests />} />
         <Route path="/payments" element={<Payments />} />

@@ -9,7 +9,6 @@ import {
   GraduationCap,
   Inbox,
   Sparkles,
-  Palette,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -37,7 +36,6 @@ const navItems = [
   { title: "Requests", url: "/admin/subscription-requests", icon: Inbox },
   { title: "Payment History", url: "/admin/payments", icon: Receipt },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
-  { title: "Festival Themes", url: "/admin/festival-themes", icon: Palette },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 

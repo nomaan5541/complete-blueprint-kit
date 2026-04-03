@@ -46,7 +46,6 @@ export default function FaceAttendance() {
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [mode, setMode] = useState<"students" | "staff">("students");
 
   const [modelsReady, setModelsReady] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
@@ -89,88 +88,51 @@ export default function FaceAttendance() {
     }
   };
 
-  // Load known faces
+  // Load known faces for selected class
   useEffect(() => {
-    if (!schoolId || !selectedYearId) return;
-    if (mode === "students" && !selectedClass) return;
+    if (!schoolId || !selectedClass || !selectedYearId) return;
 
     async function loadFaces() {
-      if (mode === "students") {
-        let studQuery = supabase
-          .from("students")
-          .select("id, name")
-          .eq("school_id", schoolId!)
-          .eq("class_id", selectedClass)
-          .eq("academic_year_id", selectedYearId!)
-          .eq("status", "active");
-        if (selectedSection) studQuery = studQuery.eq("section_id", selectedSection);
-        const { data: students } = await studQuery;
-        setTotalStudents(students?.length || 0);
+      // Get students in class
+      let studQuery = supabase
+        .from("students")
+        .select("id, name")
+        .eq("school_id", schoolId!)
+        .eq("class_id", selectedClass)
+        .eq("academic_year_id", selectedYearId!)
+        .eq("status", "active");
+      if (selectedSection) studQuery = studQuery.eq("section_id", selectedSection);
+      const { data: students } = await studQuery;
+      setTotalStudents(students?.length || 0);
 
-        if (!students?.length) {
-          setKnownFaces([]);
-          setEnrolledCount(0);
-          return;
-        }
-
-        const studentIds = students.map((s) => s.id);
-        const { data: faceData } = await supabase
-          .from("student_face_data" as any)
-          .select("student_id, face_descriptor")
-          .eq("school_id", schoolId!)
-          .in("student_id", studentIds);
-
-        const faces: KnownFace[] = (faceData || []).map((fd: any) => {
-          const student = students.find((s) => s.id === fd.student_id);
-          return {
-            studentId: fd.student_id,
-            studentName: student?.name || "Unknown",
-            descriptor: arrayToDescriptor(fd.face_descriptor as number[]),
-          };
-        });
-
-        setKnownFaces(faces);
-        setEnrolledCount(faces.length);
-      } else {
-        // Staff mode
-        const { data: teachers } = await supabase
-          .from("teachers")
-          .select("id, name")
-          .eq("school_id", schoolId!)
-          .eq("status", "active");
-        
-        setTotalStudents(teachers?.length || 0);
-        
-        if (!teachers?.length) {
-          setKnownFaces([]);
-          setEnrolledCount(0);
-          return;
-        }
-
-        const { data: appSettings } = await supabase
-          .from("app_settings" as any)
-          .select("value")
-          .eq("key", `teacher_faces_${schoolId}`)
-          .maybeSingle();
-
-        const facesData = Array.isArray((appSettings as any)?.value) ? (appSettings as any).value : [];
-        
-        const faces: KnownFace[] = facesData.map((fd: any) => {
-          const teacher = teachers.find((t) => t.id === fd.teacher_id);
-          return {
-            studentId: fd.teacher_id,
-            studentName: teacher?.name || "Unknown Staff",
-            descriptor: arrayToDescriptor(fd.face_descriptor as number[]),
-          };
-        }).filter((f: any) => f.studentName !== "Unknown Staff");
-
-        setKnownFaces(faces);
-        setEnrolledCount(faces.length);
+      if (!students?.length) {
+        setKnownFaces([]);
+        setEnrolledCount(0);
+        return;
       }
+
+      const studentIds = students.map((s) => s.id);
+      const { data: faceData } = await supabase
+        .from("student_face_data" as any)
+        .select("student_id, face_descriptor")
+        .eq("school_id", schoolId!)
+        .in("student_id", studentIds);
+
+      const faces: KnownFace[] = (faceData || []).map((fd: any) => {
+        const student = students.find((s) => s.id === fd.student_id);
+        return {
+          studentId: fd.student_id,
+          studentName: student?.name || "Unknown",
+          descriptor: arrayToDescriptor(fd.face_descriptor as number[]),
+        };
+      });
+
+      setKnownFaces(faces);
+      setEnrolledCount(faces.length);
     }
 
     loadFaces();
-  }, [schoolId, selectedClass, selectedSection, selectedYearId, mode]);
+  }, [schoolId, selectedClass, selectedSection, selectedYearId]);
 
   const startCamera = async () => {
     try {
@@ -303,84 +265,49 @@ export default function FaceAttendance() {
 
   // Save detected attendance
   const handleSaveAttendance = async () => {
-    if (!schoolId || !selectedYearId || detectedStudents.length === 0) return;
-    if (mode === "students" && !selectedClass) return;
+    if (!schoolId || !selectedClass || !selectedYearId || detectedStudents.length === 0) return;
     setSaving(true);
 
     try {
-      if (mode === "students") {
-        // Get all students in this class to mark absent those not detected
-        let studQuery = supabase
-          .from("students")
-          .select("id")
-          .eq("school_id", schoolId)
-          .eq("class_id", selectedClass)
-          .eq("academic_year_id", selectedYearId)
-          .eq("status", "active");
-        if (selectedSection) studQuery = studQuery.eq("section_id", selectedSection);
-        const { data: allStudents } = await studQuery;
+      // Get all students in this class to mark absent those not detected
+      let studQuery = supabase
+        .from("students")
+        .select("id")
+        .eq("school_id", schoolId)
+        .eq("class_id", selectedClass)
+        .eq("academic_year_id", selectedYearId)
+        .eq("status", "active");
+      if (selectedSection) studQuery = studQuery.eq("section_id", selectedSection);
+      const { data: allStudents } = await studQuery;
 
-        const detectedIds = new Set(detectedStudents.map((d) => d.studentId));
+      const detectedIds = new Set(detectedStudents.map((d) => d.studentId));
 
-        const records = (allStudents || []).map((s) => ({
-          school_id: schoolId,
-          student_id: s.id,
-          class_id: selectedClass,
-          section_id: selectedSection || null,
-          academic_year_id: selectedYearId,
-          date: selectedDate,
-          status: detectedIds.has(s.id) ? "present" : "absent",
-          marked_by: user?.id || null,
-        }));
+      const records = (allStudents || []).map((s) => ({
+        school_id: schoolId,
+        student_id: s.id,
+        class_id: selectedClass,
+        section_id: selectedSection || null,
+        academic_year_id: selectedYearId,
+        date: selectedDate,
+        status: detectedIds.has(s.id) ? "present" : "absent",
+        marked_by: user?.id || null,
+      }));
 
-        // Delete existing then insert fresh records
-        await supabase
-          .from("attendance")
-          .delete()
-          .eq("school_id", schoolId)
-          .eq("class_id", selectedClass)
-          .eq("date", selectedDate)
-          .eq("academic_year_id", selectedYearId);
+      // Delete existing then insert fresh records
+      await supabase
+        .from("attendance")
+        .delete()
+        .eq("school_id", schoolId)
+        .eq("class_id", selectedClass)
+        .eq("date", selectedDate)
+        .eq("academic_year_id", selectedYearId);
 
-        const { error } = await supabase.from("attendance").insert(records);
-        if (error) throw error;
+      const { error } = await supabase.from("attendance").insert(records);
+      if (error) throw error;
 
-        toast.success(
-          `Attendance saved! ${detectedStudents.length} present, ${(allStudents?.length || 0) - detectedStudents.length} absent`
-        );
-      } else {
-        // Staff Mode: save to app_settings as a flat array per date to bypass limitations
-        const { data: teachers } = await supabase
-          .from("teachers")
-          .select("id")
-          .eq("school_id", schoolId!)
-          .eq("status", "active");
-
-        const detectedIds = new Set(detectedStudents.map((d) => d.studentId));
-        const records = (teachers || []).map((t) => ({
-          teacher_id: t.id,
-          date: selectedDate,
-          status: detectedIds.has(t.id) ? "present" : "absent",
-          marked_by: user?.id || null,
-          time: new Date().toISOString()
-        }));
-
-        const settingKey = `staff_attendance_${schoolId}_${selectedDate}`;
-        const { error } = await supabase
-          .from("app_settings" as any)
-          .upsert({
-            key: settingKey,
-            value: records,
-            updated_at: new Date().toISOString()
-          }, { onConflict: "key" });
-
-        if (error) throw error;
-
-        toast.success(
-          `Staff Attendance saved! ${detectedStudents.length} present, ${(teachers?.length || 0) - detectedStudents.length} absent`
-        );
-      }
-      
+      toast.success(
+        `Attendance saved! ${detectedStudents.length} present, ${(allStudents?.length || 0) - detectedStudents.length} absent`
+      );
       stopCamera();
     } catch (e: any) {
       toast.error("Failed to save attendance: " + e.message);
@@ -434,47 +361,36 @@ export default function FaceAttendance() {
         </Card>
       )}
 
-      {/* Mode / Class / Date selection */}
+      {/* Class/Section/Date selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Select Attendance Mode</CardTitle>
+          <CardTitle>Select Class & Date</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={mode} onValueChange={(v) => { setMode(v as "students" | "staff"); setDetectedStudents([]); }} className="w-full mb-6">
-            <TabsList>
-              <TabsTrigger value="students" className="w-32">Students</TabsTrigger>
-              <TabsTrigger value="staff" className="w-32">Staff</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            {mode === "students" && (
-              <>
-                <div className="space-y-1">
-                  <Label>Class</Label>
-                  <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); setSelectedSection(""); setDetectedStudents([]); }}>
-                    <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
-                    <SelectContent>
-                      {classes.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>Section</Label>
-                  <Select value={selectedSection} onValueChange={(v) => { setSelectedSection(v); setDetectedStudents([]); }}>
-                    <SelectTrigger><SelectValue placeholder="All sections" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All</SelectItem>
-                      {filteredSections.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
+            <div className="space-y-1">
+              <Label>Class</Label>
+              <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); setSelectedSection(""); setDetectedStudents([]); }}>
+                <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
+                <SelectContent>
+                  {classes.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Section</Label>
+              <Select value={selectedSection} onValueChange={(v) => { setSelectedSection(v); setDetectedStudents([]); }}>
+                <SelectTrigger><SelectValue placeholder="All sections" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All</SelectItem>
+                  {filteredSections.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1">
               <Label>Date</Label>
               <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
@@ -492,7 +408,7 @@ export default function FaceAttendance() {
       </Card>
 
       {/* Scanning area */}
-      {((mode === "students" && selectedClass) || mode === "staff") && modelsReady && (
+      {selectedClass && modelsReady && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Camera Feed */}
           <Card>

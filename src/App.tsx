@@ -24,7 +24,6 @@ import SubscriptionRequests from "./pages/SubscriptionRequests";
 import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/SettingsPage";
-import FestivalThemes from "./pages/FestivalThemes";
 import NotFound from "./pages/NotFound";
 import AIAnalytics from "./pages/AIAnalytics";
 
@@ -48,7 +47,6 @@ import ClassSubjectMapping from "./pages/school/ClassSubjectMapping";
 import ReportCard from "./pages/school/ReportCard";
 import StudentProfile from "./pages/school/StudentProfile";
 import BulkStudentImport from "./pages/school/BulkStudentImport";
-import BulkIDCards from "./pages/school/BulkIDCards";
 import FeeDues from "./pages/school/FeeDues";
 import StudentTransfer from "./pages/school/StudentTransfer";
 import StudentDocuments from "./pages/school/StudentDocuments";
@@ -109,7 +107,6 @@ function SuperAdminRoutes() {
         <Route path="/payments" element={<Payments />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/festival-themes" element={<FestivalThemes />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>
@@ -143,7 +140,6 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/students" element={<Students />} />
         <Route path="/students/profile" element={<StudentProfile />} />
         <Route path="/students/import" element={<BulkStudentImport />} />
-        <Route path="/id-cards" element={<BulkIDCards />} />
         <Route path="/students/transfer" element={<StudentTransfer />} />
         <Route path="/promotion" element={<StudentPromotion />} />
         <Route path="/archive" element={<StudentArchive />} />

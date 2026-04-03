@@ -214,20 +214,10 @@ export default function BackupRestore() {
           <AlertDescription>
             <strong>{result.success ? "Success:" : "Error:"}</strong> {result.message}
             {result.details && (
-              <div className="mt-2 text-sm space-y-1">
+              <div className="mt-2 text-sm">
                 <p>Tables processed: {result.details.tablesProcessed || 0}</p>
                 <p>Records restored: {result.details.recordsRestored || 0}</p>
                 <p>Records skipped: {result.details.recordsSkipped || 0}</p>
-                {result.details.errors && result.details.errors.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-destructive/20">
-                    <p className="font-medium text-destructive">Errors:</p>
-                    <ul className="list-disc list-inside text-xs text-destructive space-y-0.5 mt-1 max-h-32 overflow-auto">
-                      {result.details.errors.map((err: string, i: number) => (
-                        <li key={i}>{err}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
             )}
           </AlertDescription>

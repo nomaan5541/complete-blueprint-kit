@@ -187,8 +187,19 @@ export default function LandingPage() {
     }
   };
 
+  // Festival-aware dynamic styles
+  const festivalColors = festivalTheme?.colors;
+  const festivalStyle = festivalTheme ? {
+    '--festival-primary': festivalColors?.primary || '',
+    '--festival-secondary': festivalColors?.secondary || '',
+    '--festival-accent': festivalColors?.accent || '',
+  } as React.CSSProperties : {};
+
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative" style={festivalStyle}>
+      {/* Festival Animations */}
+      {festivalTheme && <FestivalAnimations animationType={festivalTheme.animation_type} />}
+
       <div className="animated-bg" />
       <div className="texture-overlay" />
 
@@ -197,13 +208,27 @@ export default function LandingPage() {
       <div className="floating-orb floating-orb-2" />
       <div className="floating-orb floating-orb-3" />
 
-      {/* Top urgency banner */}
-      <div className="bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground py-2.5 text-center text-sm font-medium urgency-pulse relative overflow-hidden">
-        <div className="flex items-center justify-center gap-2">
+      {/* Top urgency banner - festival aware */}
+      <div
+        className="py-2.5 text-center text-sm font-medium urgency-pulse relative overflow-hidden safe-top"
+        style={festivalTheme ? {
+          background: `linear-gradient(90deg, ${festivalColors?.primary || '#3b82f6'}, ${festivalColors?.secondary || '#8b5cf6'}, ${festivalColors?.accent || '#06b6d4'})`,
+          color: '#fff',
+        } : undefined}
+      >
+        {!festivalTheme && <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent" />}
+        <div className="flex items-center justify-center gap-2 relative z-10">
           <Gift className="h-4 w-4" />
-          <span>🎉 Limited Offer: <strong>Get 3 months FREE</strong> on yearly plans! </span>
+          <span>
+            {festivalTheme
+              ? festivalTheme.offer_text?.replace("{discount}", String(festivalTheme.discount_percent))
+              : <>🎉 Limited Offer: <strong>Get 3 months FREE</strong> on yearly plans!</>
+            }
+          </span>
           <Timer className="h-4 w-4" />
-          <span className="hidden sm:inline font-bold">Offer ends soon!</span>
+          <span className="hidden sm:inline font-bold">
+            {festivalTheme ? `${festivalTheme.discount_percent}% OFF!` : "Offer ends soon!"}
+          </span>
         </div>
       </div>
 

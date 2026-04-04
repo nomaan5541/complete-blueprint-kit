@@ -84,10 +84,11 @@ export default function SchoolSettings() {
           receipt_prefix: s.receipt_prefix || "RCPT",
         });
         setSmsForm({
-          msg91_auth_key: smsData?.msg91_auth_key || "",
+          msg91_auth_key: "",
           msg91_sender_id: smsData?.msg91_sender_id || "",
           msg91_whatsapp_template_id: smsData?.msg91_whatsapp_template_id || "",
         });
+        setHasAuthKey(smsData?.has_auth_key || false);
         setPaymentConfig({
           stripe_publishable_key: payData?.stripe_publishable_key || "",
           payment_enabled: payData?.payment_enabled || false,

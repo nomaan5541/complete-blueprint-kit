@@ -349,7 +349,7 @@ export default function SchoolSettings() {
                     type="password"
                     value={smsForm.msg91_auth_key}
                     onChange={(e) => setSmsForm((p) => ({ ...p, msg91_auth_key: e.target.value }))}
-                    placeholder="Enter your MSG91 authentication key"
+                    placeholder={hasAuthKey ? "••••••••  (key configured, enter new value to update)" : "Enter your MSG91 authentication key"}
                   />
                 </div>
                 <div className="space-y-2">

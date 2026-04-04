@@ -294,7 +294,7 @@ export default function BulkStudentImport() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Bulk Student Import</h1>
-        <p className="text-muted-foreground">Import students from CSV or UDISE+ Excel file</p>
+        <p className="text-muted-foreground">Import up to 2,000 students from CSV or UDISE+ Excel file</p>
       </div>
 
       <Card>

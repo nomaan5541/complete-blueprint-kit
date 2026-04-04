@@ -161,15 +161,22 @@ export default function SchoolSettings() {
   const saveSmsSettings = async () => {
     if (!schoolId) return;
     setSavingSms(true);
-    const smsData = {
+    const smsData: any = {
       school_id: schoolId!,
-      msg91_auth_key: smsForm.msg91_auth_key || null,
       msg91_sender_id: smsForm.msg91_sender_id || null,
       msg91_whatsapp_template_id: smsForm.msg91_whatsapp_template_id || null,
     };
-    const { error } = await supabase.from("school_sms_config").upsert(smsData as any, { onConflict: "school_id" });
+    // Only update auth key if user entered a new value
+    if (smsForm.msg91_auth_key) {
+      smsData.msg91_auth_key = smsForm.msg91_auth_key;
+    }
+    const { error } = await supabase.from("school_sms_config").upsert(smsData, { onConflict: "school_id" });
     if (error) toast.error(error.message);
-    else toast.success("SMS settings saved");
+    else {
+      toast.success("SMS settings saved");
+      if (smsForm.msg91_auth_key) setHasAuthKey(true);
+      setSmsForm(p => ({ ...p, msg91_auth_key: "" }));
+    }
     setSavingSms(false);
   };
 

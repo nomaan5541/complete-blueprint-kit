@@ -2542,6 +2542,41 @@ export type Database = {
           },
         ]
       }
+      school_sms_config_safe: {
+        Row: {
+          created_at: string | null
+          has_auth_key: boolean | null
+          msg91_sender_id: string | null
+          msg91_whatsapp_template_id: string | null
+          school_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          has_auth_key?: never
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          has_auth_key?: never
+          msg91_sender_id?: string | null
+          msg91_whatsapp_template_id?: string | null
+          school_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_sms_config_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       activate_festival_theme: {

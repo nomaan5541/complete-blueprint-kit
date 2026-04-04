@@ -32,6 +32,7 @@ export default function SchoolSettings() {
     registration_number: "", receipt_prefix: "RCPT",
   });
   const [smsForm, setSmsForm] = useState({ msg91_auth_key: "", msg91_sender_id: "", msg91_whatsapp_template_id: "" });
+  const [hasAuthKey, setHasAuthKey] = useState(false);
   const [savingSms, setSavingSms] = useState(false);
   const [grades, setGrades] = useState<any[]>([]);
 
@@ -58,7 +59,7 @@ export default function SchoolSettings() {
         supabase.from("schools").select("*").eq("id", schoolId!).single(),
         supabase.from("grade_systems").select("*").eq("school_id", schoolId!).order("min_marks", { ascending: false }),
         supabase.from("subscriptions").select("*, subscription_plans(name, price, duration_months)").eq("school_id", schoolId!).order("end_date", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("school_sms_config").select("*").eq("school_id", schoolId!).maybeSingle(),
+        supabase.from("school_sms_config_safe" as any).select("*").eq("school_id", schoolId!).maybeSingle(),
         supabase.from("school_payment_config").select("*").eq("school_id", schoolId!).maybeSingle(),
         supabase.from("platform_payment_settings").select("*").limit(1).maybeSingle(),
         supabase.from("subscription_plans").select("*").eq("is_active", true).order("price"),
@@ -83,10 +84,11 @@ export default function SchoolSettings() {
           receipt_prefix: s.receipt_prefix || "RCPT",
         });
         setSmsForm({
-          msg91_auth_key: smsData?.msg91_auth_key || "",
+          msg91_auth_key: "",
           msg91_sender_id: smsData?.msg91_sender_id || "",
           msg91_whatsapp_template_id: smsData?.msg91_whatsapp_template_id || "",
         });
+        setHasAuthKey(smsData?.has_auth_key || false);
         setPaymentConfig({
           stripe_publishable_key: payData?.stripe_publishable_key || "",
           payment_enabled: payData?.payment_enabled || false,
@@ -159,15 +161,22 @@ export default function SchoolSettings() {
   const saveSmsSettings = async () => {
     if (!schoolId) return;
     setSavingSms(true);
-    const smsData = {
+    const smsData: any = {
       school_id: schoolId!,
-      msg91_auth_key: smsForm.msg91_auth_key || null,
       msg91_sender_id: smsForm.msg91_sender_id || null,
       msg91_whatsapp_template_id: smsForm.msg91_whatsapp_template_id || null,
     };
-    const { error } = await supabase.from("school_sms_config").upsert(smsData as any, { onConflict: "school_id" });
+    // Only update auth key if user entered a new value
+    if (smsForm.msg91_auth_key) {
+      smsData.msg91_auth_key = smsForm.msg91_auth_key;
+    }
+    const { error } = await supabase.from("school_sms_config").upsert(smsData, { onConflict: "school_id" });
     if (error) toast.error(error.message);
-    else toast.success("SMS settings saved");
+    else {
+      toast.success("SMS settings saved");
+      if (smsForm.msg91_auth_key) setHasAuthKey(true);
+      setSmsForm(p => ({ ...p, msg91_auth_key: "" }));
+    }
     setSavingSms(false);
   };
 
@@ -347,7 +356,7 @@ export default function SchoolSettings() {
                     type="password"
                     value={smsForm.msg91_auth_key}
                     onChange={(e) => setSmsForm((p) => ({ ...p, msg91_auth_key: e.target.value }))}
-                    placeholder="Enter your MSG91 authentication key"
+                    placeholder={hasAuthKey ? "••••••••  (key configured, enter new value to update)" : "Enter your MSG91 authentication key"}
                   />
                 </div>
                 <div className="space-y-2">

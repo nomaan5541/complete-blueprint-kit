@@ -208,6 +208,7 @@ export default function BulkStudentImport() {
     if (!selectedYear) { toast.error("Select academic year"); return; }
     const validRows = rows.filter(r => !r.error);
     if (validRows.length === 0) { toast.error("No valid rows to import"); return; }
+    if (validRows.length > 2000) { toast.error("Maximum 2000 students per import. Please split your file."); return; }
 
     setImporting(true);
 

@@ -32,6 +32,7 @@ export default function SchoolSettings() {
     registration_number: "", receipt_prefix: "RCPT",
   });
   const [smsForm, setSmsForm] = useState({ msg91_auth_key: "", msg91_sender_id: "", msg91_whatsapp_template_id: "" });
+  const [hasAuthKey, setHasAuthKey] = useState(false);
   const [savingSms, setSavingSms] = useState(false);
   const [grades, setGrades] = useState<any[]>([]);
 

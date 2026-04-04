@@ -208,6 +208,7 @@ export default function BulkStudentImport() {
     if (!selectedYear) { toast.error("Select academic year"); return; }
     const validRows = rows.filter(r => !r.error);
     if (validRows.length === 0) { toast.error("No valid rows to import"); return; }
+    if (validRows.length > 2000) { toast.error("Maximum 2000 students per import. Please split your file."); return; }
 
     setImporting(true);
 
@@ -293,7 +294,7 @@ export default function BulkStudentImport() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Bulk Student Import</h1>
-        <p className="text-muted-foreground">Import students from CSV or UDISE+ Excel file</p>
+        <p className="text-muted-foreground">Import up to 2,000 students from CSV or UDISE+ Excel file</p>
       </div>
 
       <Card>

@@ -1,11 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { unzip } from "https://deno.land/x/zipjs@v2.7.32/index.js";
+import * as zip from "https://deno.land/x/zipjs@v2.7.32/index.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+// Tables that can be restored, in dependency order (parents first)
+const RESTORE_ORDER = [
+  "academic_years", "classes", "sections", "subjects", "class_subjects",
+  "fee_types", "grade_systems",
+  "student_master", "students",
+  "teachers", "teacher_assignments",
+  "attendance", "exams", "exam_questions", "exam_options", "exam_marks",
+  "student_exam_attempts", "student_answers",
+  "fee_structures", "fee_payments",
+  "timetable_slots", "timetable_entries",
+  "homework", "meetings", "notifications", "school_events",
+  "student_documents", "student_face_data", "student_chat_messages",
+  "school_credentials", "audit_logs",
+];
+
+const ALLOWED_TABLES = new Set(RESTORE_ORDER);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -13,44 +30,50 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify authentication
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
-    
+
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
     if (authErr || !user) throw new Error("Unauthorized");
 
-    // Verify user is school admin
-    const { data: school } = await supabase
+    // Verify user is school admin or super_admin
+    const { data: roles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+    const callerRoles = (roles || []).map((r: any) => r.role);
+    const isSuperAdmin = callerRoles.includes("super_admin");
+
+    const { data: school } = await supabaseAdmin
       .from("schools")
       .select("id")
       .eq("admin_id", user.id)
       .single();
-    
-    if (!school) {
+
+    if (!school && !isSuperAdmin) {
       throw new Error("Only school admins can restore backups");
     }
 
     const { schoolId, filePath, restoreMode = "skip" } = await req.json();
-    
-    if (school.id !== schoolId) {
+
+    if (!isSuperAdmin && school?.id !== schoolId) {
       throw new Error("Unauthorized: School ID mismatch");
     }
 
-    // Validate filePath belongs to the requesting school's storage prefix
-    const expectedPrefix = `${school.id}/backups/`;
+    // Validate filePath
+    const expectedPrefix = `${schoolId}/backups/`;
     if (!filePath || typeof filePath !== "string" || !filePath.startsWith(expectedPrefix)) {
       throw new Error("Invalid file path: must be within your school's backup directory");
     }
 
-    // Download backup file from storage
-    const { data: fileData, error: downloadErr } = await supabase.storage
+    // Download backup file
+    const { data: fileData, error: downloadErr } = await supabaseAdmin.storage
       .from("student-documents")
       .download(filePath);
-
     if (downloadErr) throw new Error(`Failed to download backup: ${downloadErr.message}`);
 
     // Parse ZIP file
@@ -59,146 +82,125 @@ serve(async (req) => {
     const reader = new zip.ZipReader(new zip.BlobReader(blob));
     const entries = await reader.getEntries();
 
-    let tablesProcessed = 0;
-    let recordsRestored = 0;
-    let recordsSkipped = 0;
+    // Build a map of table -> records from the ZIP
+    const tableData = new Map<string, any[]>();
 
-    // Process each file in the backup
     for (const entry of entries) {
       if (entry.directory) continue;
-      
       const fileName = entry.filename.split("/").pop() || "";
       if (!fileName.endsWith(".csv") && !fileName.endsWith(".json")) continue;
       if (fileName === "school_info.csv" || fileName === "school_info.json") continue;
 
       const tableName = fileName.replace(/\.(csv|json)$/, "");
-      
-      // Security: Only allow restoring specific safe tables
-      const ALLOWED_TABLES = new Set([
-        'students', 'student_master', 'attendance', 'exam_marks', 'fee_payments',
-        'fee_structures', 'fee_types', 'homework', 'student_documents',
-        'student_face_data', 'classes', 'sections', 'subjects', 'class_subjects',
-        'academic_years', 'exams', 'exam_questions', 'exam_options',
-        'grade_systems', 'meetings', 'notifications', 'school_events',
-        'school_credentials', 'study_materials', 'student_chat_messages',
-        'student_exam_attempts', 'student_answers'
-      ]);
       if (!ALLOWED_TABLES.has(tableName)) {
         console.warn(`Skipping disallowed table: ${tableName}`);
         continue;
       }
-      
-      console.log(`Processing table: ${tableName}`);
 
       try {
-        // Read file content
         const textWriter = new zip.TextWriter();
         const content = await entry.getData(textWriter);
-        
+
         let records: any[];
         if (fileName.endsWith(".json")) {
           records = JSON.parse(content);
         } else {
-          // Parse CSV
           records = parseCsv(content);
         }
 
         if (!Array.isArray(records) || records.length === 0) continue;
 
         // Validate all records belong to this school
-        const hasSchoolId = records.every(r => r.school_id === schoolId);
-        if (!hasSchoolId) {
-          console.warn(`Skipping ${tableName}: contains data from other schools`);
-          continue;
+        const validRecords = records.filter(r => r.school_id === schoolId);
+        if (validRecords.length !== records.length) {
+          console.warn(`${tableName}: filtered ${records.length - validRecords.length} cross-tenant records`);
         }
+        if (validRecords.length > 0) {
+          tableData.set(tableName, validRecords);
+        }
+      } catch (e: any) {
+        console.error(`Error reading ${tableName}:`, e.message);
+      }
+    }
+    await reader.close();
 
-        // Process records based on restore mode
-        for (const record of records) {
-          try {
-            if (restoreMode === "skip") {
-              // Insert only if doesn't exist
-              const { error } = await supabase
-                .from(tableName)
-                .insert(record)
-                .select()
-                .single();
-              
-              if (error) {
-                if (error.code === "23505") { // Duplicate key
-                  recordsSkipped++;
+    let tablesProcessed = 0;
+    let recordsRestored = 0;
+    let recordsSkipped = 0;
+    const errors: string[] = [];
+
+    // Process tables in dependency order
+    for (const tableName of RESTORE_ORDER) {
+      const records = tableData.get(tableName);
+      if (!records) continue;
+
+      console.log(`Restoring ${tableName}: ${records.length} records (mode=${restoreMode})`);
+
+      // Process in batches
+      const BATCH = 50;
+      for (let i = 0; i < records.length; i += BATCH) {
+        const batch = records.slice(i, i + BATCH);
+
+        try {
+          if (restoreMode === "skip") {
+            // Use upsert with ignoreDuplicates to skip existing
+            const { error } = await supabaseAdmin
+              .from(tableName as any)
+              .upsert(batch, { onConflict: "id", ignoreDuplicates: true });
+            if (error) {
+              console.warn(`Batch skip error in ${tableName}:`, error.message);
+              errors.push(`${tableName}: ${error.message}`);
+              recordsSkipped += batch.length;
+            } else {
+              recordsRestored += batch.length;
+            }
+          } else if (restoreMode === "overwrite") {
+            const { error } = await supabaseAdmin
+              .from(tableName as any)
+              .upsert(batch, { onConflict: "id" });
+            if (error) {
+              console.warn(`Batch upsert error in ${tableName}:`, error.message);
+              errors.push(`${tableName}: ${error.message}`);
+              recordsSkipped += batch.length;
+            } else {
+              recordsRestored += batch.length;
+            }
+          } else if (restoreMode === "merge") {
+            // For merge, process individually to compare timestamps
+            for (const record of batch) {
+              try {
+                const { data: existing } = await supabaseAdmin
+                  .from(tableName as any)
+                  .select("id, updated_at")
+                  .eq("id", record.id)
+                  .maybeSingle();
+
+                if (!existing) {
+                  const { error } = await supabaseAdmin.from(tableName as any).insert(record);
+                  if (error) { recordsSkipped++; } else { recordsRestored++; }
+                } else if (record.updated_at && existing.updated_at &&
+                           new Date(record.updated_at) > new Date(existing.updated_at)) {
+                  const { error } = await supabaseAdmin.from(tableName as any).update(record).eq("id", record.id);
+                  if (error) { recordsSkipped++; } else { recordsRestored++; }
                 } else {
-                  console.warn(`Skip insert error in ${tableName}:`, error.message);
                   recordsSkipped++;
                 }
-              } else {
-                recordsRestored++;
-              }
-            } else if (restoreMode === "overwrite") {
-              // Upsert (insert or update)
-              const { error } = await supabase
-                .from(tableName)
-                .upsert(record, { onConflict: "id" });
-              
-              if (error) {
-                console.warn(`Upsert error in ${tableName}:`, error.message);
-                recordsSkipped++;
-              } else {
-                recordsRestored++;
-              }
-            } else if (restoreMode === "merge") {
-              // Check if exists, update if newer
-              const { data: existing } = await supabase
-                .from(tableName)
-                .select("id, updated_at")
-                .eq("id", record.id)
-                .single();
-              
-              if (!existing) {
-                // Insert new record
-                const { error } = await supabase
-                  .from(tableName)
-                  .insert(record);
-                
-                if (error) {
-                  console.warn(`Insert error in ${tableName}:`, error.message);
-                  recordsSkipped++;
-                } else {
-                  recordsRestored++;
-                }
-              } else if (record.updated_at && existing.updated_at && 
-                         new Date(record.updated_at) > new Date(existing.updated_at)) {
-                // Update if backup data is newer
-                const { error } = await supabase
-                  .from(tableName)
-                  .update(record)
-                  .eq("id", record.id);
-                
-                if (error) {
-                  console.warn(`Update error in ${tableName}:`, error.message);
-                  recordsSkipped++;
-                } else {
-                  recordsRestored++;
-                }
-              } else {
+              } catch {
                 recordsSkipped++;
               }
             }
-          } catch (recordErr: any) {
-            console.warn(`Error processing record in ${tableName}:`, recordErr.message);
-            recordsSkipped++;
           }
+        } catch (batchErr: any) {
+          console.error(`Batch error in ${tableName}:`, batchErr.message);
+          errors.push(`${tableName}: ${batchErr.message}`);
+          recordsSkipped += batch.length;
         }
-
-        tablesProcessed++;
-      } catch (tableErr: any) {
-        console.error(`Error processing table ${tableName}:`, tableErr.message);
       }
+      tablesProcessed++;
     }
 
-    await reader.close();
-
     // Log audit
-    await supabase.from("audit_logs").insert({
+    await supabaseAdmin.from("audit_logs").insert({
       school_id: schoolId,
       user_id: user.id,
       action: "restore_backup",
@@ -210,7 +212,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         message: "Backup restored successfully",
-        details: { tablesProcessed, recordsRestored, recordsSkipped },
+        details: { tablesProcessed, recordsRestored, recordsSkipped, errors: errors.slice(0, 20) },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -226,38 +228,67 @@ serve(async (req) => {
 function parseCsv(content: string): any[] {
   const lines = content.trim().split("\n");
   if (lines.length < 2) return [];
-  
-  const headers = lines[0].split(",").map(h => h.trim());
+
+  const headers = parseCSVLine(lines[0]);
   const records = [];
-  
+
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(",");
+    const line = lines[i].trim();
+    if (!line) continue;
+    const values = parseCSVLine(line);
     const record: any = {};
-    
+
     headers.forEach((header, index) => {
-      let value = values[index]?.trim() || "";
-      
-      // Remove quotes if present
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.slice(1, -1).replace(/""/g, '"');
-      }
-      
-      // Try to parse JSON objects/arrays
+      let value = values[index] ?? "";
+      // Try to parse JSON
       if (value.startsWith("{") || value.startsWith("[")) {
-        try {
-          record[header] = JSON.parse(value);
-        } catch {
-          record[header] = value;
-        }
-      } else if (value === "") {
-        record[header] = null;
+        try { record[header] = JSON.parse(value); return; } catch { /* use string */ }
+      }
+      if (value === "") { record[header] = null; }
+      else if (value === "true") { record[header] = true; }
+      else if (value === "false") { record[header] = false; }
+      else if (!isNaN(Number(value)) && value !== "" && !header.includes("phone") && !header.includes("pincode") && !header.includes("number")) {
+        record[header] = Number(value);
       } else {
         record[header] = value;
       }
     });
-    
+
     records.push(record);
   }
-  
+
   return records;
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+  }
+  result.push(current.trim());
+  return result;
 }

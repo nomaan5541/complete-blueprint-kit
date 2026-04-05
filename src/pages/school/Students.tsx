@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus, ScanFace } from "lucide-react";
 import StudentFormTabs, { emptyStudentForm, type StudentFormData } from "@/components/students/StudentFormTabs";
 import { FaceEnrollment } from "@/components/FaceEnrollment";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 export default function Students() {
   const navigate = useNavigate();

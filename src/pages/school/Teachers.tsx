@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Teachers() {
   const { schoolId } = useSchool();
+  const { canAddTeachers, currentTeachers, maxTeachers, teachersRemaining, planName } = usePlanLimits(schoolId);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);

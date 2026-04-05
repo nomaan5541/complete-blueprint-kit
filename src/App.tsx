@@ -266,6 +266,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={user ? <ProtectedRedirect /> : <LandingPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/install" element={<InstallApp />} />

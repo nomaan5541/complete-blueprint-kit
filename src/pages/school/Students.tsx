@@ -22,6 +22,7 @@ export default function Students() {
   const navigate = useNavigate();
   const { schoolId } = useSchool();
   const { academicYears, selectedYearId } = useAcademicYear();
+  const { canAddStudents, currentStudents, maxStudents, studentsRemaining, planName } = usePlanLimits(schoolId);
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);

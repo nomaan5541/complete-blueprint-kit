@@ -61,6 +61,10 @@ export default function Teachers() {
 
   const handleCreate = async () => {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
+    if (!canAddTeachers()) {
+      toast.error(`Teacher limit reached! Your ${planName || "plan"} allows max ${maxTeachers} teachers. Please upgrade your plan.`);
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("teachers").insert({
       school_id: schoolId!, name: form.name.trim(),

@@ -17,9 +17,12 @@ interface PlanData {
   id: string;
   name: string;
   price: number;
-  duration_days: number;
+  duration_months: number;
   max_students: number | null;
   max_teachers: number | null;
+  features: any;
+  is_active: boolean;
+}
   features: any;
   is_active: boolean;
 }

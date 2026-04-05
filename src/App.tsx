@@ -60,7 +60,7 @@ import StudentExamTake from "./pages/school/StudentExamTake";
 import FaceAttendance from "./pages/school/FaceAttendance";
 import AIReportCard from "./pages/school/AIReportCard";
 import StudentArchive from "./pages/school/StudentArchive";
-
+import BulkIDCardGenerator from "./pages/school/BulkIDCardGenerator";
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherAttendance from "./pages/teacher/TeacherAttendance";

@@ -27,6 +27,7 @@ const navItems = [
   { title: "Subject Mapping", url: "/school/subject-mapping", icon: BookOpen },
   { title: "Students", url: "/school/students", icon: GraduationCap },
   { title: "Bulk Import", url: "/school/students/import", icon: GraduationCap },
+  { title: "Bulk ID Cards", url: "/school/students/id-cards", icon: CreditCard },
   { title: "Transfer/Leaving", url: "/school/students/transfer", icon: GraduationCap },
   { title: "Promotion", url: "/school/promotion", icon: ArrowUpRight },
   { title: "Student Archive", url: "/school/archive", icon: Archive },

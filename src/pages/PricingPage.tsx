@@ -23,9 +23,19 @@ interface PlanData {
   features: any;
   is_active: boolean;
 }
-  features: any;
-  is_active: boolean;
-}
+
+const planIcons: Record<string, any> = {
+  "Free Trial": Zap, Starter: Star, Professional: Crown, Ultimate: Crown,
+};
+const planColors: Record<string, string> = {
+  "Free Trial": "from-emerald-500 to-teal-600",
+  Starter: "from-blue-500 to-indigo-600",
+  Professional: "from-purple-500 to-pink-600",
+  Ultimate: "from-amber-500 to-orange-600",
+};
+const planBadges: Record<string, string> = {
+  Starter: "Save 33%", Professional: "Most Popular", Ultimate: "Best Value",
+};
 
 export default function PricingPage() {
   const navigate = useNavigate();
@@ -33,7 +43,6 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const [customOpen, setCustomOpen] = useState(false);
   const [customForm, setCustomForm] = useState({ name: "", email: "", school: "", message: "" });
-  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     supabase
@@ -42,52 +51,24 @@ export default function PricingPage() {
       .eq("is_active", true)
       .order("price", { ascending: true })
       .then(({ data }) => {
-        setPlans(data || []);
+        setPlans((data as any) || []);
         setLoading(false);
       });
   }, []);
 
-  const planIcons: Record<string, any> = {
-    "Free Trial": Zap,
-    "Starter": Star,
-    "Professional": Crown,
-    "Ultimate": Crown,
-  };
-
-  const planColors: Record<string, string> = {
-    "Free Trial": "from-emerald-500 to-teal-600",
-    "Starter": "from-blue-500 to-indigo-600",
-    "Professional": "from-purple-500 to-pink-600",
-    "Ultimate": "from-amber-500 to-orange-600",
-  };
-
-  const planBadges: Record<string, string> = {
-    "Starter": "Save 33%",
-    "Professional": "Most Popular",
-    "Ultimate": "Best Value",
-  };
-
-  const handleCustomRequest = async () => {
+  const handleCustomRequest = () => {
     if (!customForm.name || !customForm.email) {
-      toast.error("Please fill name and email");
-      return;
+      toast.error("Please fill name and email"); return;
     }
-    setSending(true);
-    // Store the request in notifications or a custom table
-    // For now just show success
     toast.success("Your customization request has been submitted! We'll get back to you within 24 hours.");
     setCustomOpen(false);
     setCustomForm({ name: "", email: "", school: "", message: "" });
-    setSending(false);
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading plans...</div>;
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading plans...</div>;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground">
@@ -97,36 +78,26 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Hero */}
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">Pricing Plans</Badge>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-          Choose the Perfect Plan for Your School
-        </h1>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Choose the Perfect Plan for Your School</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
           Flexible pricing designed for schools of all sizes. Start free and scale as you grow.
         </p>
 
-        {/* Plan Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const Icon = planIcons[plan.name] || Star;
             const gradient = planColors[plan.name] || "from-gray-500 to-gray-600";
             const badge = planBadges[plan.name];
             const isPro = plan.name === "Professional";
+            const durationLabel = plan.duration_months > 1 ? `${plan.duration_months} months` : `${plan.duration_months} month`;
 
             return (
-              <Card
-                key={plan.id}
-                className={`relative overflow-hidden text-left transition-all hover:shadow-xl ${
-                  isPro ? "ring-2 ring-primary scale-105 z-10" : ""
-                }`}
-              >
+              <Card key={plan.id} className={`relative overflow-hidden text-left transition-all hover:shadow-xl ${isPro ? "ring-2 ring-primary scale-105 z-10" : ""}`}>
                 {badge && (
                   <div className="absolute top-3 right-3">
-                    <Badge className={`bg-gradient-to-r ${gradient} text-white border-0 text-xs`}>
-                      {badge}
-                    </Badge>
+                    <Badge className={`bg-gradient-to-r ${gradient} border-0 text-xs`}>{badge}</Badge>
                   </div>
                 )}
                 <CardHeader className="pb-4">
@@ -140,7 +111,7 @@ export default function PricingPage() {
                     ) : (
                       <div>
                         <span className="text-3xl font-bold text-foreground">₹{plan.price.toLocaleString()}</span>
-                        <span className="text-muted-foreground text-sm">/{plan.duration_days} days</span>
+                        <span className="text-muted-foreground text-sm">/{durationLabel}</span>
                       </div>
                     )}
                   </div>
@@ -157,14 +128,10 @@ export default function PricingPage() {
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Duration</span>
-                      <span className="font-medium">{plan.duration_days} days</span>
+                      <span className="font-medium">{durationLabel}</span>
                     </div>
                   </div>
-
-                  <Button
-                    className={`w-full bg-gradient-to-r ${gradient} text-white hover:opacity-90`}
-                    onClick={() => navigate("/login?role=school_admin")}
-                  >
+                  <Button className={`w-full bg-gradient-to-r ${gradient} hover:opacity-90`} onClick={() => navigate("/login?role=school_admin")}>
                     {plan.price === 0 ? "Start Free" : "Get Started"}
                   </Button>
                 </CardContent>
@@ -179,17 +146,13 @@ export default function PricingPage() {
             <CardContent className="py-8 text-center">
               <MessageSquare className="h-10 w-10 mx-auto mb-4 text-primary" />
               <h3 className="text-xl font-bold mb-2">Need a Custom Plan?</h3>
-              <p className="text-muted-foreground mb-4">
-                Have specific requirements? We'll create a customized plan tailored to your school's needs.
-              </p>
-              <Button onClick={() => setCustomOpen(true)} variant="default" size="lg">
-                Request Custom Plan
-              </Button>
+              <p className="text-muted-foreground mb-4">Have specific requirements? We'll create a customized plan tailored to your school's needs.</p>
+              <Button onClick={() => setCustomOpen(true)} variant="default" size="lg">Request Custom Plan</Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Feature Comparison Table */}
+        {/* Feature Comparison */}
         <div className="mt-16 max-w-5xl mx-auto text-left">
           <h2 className="text-2xl font-bold text-center mb-8">Feature Comparison</h2>
           <div className="overflow-x-auto">
@@ -207,18 +170,11 @@ export default function PricingPage() {
                 {PLAN_FEATURE_LABELS.map((feat, i) => (
                   <tr key={i} className="border-b hover:bg-muted/50">
                     <td className="py-3 px-4 text-sm">{feat.label}</td>
-                    <td className="text-center py-3 px-2">
-                      {feat.trial ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      {feat.starter ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      {feat.professional ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
-                    </td>
-                    <td className="text-center py-3 px-2">
-                      {feat.ultimate ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
-                    </td>
+                    {[feat.trial, feat.starter, feat.professional, feat.ultimate].map((v, j) => (
+                      <td key={j} className="text-center py-3 px-2">
+                        {v ? <Check className="h-4 w-4 text-primary mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -227,12 +183,9 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Custom Plan Dialog */}
       <Dialog open={customOpen} onOpenChange={setCustomOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Custom Plan</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Request Custom Plan</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">
               <Label>Your Name *</Label>
@@ -248,16 +201,9 @@ export default function PricingPage() {
             </div>
             <div className="space-y-1">
               <Label>Requirements</Label>
-              <Textarea
-                value={customForm.message}
-                onChange={(e) => setCustomForm((p) => ({ ...p, message: e.target.value }))}
-                placeholder="Describe your specific needs — number of students, features required, budget, etc."
-                rows={4}
-              />
+              <Textarea value={customForm.message} onChange={(e) => setCustomForm((p) => ({ ...p, message: e.target.value }))} placeholder="Describe your specific needs..." rows={4} />
             </div>
-            <Button onClick={handleCustomRequest} disabled={sending} className="w-full">
-              Submit Request
-            </Button>
+            <Button onClick={handleCustomRequest} className="w-full">Submit Request</Button>
           </div>
         </DialogContent>
       </Dialog>

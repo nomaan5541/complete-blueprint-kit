@@ -9,10 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Loader2, Search, Trash2, Link, Pencil, UserPlus } from "lucide-react";
+import { Plus, Loader2, Search, Trash2, Link, Pencil, UserPlus, AlertTriangle } from "lucide-react";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Teachers() {
   const { schoolId } = useSchool();
+  const { canAddTeachers, currentTeachers, maxTeachers, teachersRemaining, planName } = usePlanLimits(schoolId);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -58,6 +61,10 @@ export default function Teachers() {
 
   const handleCreate = async () => {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
+    if (!canAddTeachers()) {
+      toast.error(`Teacher limit reached! Your ${planName || "plan"} allows max ${maxTeachers} teachers. Please upgrade your plan.`);
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("teachers").insert({
       school_id: schoolId!, name: form.name.trim(),

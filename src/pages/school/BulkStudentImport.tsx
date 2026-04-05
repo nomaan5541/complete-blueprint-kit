@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Upload, Download, Loader2, AlertTriangle, CheckCircle, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ParsedRow {
   admission_number: string;
@@ -40,6 +42,7 @@ const UDISE_CLASS_MAP: Record<string, string> = {
 
 export default function BulkStudentImport() {
   const { schoolId } = useSchool();
+  const { canAddStudents, currentStudents, maxStudents, studentsRemaining, planName } = usePlanLimits(schoolId);
   const fileRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
@@ -209,6 +212,10 @@ export default function BulkStudentImport() {
     const validRows = rows.filter(r => !r.error);
     if (validRows.length === 0) { toast.error("No valid rows to import"); return; }
     if (validRows.length > 2000) { toast.error("Maximum 2000 students per import. Please split your file."); return; }
+    if (!canAddStudents(validRows.length)) {
+      toast.error(`Plan limit exceeded! Your ${planName || "plan"} allows ${maxStudents} students (${currentStudents} currently). You're trying to add ${validRows.length} but only ${studentsRemaining} slots remaining. Please upgrade your plan.`);
+      return;
+    }
 
     setImporting(true);
 

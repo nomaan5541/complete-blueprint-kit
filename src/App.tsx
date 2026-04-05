@@ -12,6 +12,7 @@ import { useSchool } from "@/hooks/useSchool";
 import OfflineBanner from "@/components/OfflineBanner";
 import InstallApp from "@/pages/InstallApp";
 import LandingPage from "./pages/LandingPage";
+import PricingPage from "./pages/PricingPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
@@ -59,7 +60,7 @@ import StudentExamTake from "./pages/school/StudentExamTake";
 import FaceAttendance from "./pages/school/FaceAttendance";
 import AIReportCard from "./pages/school/AIReportCard";
 import StudentArchive from "./pages/school/StudentArchive";
-
+import BulkIDCardGenerator from "./pages/school/BulkIDCardGenerator";
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherAttendance from "./pages/teacher/TeacherAttendance";
@@ -142,6 +143,7 @@ function SchoolAdminRoutesWrapper() {
         <Route path="/students" element={<Students />} />
         <Route path="/students/profile" element={<StudentProfile />} />
         <Route path="/students/import" element={<BulkStudentImport />} />
+        <Route path="/students/id-cards" element={<BulkIDCardGenerator />} />
         <Route path="/students/transfer" element={<StudentTransfer />} />
         <Route path="/promotion" element={<StudentPromotion />} />
         <Route path="/archive" element={<StudentArchive />} />
@@ -265,6 +267,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={user ? <ProtectedRedirect /> : <LandingPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/install" element={<InstallApp />} />

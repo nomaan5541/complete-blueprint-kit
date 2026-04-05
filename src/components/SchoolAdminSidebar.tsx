@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive,
+  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive, CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -27,6 +27,7 @@ const navItems = [
   { title: "Subject Mapping", url: "/school/subject-mapping", icon: BookOpen },
   { title: "Students", url: "/school/students", icon: GraduationCap },
   { title: "Bulk Import", url: "/school/students/import", icon: GraduationCap },
+  { title: "Bulk ID Cards", url: "/school/students/id-cards", icon: CreditCard },
   { title: "Transfer/Leaving", url: "/school/students/transfer", icon: GraduationCap },
   { title: "Promotion", url: "/school/promotion", icon: ArrowUpRight },
   { title: "Student Archive", url: "/school/archive", icon: Archive },

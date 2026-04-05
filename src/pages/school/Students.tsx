@@ -14,11 +14,15 @@ import { toast } from "sonner";
 import { Plus, Loader2, Search, Eye, Trash2, Pencil, UserPlus, ScanFace } from "lucide-react";
 import StudentFormTabs, { emptyStudentForm, type StudentFormData } from "@/components/students/StudentFormTabs";
 import { FaceEnrollment } from "@/components/FaceEnrollment";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 export default function Students() {
   const navigate = useNavigate();
   const { schoolId } = useSchool();
   const { academicYears, selectedYearId } = useAcademicYear();
+  const { canAddStudents, currentStudents, maxStudents, studentsRemaining, planName } = usePlanLimits(schoolId);
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
@@ -115,6 +119,10 @@ export default function Students() {
   const handleCreate = async () => {
     if (!form.name.trim() || !form.admission_number.trim() || !form.academic_year_id) {
       toast.error("Name, admission number, and academic year are required"); return;
+    }
+    if (!canAddStudents()) {
+      toast.error(`Student limit reached! Your ${planName || "plan"} allows max ${maxStudents} students. Please upgrade your plan.`);
+      return;
     }
     setSaving(true);
     try {

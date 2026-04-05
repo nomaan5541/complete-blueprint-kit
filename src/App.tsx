@@ -12,6 +12,7 @@ import { useSchool } from "@/hooks/useSchool";
 import OfflineBanner from "@/components/OfflineBanner";
 import InstallApp from "@/pages/InstallApp";
 import LandingPage from "./pages/LandingPage";
+import PricingPage from "./pages/PricingPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";

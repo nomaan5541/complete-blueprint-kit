@@ -42,6 +42,7 @@ const UDISE_CLASS_MAP: Record<string, string> = {
 
 export default function BulkStudentImport() {
   const { schoolId } = useSchool();
+  const { canAddStudents, currentStudents, maxStudents, studentsRemaining, planName } = usePlanLimits(schoolId);
   const fileRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [classes, setClasses] = useState<any[]>([]);

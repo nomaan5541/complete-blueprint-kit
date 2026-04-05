@@ -212,6 +212,10 @@ export default function BulkStudentImport() {
     const validRows = rows.filter(r => !r.error);
     if (validRows.length === 0) { toast.error("No valid rows to import"); return; }
     if (validRows.length > 2000) { toast.error("Maximum 2000 students per import. Please split your file."); return; }
+    if (!canAddStudents(validRows.length)) {
+      toast.error(`Plan limit exceeded! Your ${planName || "plan"} allows ${maxStudents} students (${currentStudents} currently). You're trying to add ${validRows.length} but only ${studentsRemaining} slots remaining. Please upgrade your plan.`);
+      return;
+    }
 
     setImporting(true);
 

@@ -1297,6 +1297,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          id_card_signature_url: string | null
+          id_card_template: string | null
           logo_url: string | null
           name: string
           phone: string | null
@@ -1320,6 +1322,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          id_card_signature_url?: string | null
+          id_card_template?: string | null
           logo_url?: string | null
           name: string
           phone?: string | null
@@ -1343,6 +1347,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          id_card_signature_url?: string | null
+          id_card_template?: string | null
           logo_url?: string | null
           name?: string
           phone?: string | null

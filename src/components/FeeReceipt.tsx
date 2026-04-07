@@ -21,6 +21,7 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
   const [totalPaid, setTotalPaid] = useState(0);
   const [previousPaid, setPreviousPaid] = useState(0);
   const [showFullBreakdown, setShowFullBreakdown] = useState(true);
+  const [blackAndWhite, setBlackAndWhite] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

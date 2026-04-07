@@ -199,8 +199,9 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
         </style>
       </head>
       <body>${printContent.innerHTML}</body>
-      </html>
-    `);
+      </html>`;
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
     printWindow.document.close();
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
   };

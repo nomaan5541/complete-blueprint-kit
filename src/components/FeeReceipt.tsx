@@ -421,6 +421,16 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
               Show total fee, dues & remaining balance on receipt
             </Label>
           </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="blackAndWhite"
+              checked={blackAndWhite}
+              onCheckedChange={(checked) => setBlackAndWhite(checked === true)}
+            />
+            <Label htmlFor="blackAndWhite" className="text-sm text-muted-foreground cursor-pointer">
+              🖨️ Black & White mode (saves printer ink)
+            </Label>
+          </div>
           <Button
             onClick={handlePrint}
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"

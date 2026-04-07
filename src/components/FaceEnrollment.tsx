@@ -76,10 +76,11 @@ export function FaceEnrollment({ open, onOpenChange, student, onEnrolled }: Face
       setStatus("success");
       toast.success(`Face enrolled for ${student.name}`);
       onEnrolled?.();
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Failed to enroll face";
       setStatus("error");
-      setErrorMsg(e.message || "Failed to enroll face");
-      toast.error("Enrollment failed: " + e.message);
+      setErrorMsg(errorMessage);
+      toast.error("Enrollment failed: " + errorMessage);
     } finally {
       setLoading(false);
     }

@@ -93,13 +93,7 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Fee Receipt - ${payment.receipt_number}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
+    const styles = `* { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A5; margin: 0; }
           body {
             font-family: 'Georgia', 'Times New Roman', serif;
@@ -148,7 +142,7 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
             position: relative;
           }
           .receipt-title::before, .receipt-title::after {
-            content: '—';
+            content: '\\2014';
             color: #8B6914;
             margin: 0 8px;
           }
@@ -195,13 +189,18 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
           .footer .motto { font-size: 9px; color: #6a5e4a; letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
           @media print {
             body { background: #0a0a0a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          }
-        </style>
-      </head>
-      <body>${printContent.innerHTML}</body>
-      </html>
-    `);
-    printWindow.document.close();
+          }`;
+
+    const receiptNumber = payment.receipt_number || '';
+    const doc = printWindow.document;
+    doc.open();
+    doc.write("<!DOCTYPE html><html><head>");
+    doc.write("<title>Fee Receipt - " + receiptNumber.replace(/[<>"'&]/g, '') + "</title>");
+    doc.write("<style>" + styles + "</style>");
+    doc.write("</head><body>");
+    doc.write(printContent.innerHTML);
+    doc.write("</body></html>");
+    doc.close();
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
   };
 

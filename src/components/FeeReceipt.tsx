@@ -94,6 +94,7 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
+    const bwFilter = blackAndWhite ? "filter: grayscale(100%) !important;" : "";
     const styles = `* { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A5; margin: 0; }
           body {
@@ -189,7 +190,8 @@ export function FeeReceipt({ open, onOpenChange, payment, schoolId }: FeeReceipt
           .footer .thanks { font-size: 11px; color: #b0a48a; }
           .footer .motto { font-size: 9px; color: #6a5e4a; letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
           @media print {
-            body { background: #0a0a0a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { background: #0a0a0a; -webkit-print-color-adjust: exact; print-color-adjust: exact; ${bwFilter} }
+            .receipt-wrapper { ${bwFilter} }
           }`;
 
     const receiptNumber = payment.receipt_number || '';

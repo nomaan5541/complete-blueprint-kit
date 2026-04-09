@@ -2551,7 +2551,7 @@ export type Database = {
       school_sms_config_safe: {
         Row: {
           created_at: string | null
-          has_auth_key: boolean | null
+          key_configured: boolean | null
           msg91_sender_id: string | null
           msg91_whatsapp_template_id: string | null
           school_id: string | null
@@ -2559,7 +2559,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          has_auth_key?: never
+          key_configured?: never
           msg91_sender_id?: string | null
           msg91_whatsapp_template_id?: string | null
           school_id?: string | null
@@ -2567,7 +2567,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          has_auth_key?: never
+          key_configured?: never
           msg91_sender_id?: string | null
           msg91_whatsapp_template_id?: string | null
           school_id?: string | null

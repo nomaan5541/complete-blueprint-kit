@@ -15,7 +15,7 @@ import { TeacherLayout } from "@/components/TeacherLayout";
 import { StudentLayout } from "@/components/StudentLayout";
 
 // Lazy-loaded pages
-const LandingPage = lazy(() => import("./pages/LandingPage"));
+import LandingPage from "./pages/LandingPage";
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const Login = lazy(() => import("./pages/Login"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));

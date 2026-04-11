@@ -22,21 +22,25 @@ export function useFestivalTheme() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("festival_themes")
-      .select("*")
-      .eq("is_active", true)
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          setTheme({
-            ...data,
-            colors: typeof data.colors === "string" ? JSON.parse(data.colors) : (data.colors || {}),
-          } as FestivalTheme);
-        }
-        setLoading(false);
-      });
+    // Defer festival theme fetch to not block LCP
+    const id = requestAnimationFrame(() => {
+      supabase
+        .from("festival_themes")
+        .select("*")
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) {
+            setTheme({
+              ...data,
+              colors: typeof data.colors === "string" ? JSON.parse(data.colors) : (data.colors || {}),
+            } as FestivalTheme);
+          }
+          setLoading(false);
+        });
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   return { theme, loading };

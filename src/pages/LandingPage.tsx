@@ -53,27 +53,33 @@ const whyChooseUs = [
   { icon: Heart, title: "Dedicated Support", desc: "Priority WhatsApp support, video call training & regular feature updates." },
 ];
 
-// Custom hook for scroll reveal
+// Custom hook for scroll reveal - deferred to not block LCP
 function useScrollReveal() {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("revealed");
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
-    );
+    // Defer scroll reveal setup to after initial paint
+    const id = requestAnimationFrame(() => {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("revealed");
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+      );
 
-    document.querySelectorAll(".scroll-reveal").forEach((el) => {
-      observerRef.current?.observe(el);
+      document.querySelectorAll(".scroll-reveal").forEach((el) => {
+        observerRef.current?.observe(el);
+      });
     });
 
-    return () => observerRef.current?.disconnect();
+    return () => {
+      cancelAnimationFrame(id);
+      observerRef.current?.disconnect();
+    };
   }, []);
 }
 
@@ -142,9 +148,13 @@ export default function LandingPage() {
   useScrollReveal();
 
   useEffect(() => {
-    supabase.from("subscription_plans").select("*").eq("is_active", true).order("price").then(({ data }) => {
-      setPlans(data || []);
+    // Defer non-critical data fetch to after initial paint
+    const id = requestAnimationFrame(() => {
+      supabase.from("subscription_plans").select("*").eq("is_active", true).order("price").then(({ data }) => {
+        setPlans(data || []);
+      });
     });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {

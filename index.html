@@ -34,11 +34,26 @@
     /* Critical inline CSS for faster LCP */
     #root { min-height: 100vh; }
     body { margin: 0; font-family: Inter, system-ui, -apple-system, sans-serif; }
+    /* Static skeleton styles - hidden once React mounts */
+    #static-skeleton { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; background: hsl(214, 32%, 97%); }
+    #static-skeleton h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; color: hsl(215, 25%, 12%); line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
+    #static-skeleton .hero-gradient { background: linear-gradient(to right, hsl(217, 91%, 53%), hsl(226, 76%, 60%), hsl(199, 89%, 60%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    #static-skeleton p { color: hsl(215, 15%, 47%); font-size: 1.125rem; max-width: 36rem; margin: 1.5rem auto 0; line-height: 1.6; }
+    @media (prefers-color-scheme: dark) {
+      #static-skeleton { background: hsl(222, 47%, 6%); }
+      #static-skeleton h1 { color: hsl(214, 32%, 97%); }
+    }
   </style>
 </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static skeleton for faster LCP - replaced by React on mount -->
+      <div id="static-skeleton">
+        <h1>Complete School Management <span class="hero-gradient">Made Simple</span></h1>
+        <p>Streamline admissions, attendance, fees, exams & more. One powerful platform for schools, teachers & students.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -2524,20 +2524,6 @@ export type Database = {
           option_text: string | null
           question_id: string | null
         }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          option_image?: string | null
-          option_text?: string | null
-          question_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          option_image?: string | null
-          option_text?: string | null
-          question_id?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "exam_options_question_id_fkey"

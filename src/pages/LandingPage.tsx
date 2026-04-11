@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFestivalTheme } from "@/hooks/useFestivalTheme";
-import FestivalAnimations from "@/components/FestivalAnimations";
+const FestivalAnimations = lazy(() => import("@/components/FestivalAnimations"));
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -198,7 +198,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen relative" style={festivalStyle}>
       {/* Festival Animations */}
-      {festivalTheme && <FestivalAnimations animationType={festivalTheme.animation_type} />}
+      {festivalTheme && <Suspense fallback={null}><FestivalAnimations animationType={festivalTheme.animation_type} /></Suspense>}
 
       <div className="animated-bg" />
       <div className="texture-overlay" />

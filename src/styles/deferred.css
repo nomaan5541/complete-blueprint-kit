@@ -1,0 +1,259 @@
+/* ── Animated gradient background ── */
+.animated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    135deg,
+    hsl(214, 32%, 97%) 0%,
+    hsl(215, 28%, 91%) 30%,
+    hsl(220, 30%, 95%) 60%,
+    hsl(210, 36%, 96%) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+.dark .animated-bg {
+  background: linear-gradient(
+    135deg,
+    hsl(222, 47%, 6%) 0%,
+    hsl(217, 33%, 10%) 30%,
+    hsl(222, 47%, 8%) 60%,
+    hsl(215, 28%, 7%) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Floating particles ── */
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  animation: floatOrb 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.floating-orb-1 {
+  width: 300px; height: 300px;
+  background: hsl(217, 91%, 53%);
+  top: 10%; left: 10%;
+  animation-delay: 0s;
+}
+.floating-orb-2 {
+  width: 250px; height: 250px;
+  background: hsl(226, 76%, 60%);
+  top: 60%; right: 10%;
+  animation-delay: -5s;
+}
+.floating-orb-3 {
+  width: 200px; height: 200px;
+  background: hsl(199, 89%, 60%);
+  bottom: 20%; left: 30%;
+  animation-delay: -10s;
+}
+
+.dark .floating-orb { opacity: 0.12; }
+
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 10px) scale(1.05); }
+}
+
+/* ── Noise texture overlay ── */
+.texture-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+.dark .texture-overlay { opacity: 0.06; }
+
+/* ── Scroll reveal animation ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Animated counter pulse ── */
+@keyframes countPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.count-animate {
+  animation: countPulse 2s ease-in-out infinite;
+}
+
+/* ── Glow effect ── */
+.glow-primary {
+  box-shadow: 0 0 30px hsl(217 91% 53% / 0.25), 0 0 60px hsl(217 91% 53% / 0.1);
+}
+.glow-amber {
+  box-shadow: 0 0 30px hsl(38 92% 50% / 0.25), 0 0 60px hsl(38 92% 50% / 0.1);
+}
+
+/* ── Marquee for trust logos ── */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+/* ── Gradient text shimmer ── */
+@keyframes textShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-text {
+  background-size: 200% auto;
+  animation: textShimmer 4s linear infinite;
+}
+
+/* ── Urgency pulse ── */
+@keyframes urgencyPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.urgency-pulse {
+  animation: urgencyPulse 2s ease-in-out infinite;
+}
+
+/* ── Stagger children animation ── */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(11) { animation-delay: 0.55s; }
+.stagger-children > *:nth-child(12) { animation-delay: 0.6s; }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Page-level animation */
+main > * {
+  animation: fadeInUp 0.35s ease-out;
+}
+
+/* Sidebar item slide-in */
+[data-sidebar="menu-item"] {
+  animation: slideInLeft 0.3s ease-out both;
+}
+
+[data-sidebar="menu-item"]:nth-child(1) { animation-delay: 0.02s; }
+[data-sidebar="menu-item"]:nth-child(2) { animation-delay: 0.04s; }
+[data-sidebar="menu-item"]:nth-child(3) { animation-delay: 0.06s; }
+[data-sidebar="menu-item"]:nth-child(4) { animation-delay: 0.08s; }
+[data-sidebar="menu-item"]:nth-child(5) { animation-delay: 0.1s; }
+[data-sidebar="menu-item"]:nth-child(6) { animation-delay: 0.12s; }
+[data-sidebar="menu-item"]:nth-child(7) { animation-delay: 0.14s; }
+[data-sidebar="menu-item"]:nth-child(8) { animation-delay: 0.16s; }
+[data-sidebar="menu-item"]:nth-child(9) { animation-delay: 0.18s; }
+[data-sidebar="menu-item"]:nth-child(10) { animation-delay: 0.2s; }
+
+/* Print styles for receipts and report cards */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 2rem;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ── Mobile safe area for status bar ── */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Festival theme decorative elements ── */
+@keyframes festivalGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.festival-glow {
+  animation: festivalGlow 2s ease-in-out infinite;
+}

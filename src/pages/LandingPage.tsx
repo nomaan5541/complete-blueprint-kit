@@ -198,7 +198,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen relative" style={festivalStyle}>
       {/* Festival Animations */}
-      {festivalTheme && <FestivalAnimations animationType={festivalTheme.animation_type} />}
+      {festivalTheme && <Suspense fallback={null}><FestivalAnimations animationType={festivalTheme.animation_type} /></Suspense>}
 
       <div className="animated-bg" />
       <div className="texture-overlay" />

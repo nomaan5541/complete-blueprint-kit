@@ -22,6 +22,15 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const InstallApp = lazy(() => import("@/pages/InstallApp"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Public legal & info pages
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/legal/TermsConditions"));
+const Disclaimer = lazy(() => import("./pages/legal/Disclaimer"));
+const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
+const About = lazy(() => import("./pages/legal/About"));
+const Contact = lazy(() => import("./pages/legal/Contact"));
+const ContactMessages = lazy(() => import("./pages/ContactMessages"));
+
 // Super Admin pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Schools = lazy(() => import("./pages/Schools"));
@@ -120,6 +129,7 @@ function SuperAdminRoutes() {
           <Route path="/festival-themes" element={<FestivalThemes />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/subscription-requests" element={<SubscriptionRequests />} />
+          <Route path="/messages" element={<ContactMessages />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<SettingsPage />} />
@@ -291,6 +301,12 @@ function AppRoutes() {
         <Route path="/login" element={user ? <ProtectedRedirect /> : <Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/install" element={<InstallApp />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>
     </Suspense>

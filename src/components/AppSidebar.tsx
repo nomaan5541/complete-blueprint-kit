@@ -10,6 +10,7 @@ import {
   Inbox,
   Sparkles,
   PartyPopper,
+  MessageSquare,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -36,6 +37,7 @@ const navItems = [
   { title: "Festival Themes", url: "/admin/festival-themes", icon: PartyPopper },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: CreditCard },
   { title: "Requests", url: "/admin/subscription-requests", icon: Inbox },
+  { title: "Contact Messages", url: "/admin/messages", icon: MessageSquare },
   { title: "Payment History", url: "/admin/payments", icon: Receipt },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },

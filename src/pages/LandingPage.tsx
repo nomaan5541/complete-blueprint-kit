@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFestivalTheme } from "@/hooks/useFestivalTheme";
 const FestivalAnimations = lazy(() => import("@/components/FestivalAnimations"));
@@ -322,6 +322,43 @@ export default function LandingPage() {
           {/* Scroll hint */}
           <div className="mt-12 animate-bounce">
             <ChevronDown className="h-6 w-6 mx-auto text-muted-foreground" />
+          </div>
+        </div>
+      </section>
+
+      {/* Data Security & Privacy Trust Section */}
+      <section className="py-16 scroll-reveal border-y border-border/30 bg-muted/20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <Badge variant="outline" className="mb-3 px-3 py-1">
+              <Lock className="h-3.5 w-3.5 mr-1.5" /> Data Security & Privacy
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Built for the trust schools <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">deserve</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+              Student data is sensitive. We treat it that way — with bank-grade encryption, strict
+              isolation between schools, and full audit trails of every action.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Lock, title: "End-to-end encryption", desc: "All data encrypted in transit (HTTPS) and at rest." },
+              { icon: Shield, title: "Multi-tenant isolation", desc: "Row-level security ensures schools never see each other's data." },
+              { icon: Eye, title: "Audit logs", desc: "Every sensitive action is recorded for accountability." },
+              { icon: FileText, title: "You own your data", desc: "Export full backups anytime. Delete on request." },
+            ].map((item, i) => (
+              <div key={i} className="rounded-2xl p-5 bg-background/60 border border-border/50 hover:border-primary/40 transition-colors">
+                <item.icon className="h-6 w-6 text-primary mb-3" />
+                <h3 className="font-semibold text-foreground text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link to="/privacy" className="text-sm text-primary hover:underline">
+              Read our full Privacy Policy →
+            </Link>
           </div>
         </div>
       </section>
@@ -767,8 +804,8 @@ export default function LandingPage() {
               <div className="space-y-2">
                 <a href="#features" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
                 <a href="#pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-                <a href="#testimonials" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Reviews</a>
-                <a href="#login" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Login</a>
+                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
+                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
               </div>
             </div>
             <div>
@@ -780,11 +817,17 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-border/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} EDUPRIMEX. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+          <div className="border-t border-border/50 pt-6 flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+              <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms & Conditions</Link>
+              <Link to="/disclaimer" className="text-muted-foreground hover:text-foreground transition-colors">Disclaimer</Link>
+              <Link to="/refund-policy" className="text-muted-foreground hover:text-foreground transition-colors">Refund Policy</Link>
+              <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
+              <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} EDUPRIMEX. All rights reserved. Made for schools, colleges & institutes.</p>
               <button onClick={handleCrownClick} className="text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors p-1" title="" aria-label="decoration">
                 <Crown className="h-4 w-4" />
               </button>

@@ -30,6 +30,9 @@ const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
 const About = lazy(() => import("./pages/legal/About"));
 const Contact = lazy(() => import("./pages/legal/Contact"));
 const ContactMessages = lazy(() => import("./pages/ContactMessages"));
+const Blog = lazy(() => import("./pages/blog/Blog"));
+const BlogWhatIsSMS = lazy(() => import("./pages/blog/WhatIsSchoolManagementSystem"));
+const BlogMultiSchoolERP = lazy(() => import("./pages/blog/ManageMultipleSchoolsWithERP"));
 
 // Super Admin pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -307,6 +310,9 @@ function AppRoutes() {
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/what-is-school-management-system" element={<BlogWhatIsSMS />} />
+        <Route path="/blog/manage-multiple-schools-with-erp" element={<BlogMultiSchoolERP />} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>
     </Suspense>

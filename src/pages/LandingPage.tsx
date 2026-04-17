@@ -20,6 +20,7 @@ import {
   Play, ChevronDown, Rocket, Target, Eye, MessageCircle,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import SEO from "@/components/SEO";
 import { PLAN_FEATURE_LABELS } from "@/hooks/useSubscriptionPlan";
 
 const features = [
@@ -207,6 +208,12 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen relative" style={festivalStyle}>
+      <SEO
+        title="EduPrimeX – Multiple School Management System | ERP for Schools & Colleges"
+        description="EduPrimeX is a powerful school management system to manage multiple schools, students, staff, fees, exams, and analytics in one platform."
+        keywords="school management system, school ERP software, multiple school management, student management system, education ERP"
+        canonical="https://eduprimex.lovable.app/"
+      />
       {/* Festival Animations */}
       {festivalTheme && <Suspense fallback={null}><FestivalAnimations animationType={festivalTheme.animation_type} /></Suspense>}
 

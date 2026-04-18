@@ -111,6 +111,9 @@ const StudentStudyMaterialsPage = lazy(() => import("./pages/student/StudentStud
 const StudentOnlineExamsPage = lazy(() => import("./pages/student/StudentOnlineExams"));
 const StudentMeetings = lazy(() => import("./pages/student/StudentMeetings"));
 const StudentAIChatPage = lazy(() => import("./pages/student/StudentAIChat"));
+const StudentMyClass = lazy(() => import("./pages/student/StudentMyClass"));
+const StudentActivity = lazy(() => import("./pages/student/StudentActivity"));
+const StudentCalendar = lazy(() => import("./pages/student/StudentCalendar"));
 
 const queryClient = new QueryClient();
 
@@ -232,6 +235,9 @@ function StudentPortalWrapper() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<StudentDashboardPage />} />
+          <Route path="/my-class" element={<StudentMyClass />} />
+          <Route path="/activity" element={<StudentActivity />} />
+          <Route path="/calendar" element={<StudentCalendar />} />
           <Route path="/profile" element={<StudentProfilePage />} />
           <Route path="/chat" element={<StudentAIChatPage />} />
           <Route path="/attendance" element={<StudentAttendancePage />} />

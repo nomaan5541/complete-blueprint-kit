@@ -1,12 +1,10 @@
 import { useStudentData } from "@/hooks/useStudentData";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-import { Activity, MessageCircle, ClipboardCheck, FileText, BookOpen, TrendingUp, Award } from "lucide-react";
+import { MessageCircle, ClipboardCheck, FileText, BookOpen, TrendingUp, Award } from "lucide-react";
 
 export default function StudentActivity() {
-  const { user } = useAuth();
-  const { student, attendance, marks, homeworkList, attempts, presentDays, totalDays, attendanceRate } = useStudentData();
+  const { student, marks, homeworkList, attempts, presentDays, totalDays, attendanceRate } = useStudentData();
   const [chatCount, setChatCount] = useState(0);
 
   useEffect(() => {

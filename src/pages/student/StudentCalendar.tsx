@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStudentData } from "@/hooks/useStudentData";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight, PartyPopper, CalendarCheck, BookOpen } from "lucide-react";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, getDay, isToday } from "date-fns";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, isToday } from "date-fns";
 
 // Major Indian holidays (recurring; year-agnostic where possible). Date-specific entries are added per-year via simple lookup.
 // Approx dates for 2024–2026 — admin-declared holidays in DB will appear too.
@@ -40,9 +40,11 @@ export default function StudentCalendar() {
     })();
   }, [student]);
 
-  const monthStart = startOfMonth(cursor);
-  const monthEnd = endOfMonth(cursor);
-  const days = useMemo(() => eachDayOfInterval({ start: monthStart, end: monthEnd }), [cursor]);
+  const { days, monthStart } = useMemo(() => {
+    const ms = startOfMonth(cursor);
+    const me = endOfMonth(cursor);
+    return { days: eachDayOfInterval({ start: ms, end: me }), monthStart: ms };
+  }, [cursor]);
   const leadingBlanks = (getDay(monthStart) + 6) % 7; // Monday-first
 
   const isHoliday = (d: Date) => {

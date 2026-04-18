@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useStudentData } from "@/hooks/useStudentData";
-import { ChevronRight, Users, Presentation, BookOpen, Calendar, ClipboardCheck, ClipboardList, FolderOpen, FileText, BarChart3, NotebookPen, Megaphone, GraduationCap } from "lucide-react";
+import { ChevronRight, Users, Presentation, BookOpen, Calendar, ClipboardCheck, ClipboardList, FileText, BarChart3, NotebookPen, Megaphone, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 

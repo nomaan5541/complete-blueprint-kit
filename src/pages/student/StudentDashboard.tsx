@@ -27,7 +27,7 @@ const SHORTCUTS: Shortcut[] = [
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
-  const { student, timetable, slots, loading } = useStudentData();
+  const { student, timetable, loading } = useStudentData();
 
   const today = new Date();
   const dayIdx = (today.getDay() + 6) % 7; // Monday=0

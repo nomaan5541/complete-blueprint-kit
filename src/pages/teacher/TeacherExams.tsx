@@ -98,16 +98,26 @@ export default function TeacherExams() {
 
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
+    pending_review: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
     published: "bg-primary/10 text-primary",
+    rejected: "bg-destructive/15 text-destructive",
     completed: "bg-success/10 text-success",
+  };
+
+  const statusLabel: Record<string, string> = {
+    draft: "Draft",
+    pending_review: "Pending Review",
+    published: "Published",
+    rejected: "Rejected",
+    completed: "Completed",
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Exams</h1>
-          <p className="text-muted-foreground">Create and manage exams for your assigned classes</p>
+          <h1 className="text-xl sm:text-2xl font-bold">My Exams</h1>
+          <p className="text-sm text-muted-foreground">Create exams, then submit them for admin review before students can take them</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -188,20 +198,28 @@ export default function TeacherExams() {
                   <div className="flex gap-1.5 flex-wrap">
                     <Badge variant="outline" className="text-xs">{(exam as any).classes?.name}</Badge>
                     <Badge variant="secondary" className="text-xs">{(exam as any).subjects?.name}</Badge>
-                    <Badge className={`text-xs ${statusColor[status] || ""}`}>{status}</Badge>
+                    <Badge className={`text-xs ${statusColor[status] || ""}`}>{statusLabel[status] || status}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="text-xs text-muted-foreground">
                     <p>Type: {exam.exam_type} · Marks: {(exam as any).total_marks || 100}</p>
                     {(exam as any).exam_date && <p>📅 {(exam as any).exam_date}</p>}
+                    {status === "rejected" && (exam as any).review_notes && (
+                      <p className="mt-1 text-destructive">Admin: {(exam as any).review_notes}</p>
+                    )}
                   </div>
-                  <div className="flex gap-1.5">
-                    {status === "draft" && (
-                      <Button size="sm" variant="default" onClick={() => updateStatus(exam.id, "published")}>Publish</Button>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {(status === "draft" || status === "rejected") && (
+                      <Button size="sm" variant="default" onClick={() => updateStatus(exam.id, "pending_review")}>
+                        Submit for Review
+                      </Button>
+                    )}
+                    {status === "pending_review" && (
+                      <Badge variant="outline" className="text-xs">Awaiting admin approval</Badge>
                     )}
                     {status === "published" && (
-                      <Button size="sm" variant="secondary" onClick={() => updateStatus(exam.id, "completed")}>Complete</Button>
+                      <Button size="sm" variant="secondary" onClick={() => updateStatus(exam.id, "completed")}>Mark Completed</Button>
                     )}
                   </div>
                 </CardContent>

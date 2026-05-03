@@ -446,6 +446,9 @@ export type Database = {
           id: string
           instructions: string | null
           name: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           school_id: string
           section_id: string | null
           start_date: string | null
@@ -465,6 +468,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           name: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           school_id: string
           section_id?: string | null
           start_date?: string | null
@@ -484,6 +490,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           name?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           school_id?: string
           section_id?: string | null
           start_date?: string | null

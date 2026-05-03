@@ -63,7 +63,7 @@ export default function StudentIDCard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Student ID Card</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Student ID Card</h1>
         <Button onClick={handleDownload}><Download className="mr-2 h-4 w-4" /> Download / Print</Button>
       </div>
       <div className="flex justify-center">

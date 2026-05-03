@@ -11,8 +11,8 @@ export default function StudentNotifications() {
   if (!student) return <div className="text-center py-20 text-muted-foreground">No student record found</div>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Notifications & Announcements</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <h1 className="text-xl sm:text-2xl font-bold">Notifications</h1>
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" /> All Notices</CardTitle></CardHeader>
         <CardContent className="space-y-3">

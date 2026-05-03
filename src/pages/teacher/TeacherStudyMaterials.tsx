@@ -97,6 +97,10 @@ export default function TeacherStudyMaterials() {
       toast.error("Please fill all required fields");
       return;
     }
+    if (file && file.size > 100 * 1024 * 1024) {
+      toast.error("File too large. Max 100MB per upload.");
+      return;
+    }
 
     setUploading(true);
     try {

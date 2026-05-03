@@ -11,10 +11,10 @@ export default function StudentTimetable() {
   if (!student) return <div className="text-center py-20 text-muted-foreground">No student record found</div>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">My Timetable</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <h1 className="text-xl sm:text-2xl font-bold">My Timetable</h1>
       <Card>
-        <CardHeader><CardTitle>{student.classes?.name} {student.sections?.name ? `- Section ${student.sections.name}` : ""}</CardTitle></CardHeader>
+        <CardHeader className="pb-3"><CardTitle className="text-sm sm:text-base">{student.classes?.name} {student.sections?.name ? `- Section ${student.sections.name}` : ""}</CardTitle></CardHeader>
         <CardContent>
           {timetable.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">Timetable not set yet</p>

@@ -50,7 +50,7 @@ export default function Notifications() {
       message: form.message.trim(),
       type: form.type,
       target_role: form.target_role,
-      target_class_id: form.target_class_id || null,
+      target_class_id: form.target_class_id && form.target_class_id !== "all" ? form.target_class_id : null,
       created_by: user?.id,
     }).select().single();
 

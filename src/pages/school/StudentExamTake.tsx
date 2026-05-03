@@ -323,7 +323,12 @@ export default function StudentExamTake() {
                 Tab switches detected: {tabSwitchCount}
               </div>
             )}
-            <Button className="w-full" onClick={() => navigate("/student")}>Back to Portal</Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button className="flex-1" variant="outline" onClick={() => navigate(`/student/exam-result?attemptId=${result.attempt.id}`)}>
+                Review Answers
+              </Button>
+              <Button className="flex-1" onClick={() => navigate("/student")}>Back to Portal</Button>
+            </div>
           </CardContent>
         </Card>
       </div>

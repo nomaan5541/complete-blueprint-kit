@@ -57,14 +57,26 @@ export default function ExamManagement() {
     else { toast.success("Exam deleted"); fetchAll(); }
   };
 
-  const updateExamStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("exams").update({ status } as any).eq("id", id);
+  const updateExamStatus = async (id: string, status: string, review_notes?: string | null) => {
+    const patch: any = { status };
+    if (status === "published" || status === "rejected") {
+      patch.reviewed_at = new Date().toISOString();
+      patch.review_notes = review_notes ?? null;
+    }
+    const { error } = await supabase.from("exams").update(patch).eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success(`Exam ${status}`); fetchAll(); }
+    else { toast.success(`Exam ${status.replace("_", " ")}`); fetchAll(); }
+  };
+
+  const approveExam = (id: string) => updateExamStatus(id, "published");
+  const rejectExam = (id: string) => {
+    const notes = window.prompt("Reason for rejection (optional):") || "";
+    updateExamStatus(id, "rejected", notes || null);
   };
 
   const filteredExams = exams.filter(e => {
     if (modeFilter === "all") return true;
+    if (modeFilter === "pending_review") return (e as any).status === "pending_review";
     return (e as any).exam_mode === modeFilter;
   });
 
@@ -98,9 +110,19 @@ export default function ExamManagement() {
 
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
+    pending_review: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
     published: "bg-primary/10 text-primary",
+    rejected: "bg-destructive/15 text-destructive",
     completed: "bg-success/10 text-success",
   };
+  const statusLabel: Record<string, string> = {
+    draft: "Draft",
+    pending_review: "Pending Review",
+    published: "Published",
+    rejected: "Rejected",
+    completed: "Completed",
+  };
+  const pendingCount = exams.filter((e: any) => e.status === "pending_review").length;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -120,13 +142,16 @@ export default function ExamManagement() {
         </TabsList>
 
         <TabsContent value="exams" className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Badge variant={modeFilter === "all" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("all")}>All</Badge>
             <Badge variant={modeFilter === "offline" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("offline")}>
               <BookOpen className="h-3 w-3 mr-1" /> Offline
             </Badge>
             <Badge variant={modeFilter === "online" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("online")}>
               <Monitor className="h-3 w-3 mr-1" /> Online
+            </Badge>
+            <Badge variant={modeFilter === "pending_review" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("pending_review")}>
+              ⏳ Pending Review {pendingCount > 0 && <span className="ml-1">({pendingCount})</span>}
             </Badge>
           </div>
 
@@ -150,7 +175,7 @@ export default function ExamManagement() {
                               {mode === "online" ? "💻 Online" : "📝 Offline"}
                             </Badge>
                             <Badge variant="outline" className="text-xs">{exam.exam_type}</Badge>
-                            <Badge className={`text-xs ${statusColor[status] || ""}`}>{status}</Badge>
+                            <Badge className={`text-xs ${statusColor[status] || ""}`}>{statusLabel[status] || status}</Badge>
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => deleteExam(exam.id)}
@@ -169,7 +194,26 @@ export default function ExamManagement() {
                         {mode === "online" && (exam as any).duration_minutes && (
                           <p>⏱ {(exam as any).duration_minutes} minutes</p>
                         )}
+                        {status === "rejected" && (exam as any).review_notes && (
+                          <p className="text-destructive mt-1">Rejection note: {(exam as any).review_notes}</p>
+                        )}
                       </div>
+
+                      {status === "pending_review" && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <Button size="sm" variant="default" onClick={() => approveExam(exam.id)}>
+                            ✓ Approve & Publish
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => rejectExam(exam.id)}>
+                            ✗ Reject
+                          </Button>
+                          {mode === "online" && (
+                            <Button size="sm" variant="outline" onClick={() => setQuestionExam(exam)}>
+                              <Eye className="mr-1 h-3 w-3" /> Review Questions
+                            </Button>
+                          )}
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {mode === "online" && (

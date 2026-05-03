@@ -76,6 +76,7 @@ const Meetings = lazy(() => import("./pages/school/Meetings"));
 const AuditLogs = lazy(() => import("./pages/school/AuditLogs"));
 const BackupRestore = lazy(() => import("./pages/school/BackupRestore"));
 const StudentExamTake = lazy(() => import("./pages/school/StudentExamTake"));
+const StudentExamResult = lazy(() => import("./pages/student/StudentExamResult"));
 const FaceAttendance = lazy(() => import("./pages/school/FaceAttendance"));
 const AIReportCard = lazy(() => import("./pages/school/AIReportCard"));
 const StudentArchive = lazy(() => import("./pages/school/StudentArchive"));
@@ -244,6 +245,7 @@ function StudentPortalWrapper() {
           <Route path="/results" element={<StudentResultsPage />} />
           <Route path="/exam" element={<StudentOnlineExamsPage />} />
           <Route path="/exam-take" element={<StudentExamTake />} />
+          <Route path="/exam-result" element={<StudentExamResult />} />
           <Route path="/fees" element={<StudentFeesPage />} />
           <Route path="/timetable" element={<StudentTimetablePage />} />
           <Route path="/homework" element={<StudentHomeworkPage />} />

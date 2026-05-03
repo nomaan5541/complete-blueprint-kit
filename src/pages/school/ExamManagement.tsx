@@ -76,6 +76,7 @@ export default function ExamManagement() {
 
   const filteredExams = exams.filter(e => {
     if (modeFilter === "all") return true;
+    if (modeFilter === "pending_review") return (e as any).status === "pending_review";
     return (e as any).exam_mode === modeFilter;
   });
 
@@ -174,7 +175,7 @@ export default function ExamManagement() {
                               {mode === "online" ? "💻 Online" : "📝 Offline"}
                             </Badge>
                             <Badge variant="outline" className="text-xs">{exam.exam_type}</Badge>
-                            <Badge className={`text-xs ${statusColor[status] || ""}`}>{status}</Badge>
+                            <Badge className={`text-xs ${statusColor[status] || ""}`}>{statusLabel[status] || status}</Badge>
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => deleteExam(exam.id)}
@@ -193,7 +194,26 @@ export default function ExamManagement() {
                         {mode === "online" && (exam as any).duration_minutes && (
                           <p>⏱ {(exam as any).duration_minutes} minutes</p>
                         )}
+                        {status === "rejected" && (exam as any).review_notes && (
+                          <p className="text-destructive mt-1">Rejection note: {(exam as any).review_notes}</p>
+                        )}
                       </div>
+
+                      {status === "pending_review" && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <Button size="sm" variant="default" onClick={() => approveExam(exam.id)}>
+                            ✓ Approve & Publish
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => rejectExam(exam.id)}>
+                            ✗ Reject
+                          </Button>
+                          {mode === "online" && (
+                            <Button size="sm" variant="outline" onClick={() => setQuestionExam(exam)}>
+                              <Eye className="mr-1 h-3 w-3" /> Review Questions
+                            </Button>
+                          )}
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {mode === "online" && (

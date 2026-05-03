@@ -21,6 +21,8 @@ export default function StudentExamTake() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [attempt, setAttempt] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [marked, setMarked] = useState<Record<string, boolean>>({});
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [currentQ, setCurrentQ] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);

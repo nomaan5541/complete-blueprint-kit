@@ -141,13 +141,16 @@ export default function ExamManagement() {
         </TabsList>
 
         <TabsContent value="exams" className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Badge variant={modeFilter === "all" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("all")}>All</Badge>
             <Badge variant={modeFilter === "offline" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("offline")}>
               <BookOpen className="h-3 w-3 mr-1" /> Offline
             </Badge>
             <Badge variant={modeFilter === "online" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("online")}>
               <Monitor className="h-3 w-3 mr-1" /> Online
+            </Badge>
+            <Badge variant={modeFilter === "pending_review" ? "default" : "outline"} className="cursor-pointer" onClick={() => setModeFilter("pending_review")}>
+              ⏳ Pending Review {pendingCount > 0 && <span className="ml-1">({pendingCount})</span>}
             </Badge>
           </div>
 

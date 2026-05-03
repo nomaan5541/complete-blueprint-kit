@@ -399,7 +399,7 @@ export default function StudentExamTake() {
   const isUrgent = timeLeft < 120;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4 py-4 select-none" onCopy={e => e.preventDefault()}>
+    <div className="max-w-7xl mx-auto py-3 px-2 sm:px-4 select-none" onCopy={e => e.preventDefault()}>
       {/* Tab Switch Warning Overlay */}
       {showTabWarning && (
         <div className="fixed inset-0 z-50 bg-background/95 flex items-center justify-center p-4">
@@ -408,138 +408,176 @@ export default function StudentExamTake() {
               <ShieldAlert className="h-16 w-16 text-destructive mx-auto" />
               <h2 className="text-xl font-bold text-destructive">Tab Switch Detected!</h2>
               <p className="text-muted-foreground">
-                You switched away from the exam tab. This is considered a violation of exam integrity.
+                You switched away from the exam tab. This violates exam integrity.
               </p>
               <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-3">
                 <p className="text-lg font-bold text-destructive">{tabSwitchCount} / {MAX_TAB_SWITCHES}</p>
                 <p className="text-xs text-muted-foreground">Tab switches used. Exam auto-submits at {MAX_TAB_SWITCHES}.</p>
               </div>
-              <Button onClick={() => setShowTabWarning(false)} className="w-full">
-                Return to Exam
-              </Button>
+              <Button onClick={() => setShowTabWarning(false)} className="w-full">Return to Exam</Button>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Header with webcam */}
-      <div className="flex items-center justify-between p-3 rounded-lg border bg-card sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          {/* Webcam feed */}
+      {/* Sticky Header */}
+      <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg border bg-card sticky top-0 z-10 mb-3">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="relative shrink-0">
-            <div className="w-16 h-12 rounded-lg overflow-hidden border-2 border-primary/30 bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover mirror"
-                style={{ transform: "scaleX(-1)" }}
-              />
+            <div className="w-12 h-9 sm:w-16 sm:h-12 rounded-md overflow-hidden border-2 border-primary/30 bg-black">
+              <video ref={videoRef} autoPlay playsInline muted
+                className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
             </div>
-            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border border-background ${webcamActive ? "bg-success animate-pulse" : "bg-destructive"}`} />
+            <div className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-background ${webcamActive ? "bg-success animate-pulse" : "bg-destructive"}`} />
             {webcamDenied && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-lg">
-                <CameraOff className="h-4 w-4 text-destructive" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-md">
+                <CameraOff className="h-3 w-3 text-destructive" />
               </div>
             )}
           </div>
-          <div>
-            <p className="font-semibold text-sm">{exam.name}</p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>Q {currentQ + 1} / {questions.length}</span>
+          <div className="min-w-0">
+            <p className="font-semibold text-xs sm:text-sm truncate">{exam.name}</p>
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
+              <span>Q {currentQ + 1}/{questions.length}</span>
+              <span>· {answeredCount} answered</span>
               {tabSwitchCount > 0 && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                  ⚠ {tabSwitchCount} switch{tabSwitchCount > 1 ? "es" : ""}
-                </Badge>
+                <Badge variant="destructive" className="text-[9px] px-1 py-0">⚠ {tabSwitchCount}</Badge>
               )}
             </div>
           </div>
         </div>
-        <div className={`flex items-center gap-1.5 font-mono text-lg font-bold ${isUrgent ? "text-destructive animate-pulse" : "text-foreground"}`}>
-          <Clock className="h-4 w-4" />
-          {formatTime(timeLeft)}
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" className="lg:hidden h-8 px-2" onClick={() => setPaletteOpen(p => !p)}>
+            <Eye className="h-3.5 w-3.5 mr-1" /> Palette
+          </Button>
+          <div className={`flex items-center gap-1 font-mono text-sm sm:text-lg font-bold px-2 py-1 rounded-md ${isUrgent ? "bg-destructive/10 text-destructive animate-pulse" : "bg-muted"}`}>
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            {formatTime(timeLeft)}
+          </div>
         </div>
       </div>
 
-      <Progress value={progress} className="h-2" />
+      <div className="grid lg:grid-cols-[1fr_280px] gap-3">
+        {/* Main Question Panel */}
+        <div className="space-y-3 order-2 lg:order-1">
+          <Progress value={progress} className="h-1.5" />
+          {q && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Badge variant="secondary">Question {currentQ + 1}</Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="outline" className="text-xs">{q.marks} mark{q.marks > 1 ? "s" : ""}</Badge>
+                    <Button
+                      size="sm"
+                      variant={marked[q.id] ? "default" : "outline"}
+                      className="h-7 text-xs"
+                      onClick={() => setMarked(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
+                    >
+                      {marked[q.id] ? "✓ Marked" : "Mark for Review"}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-base font-medium leading-relaxed">{q.question_text}</p>
+                {q.image_url && (
+                  <div className="flex justify-center">
+                    <img src={q.image_url} alt="Question" className="max-h-48 rounded-lg border object-contain" />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {(q.exam_options || []).map((opt: any, i: number) => {
+                    const isSelected = answers[q.id] === opt.id;
+                    return (
+                      <button key={opt.id} onClick={() => selectOption(q.id, opt.id)}
+                        className={`w-full text-left p-3 rounded-lg border-2 transition-all flex items-start gap-3 ${
+                          isSelected
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                            : "border-border hover:border-primary/40 hover:bg-muted/50"
+                        }`}>
+                        <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold ${
+                          isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
+                        }`}>
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-sm">{opt.option_text}</p>
+                          {opt.option_image && (
+                            <img src={opt.option_image} alt="Option" className="mt-2 max-h-24 rounded border object-contain" />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Question */}
-      {q && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary">Question {currentQ + 1}</Badge>
-              <Badge variant="outline">{q.marks} mark{q.marks > 1 ? "s" : ""}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-base font-medium leading-relaxed">{q.question_text}</p>
-            
-            {q.image_url && (
-              <div className="flex justify-center">
-                <img src={q.image_url} alt="Question" className="max-h-48 rounded-lg border object-contain" />
-              </div>
+          {/* Footer Navigation */}
+          <div className="flex items-center justify-between gap-2 sticky bottom-0 bg-background/95 backdrop-blur py-2">
+            <Button variant="outline" size="sm" onClick={() => setCurrentQ(p => Math.max(0, p - 1))} disabled={currentQ === 0}>
+              <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+            </Button>
+            {currentQ < questions.length - 1 ? (
+              <Button size="sm" onClick={() => setCurrentQ(p => p + 1)}>
+                Next <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => handleSubmit(false)} disabled={submitting} variant="destructive">
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Submit Exam
+              </Button>
             )}
-
-            <div className="space-y-2">
-              {(q.exam_options || []).map((opt: any, i: number) => {
-                const isSelected = answers[q.id] === opt.id;
-                return (
-                  <button key={opt.id} onClick={() => selectOption(q.id, opt.id)}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all flex items-start gap-3 ${
-                      isSelected
-                        ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                        : "border-border hover:border-primary/40 hover:bg-muted/50"
-                    }`}>
-                    <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold ${
-                      isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}>
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-sm">{opt.option_text}</p>
-                      {opt.option_image && (
-                        <img src={opt.option_image} alt="Option" className="mt-2 max-h-24 rounded border object-contain" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => setCurrentQ(p => Math.max(0, p - 1))} disabled={currentQ === 0}>
-          <ChevronLeft className="mr-1 h-4 w-4" /> Previous
-        </Button>
-        
-        <div className="flex gap-1 flex-wrap justify-center max-w-xs">
-          {questions.map((_, i) => (
-            <button key={i} onClick={() => setCurrentQ(i)}
-              className={`w-7 h-7 rounded text-xs font-medium ${
-                i === currentQ ? "bg-primary text-primary-foreground" :
-                answers[questions[i]?.id] ? "bg-success/20 text-success border border-success/30" :
-                "bg-muted text-muted-foreground"
-              }`}>
-              {i + 1}
-            </button>
-          ))}
+          </div>
         </div>
 
-        {currentQ < questions.length - 1 ? (
-          <Button onClick={() => setCurrentQ(p => p + 1)}>
-            Next <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button onClick={() => handleSubmit(false)} disabled={submitting} variant="destructive">
-            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Submit Exam
-          </Button>
-        )}
+        {/* Question Palette Sidebar */}
+        <aside className={`order-1 lg:order-2 ${paletteOpen ? "block" : "hidden lg:block"}`}>
+          <Card className="lg:sticky lg:top-20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Question Navigator</CardTitle>
+              <div className="flex flex-wrap gap-1.5 text-[10px] pt-1">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-success/30 border border-success/40" /> Answered</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-400/40 border border-amber-500/40" /> Marked</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-muted border" /> Skipped</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-5 gap-1.5">
+                {questions.map((qq: any, i: number) => {
+                  const answered = !!answers[qq.id];
+                  const isMark = !!marked[qq.id];
+                  const isCurrent = i === currentQ;
+                  return (
+                    <button
+                      key={qq.id}
+                      onClick={() => { setCurrentQ(i); setPaletteOpen(false); }}
+                      className={`aspect-square rounded text-xs font-semibold border transition-all ${
+                        isCurrent ? "ring-2 ring-primary ring-offset-1 " : ""
+                      }${
+                        isMark
+                          ? "bg-amber-400/30 border-amber-500/50 text-amber-900 dark:text-amber-200"
+                          : answered
+                            ? "bg-success/20 border-success/40 text-success-foreground"
+                            : "bg-muted border-border text-muted-foreground"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 pt-3 border-t text-xs text-muted-foreground space-y-0.5">
+                <p>Total: {questions.length}</p>
+                <p>Answered: {answeredCount}</p>
+                <p>Marked: {Object.values(marked).filter(Boolean).length}</p>
+                <p>Skipped: {questions.length - answeredCount}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
       </div>
     </div>
   );

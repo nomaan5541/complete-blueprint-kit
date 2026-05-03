@@ -68,7 +68,7 @@ export default function StudentStudyMaterials() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Study Materials</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">Study Materials</h1>
 
       <div className="flex flex-wrap gap-3">
         <Select value={filterType} onValueChange={setFilterType}>

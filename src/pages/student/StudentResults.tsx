@@ -19,7 +19,7 @@ export default function StudentResults() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Exam Results</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">Exam Results</h1>
 
       {marks.length === 0 ? (
         <Card><CardContent className="py-12 text-center text-muted-foreground">No exam results yet</CardContent></Card>

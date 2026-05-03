@@ -15,7 +15,7 @@ export default function StudentHomework() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Homework & Assignments</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">Homework & Assignments</h1>
 
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5" /> Pending Homework ({upcoming.length})</CardTitle></CardHeader>

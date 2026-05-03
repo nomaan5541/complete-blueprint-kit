@@ -57,10 +57,21 @@ export default function ExamManagement() {
     else { toast.success("Exam deleted"); fetchAll(); }
   };
 
-  const updateExamStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("exams").update({ status } as any).eq("id", id);
+  const updateExamStatus = async (id: string, status: string, review_notes?: string | null) => {
+    const patch: any = { status };
+    if (status === "published" || status === "rejected") {
+      patch.reviewed_at = new Date().toISOString();
+      patch.review_notes = review_notes ?? null;
+    }
+    const { error } = await supabase.from("exams").update(patch).eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success(`Exam ${status}`); fetchAll(); }
+    else { toast.success(`Exam ${status.replace("_", " ")}`); fetchAll(); }
+  };
+
+  const approveExam = (id: string) => updateExamStatus(id, "published");
+  const rejectExam = (id: string) => {
+    const notes = window.prompt("Reason for rejection (optional):") || "";
+    updateExamStatus(id, "rejected", notes || null);
   };
 
   const filteredExams = exams.filter(e => {
@@ -98,9 +109,19 @@ export default function ExamManagement() {
 
   const statusColor: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
+    pending_review: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
     published: "bg-primary/10 text-primary",
+    rejected: "bg-destructive/15 text-destructive",
     completed: "bg-success/10 text-success",
   };
+  const statusLabel: Record<string, string> = {
+    draft: "Draft",
+    pending_review: "Pending Review",
+    published: "Published",
+    rejected: "Rejected",
+    completed: "Completed",
+  };
+  const pendingCount = exams.filter((e: any) => e.status === "pending_review").length;
 
   return (
     <div className="space-y-4 sm:space-y-6">

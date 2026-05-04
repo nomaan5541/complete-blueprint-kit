@@ -498,6 +498,29 @@ export default function FaceAttendance() {
               </div>
             </div>
           </div>
+
+          {selectedClass && modelsReady && enrolledCount < totalStudents && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t pt-4">
+              <Button
+                onClick={handleBulkEnroll}
+                disabled={bulkEnrolling}
+                variant="secondary"
+                size="sm"
+              >
+                {bulkEnrolling ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                Bulk-enroll all students from photos
+              </Button>
+              {bulkEnrolling && bulkProgress.total > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {bulkProgress.done}/{bulkProgress.total} processed · {bulkProgress.ok} ok · {bulkProgress.fail} failed
+                </span>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

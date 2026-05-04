@@ -323,7 +323,96 @@ export default function FaceAttendance() {
     setDetectedStudents((prev) => prev.filter((d) => d.studentId !== studentId));
   };
 
-  const filteredSections = sections.filter((s) => s.class_id === selectedClass);
+  // Bulk enroll: extract face descriptors from all unenrolled students' photos
+  const handleBulkEnroll = async () => {
+    if (!schoolId || !selectedClass || !selectedYearId) return;
+    if (!modelsReady) {
+      toast.error("Please load face models first");
+      return;
+    }
+    setBulkEnrolling(true);
+    try {
+      // Get all students with photos
+      let q = supabase
+        .from("students")
+        .select("id, name, photo_url")
+        .eq("school_id", schoolId)
+        .eq("class_id", selectedClass)
+        .eq("academic_year_id", selectedYearId)
+        .eq("status", "active")
+        .not("photo_url", "is", null);
+      if (selectedSection) q = q.eq("section_id", selectedSection);
+      const { data: students } = await q;
+
+      // Filter out already-enrolled
+      const enrolledIds = new Set(knownFaces.map((k) => k.studentId));
+      const pending = (students || []).filter((s: any) => !enrolledIds.has(s.id) && s.photo_url);
+
+      if (pending.length === 0) {
+        toast.info("All students with photos are already enrolled");
+        setBulkEnrolling(false);
+        return;
+      }
+
+      setBulkProgress({ done: 0, total: pending.length, ok: 0, fail: 0 });
+      let ok = 0, fail = 0;
+
+      for (let i = 0; i < pending.length; i++) {
+        const student: any = pending[i];
+        try {
+          // Load image
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error("img load fail"));
+            img.src = student.photo_url;
+          });
+
+          const descriptor = await extractFaceDescriptor(img);
+          if (!descriptor) { fail++; }
+          else {
+            const { error } = await supabase
+              .from("student_face_data" as any)
+              .upsert({
+                student_id: student.id,
+                school_id: schoolId,
+                face_descriptor: descriptorToArray(descriptor),
+                updated_at: new Date().toISOString(),
+              }, { onConflict: "student_id" });
+            if (error) fail++; else ok++;
+          }
+        } catch {
+          fail++;
+        }
+        setBulkProgress({ done: i + 1, total: pending.length, ok, fail });
+      }
+
+      toast.success(`Enrollment complete: ${ok} succeeded, ${fail} failed`);
+
+      // Refresh known faces
+      const studentIds = (students || []).map((s: any) => s.id);
+      const { data: faceData } = await supabase
+        .from("student_face_data" as any)
+        .select("student_id, face_descriptor")
+        .eq("school_id", schoolId)
+        .in("student_id", studentIds);
+      const faces: KnownFace[] = (faceData || []).map((fd: any) => {
+        const st = (students || []).find((s: any) => s.id === fd.student_id);
+        return {
+          studentId: fd.student_id,
+          studentName: st?.name || "Unknown",
+          descriptor: arrayToDescriptor(fd.face_descriptor as number[]),
+        };
+      });
+      setKnownFaces(faces);
+      setEnrolledCount(faces.length);
+    } catch (e: any) {
+      toast.error("Bulk enrollment failed: " + e.message);
+    } finally {
+      setBulkEnrolling(false);
+    }
+  };
 
   return (
     <div className="space-y-6">

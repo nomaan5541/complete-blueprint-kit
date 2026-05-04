@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, Bot, User, Sparkles } from "lucide-react";
+import { Loader2, Send, Bot } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
+
+const SUGGESTIONS = [
+  "What are my assignments?",
+  "Show my today's timetable",
+  "Upcoming exams",
+  "Study tips for physics",
+  "Remind me about PTM",
+];
 
 export default function StudentAIChatPage() {
   const { user } = useAuth();
@@ -19,280 +23,126 @@ export default function StudentAIChatPage() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load chat history
   useEffect(() => {
     async function loadHistory() {
       if (!user) return;
       setLoadingHistory(true);
-
-      const { data: student } = await supabase
-        .from("students")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      if (!student) {
-        setLoadingHistory(false);
-        return;
-      }
-
-      const { data } = await supabase
-        .from("student_chat_messages")
-        .select("role, content")
-        .eq("student_id", student.id)
-        .order("created_at", { ascending: true });
-
-      setMessages((data || []).map(m => ({ role: m.role as "user" | "assistant", content: m.content })));
+      const { data: student } = await supabase.from("students").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle();
+      if (!student) { setLoadingHistory(false); return; }
+      const { data } = await supabase.from("student_chat_messages").select("role, content").eq("student_id", student.id).order("created_at", { ascending: true });
+      setMessages((data || []).map((m: any) => ({ role: m.role, content: m.content })));
       setLoadingHistory(false);
     }
     loadHistory();
   }, [user]);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  async function sendMessage() {
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
+  async function send(text?: string) {
+    const userMessage = (text ?? input).trim();
+    if (!userMessage || loading) return;
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setMessages((p) => [...p, { role: "user", content: userMessage }]);
     setLoading(true);
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/student-chat`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ message: userMessage }),
-        }
-      );
-
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/student-chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ message: userMessage }),
+      });
       if (!response.ok) {
-        if (response.status === 429) {
-          toast.error("Too many requests. Please wait a moment and try again.");
-          setMessages(prev => prev.slice(0, -1));
-          setLoading(false);
-          return;
-        }
-        if (response.status === 402) {
-          toast.error("AI service temporarily unavailable.");
-          setMessages(prev => prev.slice(0, -1));
-          setLoading(false);
-          return;
-        }
-        throw new Error("Failed to get response");
+        if (response.status === 429) toast.error("Too many requests. Wait a moment.");
+        else if (response.status === 402) toast.error("AI service unavailable.");
+        else toast.error("Failed to get response");
+        setMessages((p) => p.slice(0, -1)); setLoading(false); return;
       }
-
-      if (!response.body) throw new Error("No response body");
-
-      const reader = response.body.getReader();
+      const reader = response.body!.getReader();
       const decoder = new TextDecoder();
-      let assistantContent = "";
-      let textBuffer = "";
-
-      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
-
+      let assistant = ""; let buf = "";
+      setMessages((p) => [...p, { role: "assistant", content: "" }]);
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
+        const { done, value } = await reader.read(); if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buf.indexOf("\n")) !== -1) {
+          let line = buf.slice(0, nl); buf = buf.slice(nl + 1);
           if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-
+          const j = line.slice(6).trim(); if (j === "[DONE]") break;
           try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
-                  role: "assistant",
-                  content: assistantContent,
-                };
-                return newMessages;
-              });
-            }
-          } catch {
-            // Incomplete JSON, buffer it
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
+            const c = JSON.parse(j).choices?.[0]?.delta?.content;
+            if (c) { assistant += c; setMessages((p) => { const n = [...p]; n[n.length - 1] = { role: "assistant", content: assistant }; return n; }); }
+          } catch { buf = line + "\n" + buf; break; }
         }
       }
-    } catch (error) {
-      console.error("Chat error:", error);
-      toast.error("Failed to send message. Please try again.");
-      setMessages(prev => prev.slice(0, -1));
-    }
-
+    } catch (e) { console.error(e); toast.error("Failed to send"); setMessages((p) => p.slice(0, -1)); }
     setLoading(false);
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  if (loadingHistory) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (loadingHistory) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl sm:text-3xl font-bold">AI Assistant</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Ask me about your exams, homework, fees, or attendance
-        </p>
-      </div>
-
-      <Card className="h-[calc(100vh-280px)] flex flex-col">
-        <CardHeader className="border-b pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
-            Chat with AI Assistant
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 p-0 flex flex-col">
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.length === 0 && (
-                <div className="text-center py-12">
-                  <Bot className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Start a conversation</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Try asking:
-                  </p>
-                  <div className="space-y-2 max-w-md mx-auto">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-left justify-start"
-                      onClick={() => setInput("When is my next exam?")}
-                    >
-                      When is my next exam?
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-left justify-start"
-                      onClick={() => setInput("What homework do I have?")}
-                    >
-                      What homework do I have?
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-left justify-start"
-                      onClick={() => setInput("What is my fee status?")}
-                    >
-                      What is my fee status?
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-left justify-start"
-                      onClick={() => setInput("What is my attendance percentage?")}
-                    >
-                      What is my attendance percentage?
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex gap-3 ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {msg.role === "assistant" && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <Bot className="h-5 w-5 text-primary" />
-                    </div>
-                  )}
-                  <div
-                    className={`rounded-2xl px-4 py-2 max-w-[80%] ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {msg.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                  </div>
-                  {msg.role === "user" && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                      <User className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div ref={scrollRef} />
-            </div>
-          </ScrollArea>
-
-          <div className="border-t p-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Ask me anything about your academic info..."
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={loading}
-                className="flex-1"
-              />
-              <Button onClick={sendMessage} disabled={loading || !input.trim()}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              AI responses may not always be accurate. Verify important information.
-            </p>
+    <div className="space-y-4 pb-6 pt-2 flex flex-col min-h-[calc(100vh-220px)]">
+      {messages.length === 0 ? (
+        <div className="text-center py-6">
+          <div className="h-24 w-24 mx-auto rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_8px_32px_rgba(99,102,241,0.4)]">
+            <Bot className="h-12 w-12" />
           </div>
-        </CardContent>
-      </Card>
+          <p className="font-extrabold text-xl mt-4">Hello! 👋</p>
+          <p className="text-sm text-slate-300 mt-1">How can I help you today?</p>
+        </div>
+      ) : (
+        <div className="flex-1 space-y-3">
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                m.role === "user" ? "bg-indigo-500 text-white" : "bg-white/5 border border-white/10 text-slate-100"
+              }`}>
+                {m.role === "assistant" ? (
+                  <div className="prose prose-invert prose-sm max-w-none"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+                ) : (
+                  <p className="whitespace-pre-wrap">{m.content}</p>
+                )}
+              </div>
+            </div>
+          ))}
+          <div ref={scrollRef} />
+        </div>
+      )}
+
+      {messages.length === 0 && (
+        <div className="space-y-2">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => send(s)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-100 active:scale-[0.99] transition flex items-center justify-between"
+            >
+              {s}
+              <span className="text-slate-500">›</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input */}
+      <div className="sticky bottom-24 bg-[#0f1530]/95 border border-white/10 rounded-2xl p-2 flex items-center gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder="Type your question..."
+          disabled={loading}
+          className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none"
+        />
+        <button
+          onClick={() => send()}
+          disabled={loading || !input.trim()}
+          className="h-10 w-10 rounded-xl bg-indigo-500 disabled:opacity-40 flex items-center justify-center active:scale-90 transition"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </button>
+      </div>
     </div>
   );
 }

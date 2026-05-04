@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     // Fetch MSG91 config from secure table
     const { data: smsConfig } = await supabase
       .from("school_sms_config")
-      .select("msg91_auth_key, msg91_sender_id")
+      .select("msg91_auth_key, msg91_sender_id, msg91_whatsapp_template_id")
       .eq("school_id", school_id)
       .single();
 
@@ -89,7 +89,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    let sent = 0;
+    let smsSent = 0;
+    let waSent = 0;
     for (const student of students) {
       const phone = student.father_phone!.replace(/\D/g, "").replace(/^0+/, "");
       if (phone.length < 10) continue;
@@ -97,23 +98,67 @@ Deno.serve(async (req) => {
       const mobile = phone.length === 10 ? `91${phone}` : phone;
       const message = `Dear ${student.father_name || "Parent"}, your child ${student.name} was marked absent on ${date}. - ${school.name}`;
 
-      await fetch("https://control.msg91.com/api/v5/flow/", {
-        method: "POST",
-        headers: {
-          "authkey": smsConfig.msg91_auth_key,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sender: smsConfig.msg91_sender_id || "SCHOOL",
-          route: "4",
-          country: "91",
-          sms: [{ message, to: [mobile] }],
-        }),
-      });
-      sent++;
+      // Send SMS
+      try {
+        await fetch("https://control.msg91.com/api/v5/flow/", {
+          method: "POST",
+          headers: {
+            "authkey": smsConfig.msg91_auth_key,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender: smsConfig.msg91_sender_id || "SCHOOL",
+            route: "4",
+            country: "91",
+            sms: [{ message, to: [mobile] }],
+          }),
+        });
+        smsSent++;
+      } catch (e) {
+        console.error("SMS error:", e);
+      }
+
+      // Send WhatsApp if template configured
+      if (smsConfig.msg91_whatsapp_template_id) {
+        try {
+          await fetch("https://control.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/", {
+            method: "POST",
+            headers: {
+              "authkey": smsConfig.msg91_auth_key,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              integrated_number: smsConfig.msg91_sender_id || undefined,
+              content_type: "template",
+              payload: {
+                messaging_product: "whatsapp",
+                type: "template",
+                template: {
+                  name: smsConfig.msg91_whatsapp_template_id,
+                  language: { code: "en", policy: "deterministic" },
+                  namespace: null,
+                  to_and_components: [
+                    {
+                      to: [mobile],
+                      components: {
+                        body_1: { type: "text", value: student.father_name || "Parent" },
+                        body_2: { type: "text", value: student.name },
+                        body_3: { type: "text", value: date },
+                      },
+                    },
+                  ],
+                },
+              },
+            }),
+          });
+          waSent++;
+        } catch (e) {
+          console.error("WhatsApp error:", e);
+        }
+      }
     }
 
-    return new Response(JSON.stringify({ success: true, sent }), {
+    return new Response(JSON.stringify({ success: true, sms_sent: smsSent, whatsapp_sent: waSent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {

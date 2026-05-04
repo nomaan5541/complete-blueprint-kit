@@ -414,6 +414,8 @@ export default function FaceAttendance() {
     }
   };
 
+  const filteredSections = sections.filter((s) => s.class_id === selectedClass);
+
   return (
     <div className="space-y-6">
       <div>

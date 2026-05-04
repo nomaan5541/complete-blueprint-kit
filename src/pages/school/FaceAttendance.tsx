@@ -57,6 +57,8 @@ export default function FaceAttendance() {
   const [scanning, setScanning] = useState(false);
   const [detectedStudents, setDetectedStudents] = useState<DetectedStudent[]>([]);
   const [saving, setSaving] = useState(false);
+  const [bulkEnrolling, setBulkEnrolling] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, ok: 0, fail: 0 });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);

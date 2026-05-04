@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Camera, Loader2, User, Users, Check, ScanFace, StopCircle, Save } from "lucide-react";
+import { Camera, Loader2, User, Users, Check, ScanFace, StopCircle, Save, Sparkles } from "lucide-react";
+import { descriptorToArray } from "@/lib/faceRecognition";
 import { format } from "date-fns";
 import {
   loadFaceModels,

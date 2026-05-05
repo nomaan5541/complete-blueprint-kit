@@ -191,8 +191,8 @@ serve(async (req) => {
             }
           }
         } catch (batchErr: any) {
-          console.error(`Batch error in ${tableName}:`, batchErr.message);
-          errors.push(`${tableName}: ${batchErr.message}`);
+          console.error(`Batch error in ${tableName}:`, batchErr?.message, batchErr);
+          errors.push(`${tableName}: failed to restore one or more rows`);
           recordsSkipped += batch.length;
         }
       }
@@ -219,7 +219,7 @@ serve(async (req) => {
   } catch (error: any) {
     console.error("Restore backup error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Restore failed. Please verify your backup file and try again." }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -55,8 +55,9 @@ serve(async (req) => {
       .select()
       .single();
     if (schoolError) {
+      console.error("School insert failed:", schoolError);
       await supabaseAdmin.auth.admin.deleteUser(adminUserId);
-      throw new Error("Failed to create school: " + schoolError.message);
+      throw new Error("Failed to create school. Please verify the inputs and try again.");
     }
 
     // Assign school_admin role

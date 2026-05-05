@@ -30,11 +30,42 @@ export const TEMPLATES: { id: TemplateId; name: string; description: string; col
   { id: "minimal-corporate", name: "Minimal Corporate", description: "Clean and professional", color: "#374151" },
 ];
 
+const esc = (s: string | null | undefined): string =>
+  (s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+const safeUrl = (u: string | null | undefined): string | null => {
+  if (!u) return null;
+  const t = u.trim();
+  if (/^(https?:|data:image\/(png|jpeg|jpg|gif|webp);base64,|\/)/i.test(t)) return esc(t);
+  return null;
+};
+
 export function generateIDCardHTML(data: IDCardData, template: TemplateId): string {
-  const d = data;
+  // Escape every string field; sanitize URLs to safe schemes only.
+  const raw = data;
+  const d: IDCardData = {
+    studentName: esc(raw.studentName),
+    fatherName: esc(raw.fatherName),
+    admissionNumber: esc(raw.admissionNumber),
+    className: esc(raw.className),
+    sectionName: esc(raw.sectionName),
+    dateOfBirth: esc(raw.dateOfBirth),
+    bloodGroup: esc(raw.bloodGroup),
+    phone: esc(raw.phone),
+    address: esc(raw.address),
+    photoUrl: safeUrl(raw.photoUrl),
+    schoolName: esc(raw.schoolName),
+    schoolAddress: esc(raw.schoolAddress),
+    schoolPhone: esc(raw.schoolPhone),
+    schoolLogoUrl: safeUrl(raw.schoolLogoUrl),
+    signatureUrl: safeUrl(raw.signatureUrl),
+    academicYear: esc(raw.academicYear),
+    penNumber: esc(raw.penNumber),
+  };
+  const initial = (raw.studentName ?? "?").charAt(0);
   const photo = d.photoUrl
     ? `<img src="${d.photoUrl}" style="width:100%;height:100%;object-fit:cover;" />`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#999;background:#f0f0f0;">${d.studentName?.charAt(0) || "?"}</div>`;
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#999;background:#f0f0f0;">${esc(initial)}</div>`;
   const sig = d.signatureUrl
     ? `<img src="${d.signatureUrl}" style="height:35px;margin:0 auto;" />`
     : `<div style="width:80px;border-bottom:1px solid #999;margin:0 auto;"></div>`;

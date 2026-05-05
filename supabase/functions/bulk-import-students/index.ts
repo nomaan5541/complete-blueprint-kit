@@ -195,7 +195,13 @@ serve(async (req) => {
           success++;
         } else {
           failed++;
-          errors.push(`${batch[i].name || "unknown"}: ${r.reason?.message || "unknown error"}`);
+          const raw = r.reason?.message || "";
+          console.error("bulk-import row failed:", batch[i]?.name, raw);
+          let safe = "Could not import this row.";
+          if (/duplicate key|unique constraint/i.test(raw)) safe = "Admission number already exists for this school/year.";
+          else if (/violates foreign key/i.test(raw)) safe = "Referenced class or section not found.";
+          else if (/null value in column/i.test(raw)) safe = "Required field is missing.";
+          errors.push(`${batch[i].name || "unknown"}: ${safe}`);
         }
       }
     }
@@ -204,8 +210,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("bulk-import-students error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("bulk-import-students error:", error?.message, error);
+    return new Response(JSON.stringify({ error: "Bulk import failed. Please check the file format and try again." }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

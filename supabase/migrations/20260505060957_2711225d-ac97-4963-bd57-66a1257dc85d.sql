@@ -1,0 +1,1 @@
+ALTER VIEW public.exam_options_student SET (security_invoker = on);

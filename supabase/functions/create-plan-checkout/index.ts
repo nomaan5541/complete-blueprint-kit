@@ -114,8 +114,8 @@ serve(async (req) => {
         school_id: schoolId,
         duration_months: plan.duration_months.toString(),
       },
-      success_url: `${req.headers.get("origin")}/school/settings?payment=success&plan=${planId}`,
-      cancel_url: `${req.headers.get("origin")}/school/settings?payment=cancelled`,
+      success_url: `${(Deno.env.get("APP_URL") ?? "https://eduprimex.lovable.app").replace(/\/$/, "")}/school/settings?payment=success&plan=${planId}`,
+      cancel_url: `${(Deno.env.get("APP_URL") ?? "https://eduprimex.lovable.app").replace(/\/$/, "")}/school/settings?payment=cancelled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });

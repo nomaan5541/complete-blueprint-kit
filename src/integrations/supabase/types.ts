@@ -2557,11 +2557,22 @@ export type Database = {
     Views: {
       exam_options_student: {
         Row: {
-          created_at: string | null
           id: string | null
           option_image: string | null
           option_text: string | null
           question_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          option_image?: string | null
+          option_text?: string | null
+          question_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          option_image?: string | null
+          option_text?: string | null
+          question_id?: string | null
         }
         Relationships: [
           {

@@ -157,7 +157,10 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("send-notification error:", err);
+    const safe = ["Missing authorization", "Unauthorized", "notification_id required", "Notification not found", "Forbidden"];
+    const msg = safe.includes(err?.message) ? err.message : "An unexpected error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

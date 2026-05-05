@@ -162,7 +162,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("send-absence-sms error:", err);
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

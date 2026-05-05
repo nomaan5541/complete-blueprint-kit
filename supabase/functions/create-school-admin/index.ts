@@ -45,7 +45,10 @@ serve(async (req) => {
       email_confirm: true,
       user_metadata: { full_name: fullName || "" },
     });
-    if (createErr) throw new Error("Failed to create user: " + createErr.message);
+    if (createErr) {
+      console.error("createUser failed:", createErr);
+      throw new Error("Failed to create admin user. Please verify the email is not already in use.");
+    }
     const adminUserId = authData.user.id;
 
     // Create school
@@ -75,8 +78,16 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("create-school-admin error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("create-school-admin error:", error);
+    const safe = [
+      "No authorization header",
+      "Only super admins can create schools",
+      "Email, password, and school name are required",
+      "Failed to create admin user. Please verify the email is not already in use.",
+      "Failed to create school. Please verify the inputs and try again.",
+    ];
+    const msg = safe.includes(error?.message) ? error.message : "An unexpected error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

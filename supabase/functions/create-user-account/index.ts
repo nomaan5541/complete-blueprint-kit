@@ -59,7 +59,10 @@ serve(async (req) => {
       email_confirm: true,
       user_metadata: { full_name: fullName || "" },
     });
-    if (createErr) throw new Error("Failed to create user: " + createErr.message);
+    if (createErr) {
+      console.error("createUser failed:", createErr);
+      throw new Error("Failed to create user account. The email may already be in use.");
+    }
     const userId = authData.user.id;
 
     // Assign role
@@ -114,8 +117,22 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("create-user-account error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("create-user-account error:", error);
+    const safe = [
+      "No authorization header",
+      "Unauthorized",
+      "Only school admins can create user accounts",
+      "Forbidden: you do not own this school",
+      "email, password, role, and schoolId are required",
+      "Role must be teacher or student",
+      "Teacher not found",
+      "Teacher does not belong to this school",
+      "Student not found",
+      "Student does not belong to this school",
+      "Failed to create user account. The email may already be in use.",
+    ];
+    const msg = safe.includes(error?.message) ? error.message : "An unexpected error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: msg }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

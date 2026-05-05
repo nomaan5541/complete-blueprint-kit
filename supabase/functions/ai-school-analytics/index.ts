@@ -199,10 +199,12 @@ Be specific with numbers. Focus on engagement, adoption, and growth metrics.`;
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: any) {
+    console.error("ai-school-analytics error:", error);
+    const isAuth = error?.message === "Unauthorized" || error?.message?.includes("Forbidden");
+    return new Response(JSON.stringify({ error: isAuth ? error.message : "An unexpected error occurred. Please try again." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: error.message === "Unauthorized" || error.message?.includes("Forbidden") ? 403 : 500,
+      status: isAuth ? 403 : 500,
     });
   }
 });

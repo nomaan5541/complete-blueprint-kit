@@ -261,10 +261,19 @@ Instructions:
     return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat error:", error);
+    const safe = new Set([
+      "Missing authorization header",
+      "Unauthorized",
+      "Message cannot be empty",
+      "Message too long (max 2000 characters)",
+      "Rate limit exceeded. Please wait a moment before sending more messages.",
+      "AI service unavailable. Please contact support.",
+    ]);
+    const msg = safe.has(error?.message) ? error.message : "An unexpected error occurred. Please try again.";
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: msg }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

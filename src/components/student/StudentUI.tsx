@@ -83,9 +83,8 @@ export function StudentStatTile({
   tone?: "violet" | "blue" | "green" | "amber" | "rose" | "cyan" | "pink" | "orange";
   onClick?: () => void;
 }) {
-  const Comp = onClick ? "button" : "div";
-  return (
-    <Comp type={onClick ? "button" : undefined} onClick={onClick} className="student-panel p-3 sm:p-4 text-left min-w-0 active:scale-[0.98] transition">
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="student-muted-text text-xs truncate">{label}</p>
@@ -96,7 +95,21 @@ export function StudentStatTile({
           <Icon className="h-5 w-5" />
         </span>
       </div>
-    </Comp>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="student-panel p-3 sm:p-4 text-left min-w-0 active:scale-[0.98] transition">
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className="student-panel p-3 sm:p-4 text-left min-w-0 active:scale-[0.98] transition">
+      {content}
+    </div>
   );
 }
 

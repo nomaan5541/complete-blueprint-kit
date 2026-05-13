@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ReactNode, ElementType } from "react";
 
 export function StudentPanel({
   children,
@@ -7,9 +8,9 @@ export function StudentPanel({
   as: Comp = "div",
   ...props
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-  as?: React.ElementType;
+  as?: ElementType;
   [key: string]: any;
 }) {
   return (

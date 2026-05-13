@@ -111,6 +111,7 @@ const StudentIDCardPage = lazy(() => import("./pages/student/StudentIDCard"));
 const StudentStudyMaterialsPage = lazy(() => import("./pages/student/StudentStudyMaterials"));
 const StudentOnlineExamsPage = lazy(() => import("./pages/student/StudentOnlineExams"));
 const StudentMeetings = lazy(() => import("./pages/student/StudentMeetings"));
+const StudentTransport = lazy(() => import("./pages/student/StudentTransport"));
 const StudentAIChatPage = lazy(() => import("./pages/student/StudentAIChat"));
 const StudentMyClass = lazy(() => import("./pages/student/StudentMyClass"));
 const StudentActivity = lazy(() => import("./pages/student/StudentActivity"));
@@ -259,6 +260,9 @@ function StudentPortalWrapper() {
           <Route path="/materials" element={<StudentStudyMaterialsPage />} />
           <Route path="/id-card" element={<StudentIDCardPage />} />
           <Route path="/meetings" element={<StudentMeetings />} />
+          <Route path="/library" element={<StudentStudyMaterialsPage />} />
+          <Route path="/events" element={<StudentCalendar />} />
+          <Route path="/transport" element={<StudentTransport />} />
           <Route path="*" element={<Navigate to="/student" replace />} />
         </Routes>
       </Suspense>

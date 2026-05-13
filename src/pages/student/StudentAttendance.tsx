@@ -1,76 +1,66 @@
 import { useStudentData } from "@/hooks/useStudentData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { CalendarCheck, CheckCircle2, XCircle, Clock3 } from "lucide-react";
+import { StudentEmpty, StudentPanel, StudentStatTile } from "@/components/student/StudentUI";
 
 export default function StudentAttendancePage() {
   const { student, attendance, loading, presentDays, totalDays, attendanceRate } = useStudentData();
 
-  if (loading) return <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">Loading...</div>;
-  if (!student) return <div className="text-center py-20 text-muted-foreground">No student record found</div>;
+  if (loading) return <div className="pt-4 h-64 rounded-3xl bg-[hsl(var(--student-surface)/0.65)] animate-pulse" />;
+  if (!student) return <StudentEmpty title="No student record found" />;
 
   const absentDays = attendance.filter(a => a.status === "absent").length;
   const leaveDays = attendance.filter(a => a.status === "leave").length;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl sm:text-2xl font-bold">Attendance</h1>
-
-      {/* Summary */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-4 text-center">
-          <p className="text-2xl font-bold text-primary">{attendanceRate}%</p>
-          <p className="text-xs text-muted-foreground">Overall Attendance</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 text-center">
-          <p className="text-2xl font-bold text-emerald-500">{presentDays}</p>
-          <p className="text-xs text-muted-foreground">Present Days</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 text-center">
-          <p className="text-2xl font-bold text-destructive">{absentDays}</p>
-          <p className="text-xs text-muted-foreground">Absent Days</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 text-center">
-          <p className="text-2xl font-bold text-amber-500">{leaveDays}</p>
-          <p className="text-xs text-muted-foreground">Leave Days</p>
-        </CardContent></Card>
+    <div className="space-y-5 pb-6 pt-2 animate-fade-in">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StudentStatTile label="Overall" value={`${attendanceRate}%`} subtitle={`${presentDays}/${totalDays} days`} icon={CalendarCheck} tone="blue" />
+        <StudentStatTile label="Present" value={presentDays} subtitle="Marked present" icon={CheckCircle2} tone="green" />
+        <StudentStatTile label="Absent" value={absentDays} subtitle="Needs attention" icon={XCircle} tone="rose" />
+        <StudentStatTile label="Leave" value={leaveDays} subtitle="Approved leave" icon={Clock3} tone="amber" />
       </div>
 
-      {/* Calendar Grid */}
-      <Card>
-        <CardHeader><CardTitle>Attendance Record (Last 60 Days)</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex gap-2 mb-4">
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500">P = Present</Badge>
-            <Badge variant="outline" className="bg-destructive/10 text-destructive">A = Absent</Badge>
-            <Badge variant="outline" className="bg-amber-500/10 text-amber-500">L = Leave</Badge>
+      <StudentPanel className="p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h2 className="font-extrabold text-lg">Last 60 Days</h2>
+          <div className="flex gap-2 text-[10px] font-bold">
+            <span className="student-chip">P</span><span className="student-chip">A</span><span className="student-chip">L</span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {attendance.map((a) => (
-              <div key={a.id} title={`${format(new Date(a.date), "dd MMM yyyy")}: ${a.status}`}
-                className={`w-8 h-8 rounded-md text-xs flex items-center justify-center font-medium cursor-default ${
-                  a.status === "present" ? "bg-emerald-500/20 text-emerald-600" : 
-                  a.status === "absent" ? "bg-destructive/20 text-destructive" : 
-                  "bg-amber-500/20 text-amber-600"
-                }`}>
-                {a.status[0].toUpperCase()}
-              </div>
-            ))}
-          </div>
-
-          {/* Date-wise list */}
-          {attendance.length > 0 && (
-            <div className="mt-6 space-y-1 max-h-60 overflow-y-auto">
-              {attendance.filter(a => a.status !== "present").map((a) => (
-                <div key={a.id} className="flex items-center justify-between py-1.5 px-2 rounded text-sm border-b">
-                  <span>{format(new Date(a.date), "dd MMM yyyy, EEEE")}</span>
-                  <Badge variant={a.status === "absent" ? "destructive" : "secondary"} className="text-xs capitalize">{a.status}</Badge>
+        </div>
+        {attendance.length === 0 ? (
+          <StudentEmpty title="No attendance marked yet" text="Your daily records will appear here." />
+        ) : (
+          <>
+            <div className="grid grid-cols-7 sm:grid-cols-12 lg:grid-cols-15 gap-2">
+              {attendance.map((a) => (
+                <div
+                  key={a.id}
+                  title={`${format(new Date(a.date), "dd MMM yyyy")}: ${a.status}`}
+                  className={`aspect-square rounded-xl text-xs flex items-center justify-center font-extrabold cursor-default border ${
+                    a.status === "present" ? "bg-[hsl(var(--student-green)/0.16)] text-[hsl(var(--student-green))] border-[hsl(var(--student-green)/0.22)]" :
+                    a.status === "absent" ? "bg-[hsl(var(--student-rose)/0.16)] text-[hsl(var(--student-rose))] border-[hsl(var(--student-rose)/0.22)]" :
+                    "bg-[hsl(var(--student-amber)/0.16)] text-[hsl(var(--student-amber))] border-[hsl(var(--student-amber)/0.22)]"
+                  }`}
+                >
+                  {a.status[0].toUpperCase()}
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {attendance.some(a => a.status !== "present") && (
+              <div className="mt-5 space-y-2 max-h-72 overflow-y-auto pr-1 scrollbar-none">
+                {attendance.filter(a => a.status !== "present").map((a) => (
+                  <div key={a.id} className="student-panel-soft rounded-2xl flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <span className="truncate">{format(new Date(a.date), "dd MMM yyyy, EEEE")}</span>
+                    <span className="student-chip capitalize shrink-0">{a.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </StudentPanel>
     </div>
   );
 }

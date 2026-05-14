@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStudentData } from "@/hooks/useStudentData";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { format, addMonths, subMonths, startOfWeek, addDays, isSameDay, isToday } from "date-fns";
+import { StudentPanel, formatDisplayTime } from "@/components/student/StudentUI";
 
 const INDIAN_HOLIDAYS: Record<string, string> = {
   "01-26": "Republic Day", "08-15": "Independence Day", "10-02": "Gandhi Jayanti",
@@ -11,14 +12,7 @@ const INDIAN_HOLIDAYS: Record<string, string> = {
   "04-14": "Ambedkar Jayanti", "05-01": "Labour Day",
 };
 
-const SLOT_COLORS = [
-  { dot: "bg-violet-400", chip: "bg-violet-500/15 text-violet-300" },
-  { dot: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-300" },
-  { dot: "bg-amber-400", chip: "bg-amber-500/15 text-amber-300" },
-  { dot: "bg-rose-400", chip: "bg-rose-500/15 text-rose-300" },
-  { dot: "bg-cyan-400", chip: "bg-cyan-500/15 text-cyan-300" },
-  { dot: "bg-fuchsia-400", chip: "bg-fuchsia-500/15 text-fuchsia-300" },
-];
+const TONES = ["violet", "blue", "green", "amber", "rose", "cyan", "pink"] as const;
 
 export default function StudentCalendar() {
   const { student, timetable } = useStudentData();
@@ -34,7 +28,6 @@ export default function StudentCalendar() {
     })();
   }, [student]);
 
-  // Week strip — week containing the selected date
   const weekDays = useMemo(() => {
     const start = startOfWeek(selected, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -54,95 +47,83 @@ export default function StudentCalendar() {
   });
 
   return (
-    <div className="space-y-4 pb-6 pt-2 relative">
-      {/* Month header */}
-      <div className="flex items-center justify-center gap-3">
-        <button onClick={() => { const d = subMonths(cursor, 1); setCursor(d); setSelected(d); }} className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center active:scale-90">
+    <div className="space-y-5 pb-6 pt-2 relative animate-fade-in">
+      <StudentPanel className="px-3 py-3 flex items-center justify-between">
+        <button onClick={() => { const d = subMonths(cursor, 1); setCursor(d); setSelected(d); }} className="student-header-button h-9 w-9">
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <p className="font-bold text-base min-w-[140px] text-center">{format(selected, "MMMM yyyy")}</p>
-        <button onClick={() => { const d = addMonths(cursor, 1); setCursor(d); setSelected(d); }} className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center active:scale-90">
+        <p className="font-extrabold text-base text-center">{format(selected, "MMMM yyyy")}</p>
+        <button onClick={() => { const d = addMonths(cursor, 1); setCursor(d); setSelected(d); }} className="student-header-button h-9 w-9">
           <ChevronRight className="h-4 w-4" />
         </button>
-      </div>
+      </StudentPanel>
 
-      {/* Week strip */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1.5">
         {weekDays.map((d) => {
           const sel = isSameDay(d, selected);
           return (
             <button
               key={d.toISOString()}
               onClick={() => setSelected(d)}
-              className={`flex flex-col items-center gap-1.5 py-2 rounded-2xl transition active:scale-95 ${
-                sel ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.4)]" : "bg-white/5 text-slate-300"
+              className={`flex flex-col items-center gap-1.5 py-2.5 rounded-2xl transition active:scale-95 ${
+                sel
+                  ? "bg-[hsl(var(--student-primary))] text-[hsl(var(--student-foreground))] shadow-[0_8px_22px_hsl(var(--student-primary)/0.4)]"
+                  : "bg-[hsl(var(--student-surface)/0.6)] border border-[hsl(var(--student-border)/0.55)] text-[hsl(var(--student-foreground))]"
               }`}
             >
-              <span className={`text-[10px] font-semibold uppercase ${sel ? "text-indigo-100" : "text-slate-400"}`}>
+              <span className={`text-[10px] font-bold uppercase ${sel ? "" : "student-muted-text"}`}>
                 {format(d, "EEE").slice(0, 3)}
               </span>
-              <span className={`text-base font-bold ${isToday(d) && !sel ? "text-indigo-300" : ""}`}>{format(d, "d")}</span>
+              <span className={`text-base font-extrabold ${isToday(d) && !sel ? "text-[hsl(var(--student-primary))]" : ""}`}>{format(d, "d")}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Holiday banner */}
       {holiday && (
-        <div className="bg-rose-500/15 border border-rose-400/30 rounded-2xl p-3 text-center">
-          <p className="text-sm font-bold text-rose-300">🎉 {holiday}</p>
-          <p className="text-[11px] text-slate-300 mt-0.5">National holiday — no school</p>
-        </div>
+        <StudentPanel className="p-4 text-center bg-[hsl(var(--student-rose)/0.12)] border-[hsl(var(--student-rose)/0.32)]">
+          <p className="text-sm font-extrabold text-[hsl(var(--student-rose))]">🎉 {holiday}</p>
+          <p className="text-[11px] student-muted-text mt-0.5">National holiday — no school</p>
+        </StudentPanel>
       )}
 
-      {/* Schedule timeline */}
       <div className="space-y-0">
         {dayClasses.length === 0 && dayEvents.length === 0 && !holiday && (
-          <p className="text-center py-12 text-sm text-slate-400">No classes or events</p>
+          <p className="text-center py-12 text-sm student-muted-text">No classes or events</p>
         )}
 
         {dayClasses.map((c: any, i: number) => {
-          const start = c.timetable_slots?.start_time?.slice(0, 5) || "—";
-          const color = SLOT_COLORS[i % SLOT_COLORS.length];
-          const [hh, mm] = start.split(":");
-          const ampm = Number(hh) >= 12 ? "PM" : "AM";
-          const h12 = ((Number(hh) + 11) % 12) + 1;
+          const tone = TONES[i % TONES.length];
+          const [hour, suffix] = formatDisplayTime(c.timetable_slots?.start_time?.slice(0, 5)).split(" ");
           return (
-            <div key={c.id} className="flex items-stretch gap-3 py-2">
-              <div className="text-center shrink-0 w-16">
-                <p className="text-base font-extrabold tabular-nums">{h12.toString().padStart(2,"0")}:{mm}</p>
-                <p className="text-[10px] text-slate-400">{ampm}</p>
+            <div key={c.id} className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 py-2">
+              <div className={`rounded-2xl py-2 text-center self-start bg-[hsl(var(--student-${tone})/0.16)] text-[hsl(var(--student-${tone}))]`}>
+                <p className="text-base font-extrabold tabular-nums leading-none">{hour}</p>
+                <p className="text-[10px] font-bold mt-1 opacity-90">{suffix}</p>
               </div>
-              <div className={`flex-1 bg-white/5 border border-white/10 rounded-2xl p-3.5 flex items-center gap-3`}>
-                <div className={`h-2 w-2 rounded-full ${color.dot}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm truncate">{c.subjects?.name}</p>
-                  <p className="text-[11px] text-slate-400 truncate">
-                    {c.room ? `Room ${c.room}` : "Classroom"}{c.teachers?.name && ` • ${c.teachers.name}`}
-                  </p>
-                </div>
+              <div className="student-panel-soft rounded-2xl px-4 py-3 min-w-0">
+                <p className="font-bold text-sm truncate">{c.subjects?.name}</p>
+                <p className="text-[11px] student-muted-text truncate mt-0.5">
+                  {c.room ? `Room ${c.room}` : "Classroom"}{c.teachers?.name && ` • ${c.teachers.name}`}
+                </p>
               </div>
             </div>
           );
         })}
 
         {dayEvents.map((ev: any) => (
-          <div key={ev.id} className="flex items-stretch gap-3 py-2">
-            <div className="text-center shrink-0 w-16 text-orange-300 text-xs font-bold">EVENT</div>
-            <div className="flex-1 bg-orange-500/10 border border-orange-400/20 rounded-2xl p-3.5">
-              <p className="font-bold text-sm">{ev.title}</p>
-              {ev.description && <p className="text-[11px] text-slate-300 mt-0.5 line-clamp-2">{ev.description}</p>}
+          <div key={ev.id} className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 py-2">
+            <div className="rounded-2xl py-2 text-center self-start bg-[hsl(var(--student-orange)/0.16)] text-[hsl(var(--student-orange))] flex flex-col items-center justify-center">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-[10px] font-extrabold mt-1">EVENT</span>
             </div>
+            <StudentPanel className="px-4 py-3 min-w-0 bg-[hsl(var(--student-orange)/0.1)] border-[hsl(var(--student-orange)/0.28)]">
+              <p className="font-bold text-sm">{ev.title}</p>
+              {ev.description && <p className="text-[11px] student-muted-text mt-1 line-clamp-2">{ev.description}</p>}
+            </StudentPanel>
           </div>
         ))}
       </div>
-
-      <button
-        aria-label="Add event"
-        className="fixed bottom-28 right-6 h-14 w-14 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 shadow-[0_8px_24px_rgba(99,102,241,0.5)] flex items-center justify-center active:scale-90 transition z-40"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useStudentData } from "@/hooks/useStudentData";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generateIDCardHTML, type TemplateId, type IDCardData } from "@/components/IDCardTemplates";
+import { StudentEmpty, StudentPanel } from "@/components/student/StudentUI";
 
 export default function StudentIDCard() {
   const { student, school, loading } = useStudentData();
@@ -12,8 +12,7 @@ export default function StudentIDCard() {
 
   useEffect(() => {
     if (!school) return;
-    // Fetch school's selected template and signature
-    async function fetchConfig() {
+    (async () => {
       const { data } = await supabase
         .from("schools")
         .select("id_card_template, id_card_signature_url")
@@ -23,12 +22,11 @@ export default function StudentIDCard() {
         if ((data as any).id_card_template) setTemplate((data as any).id_card_template as TemplateId);
         if ((data as any).id_card_signature_url) setSignatureUrl((data as any).id_card_signature_url);
       }
-    }
-    fetchConfig();
+    })();
   }, [school]);
 
-  if (loading) return <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">Loading...</div>;
-  if (!student) return <div className="text-center py-20 text-muted-foreground">No student record found</div>;
+  if (loading) return <div className="pt-4 h-72 rounded-3xl bg-[hsl(var(--student-surface)/0.65)] animate-pulse" />;
+  if (!student) return <StudentEmpty title="No student record found" />;
 
   const cardData: IDCardData = {
     studentName: student.name,
@@ -45,7 +43,7 @@ export default function StudentIDCard() {
     schoolAddress: [school?.address, school?.city, school?.state].filter(Boolean).join(", "),
     schoolPhone: school?.phone || "",
     schoolLogoUrl: school?.logo_url || null,
-    signatureUrl: signatureUrl,
+    signatureUrl,
     academicYear: student.academic_years?.name || "",
     penNumber: (student as any).pen_number || "",
   };
@@ -61,14 +59,16 @@ export default function StudentIDCard() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl sm:text-2xl font-bold">Student ID Card</h1>
-        <Button onClick={handleDownload}><Download className="mr-2 h-4 w-4" /> Download / Print</Button>
-      </div>
-      <div className="flex justify-center">
-        <div dangerouslySetInnerHTML={{ __html: generateIDCardHTML(cardData, template) }} />
-      </div>
+    <div className="space-y-4 pb-6 pt-2 animate-fade-in">
+      <StudentPanel className="p-4 flex flex-col items-center gap-4">
+        <div className="bg-white rounded-2xl p-4 overflow-auto max-w-full" dangerouslySetInnerHTML={{ __html: generateIDCardHTML(cardData, template) }} />
+        <button
+          onClick={handleDownload}
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-[linear-gradient(135deg,hsl(var(--student-primary)),hsl(var(--student-blue)))] font-extrabold text-sm text-[hsl(var(--student-foreground))] shadow-[0_12px_30px_hsl(var(--student-primary)/0.4)] active:scale-[0.99] transition"
+        >
+          <Download className="h-4 w-4" /> Download / Print ID Card
+        </button>
+      </StudentPanel>
     </div>
   );
 }

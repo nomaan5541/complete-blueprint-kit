@@ -5,7 +5,7 @@ import {
   Calendar, ClipboardCheck, FileText, ClipboardList, BarChart3,
   Users, Bell, Wallet, Sparkles, CalendarDays, FolderOpen, IdCard,
   ChevronRight, GraduationCap, Bus, BookOpen, User as UserIcon, Trophy,
-  Monitor, School, BookMarked,
+  Monitor, School, BookMarked, Pencil,
 } from "lucide-react";
 import { StudentIconTile, StudentPanel, StudentStatTile, TimelineRow } from "@/components/student/StudentUI";
 import type { LucideIcon } from "lucide-react";

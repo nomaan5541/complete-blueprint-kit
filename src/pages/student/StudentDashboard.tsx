@@ -118,7 +118,7 @@ export default function StudentDashboard() {
               onClick={() => navigate("/student/more")}
               className="text-sm font-semibold text-[hsl(var(--student-primary))] flex items-center gap-1 active:scale-95"
             >
-              Customise <Sparkles className="h-4 w-4" />
+              Customise <Pencil className="h-3.5 w-3.5" />
             </button>
           </div>
           <div className="grid grid-cols-3 min-[390px]:grid-cols-5 lg:grid-cols-5 xl:grid-cols-5 gap-2.5 sm:gap-3">

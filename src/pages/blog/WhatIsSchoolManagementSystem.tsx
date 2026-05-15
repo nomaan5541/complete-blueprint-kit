@@ -12,6 +12,23 @@ export default function WhatIsSchoolManagementSystem() {
         title="What is a School Management System? | EduPrimeX Blog"
         description="Learn what a school management system is, its key modules (attendance, fees, exams, reports), and why schools, colleges, and coaching institutes need one in 2025."
         keywords="school management system, what is school ERP, school software guide, student information system"
+        canonical="https://eduprimex.lovable.app/blog/what-is-school-management-system"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "What is a School Management System and Why Schools Need It",
+          description:
+            "A complete guide to school management systems (SMS / school ERP) — what they do, key modules, benefits, and how to choose the right platform.",
+          author: { "@type": "Organization", name: "EduPrimeX" },
+          publisher: {
+            "@type": "Organization",
+            name: "EduPrimeX",
+            logo: { "@type": "ImageObject", url: "https://eduprimex.lovable.app/pwa-512x512.png" },
+          },
+          datePublished: "2025-01-15",
+          dateModified: "2025-01-15",
+          mainEntityOfPage: "https://eduprimex.lovable.app/blog/what-is-school-management-system",
+        }}
       />
 
       <h2>Introduction</h2>

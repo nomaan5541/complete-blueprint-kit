@@ -2,8 +2,10 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /school
+Disallow: /schools
 Disallow: /teacher
 Disallow: /student
+Disallow: /ai-analytics
 Disallow: /login
 Disallow: /reset-password
 

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { GraduationCap, Loader2, School, UserCheck, Crown, ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import SEO from "@/components/SEO";
 
 const roleConfig: Record<string, { icon: any; title: string; subtitle: string; gradient: string }> = {
   school_admin: {
@@ -133,6 +134,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
+      <SEO
+        title={`${config.title} | EduPrimeX`}
+        description={`${config.subtitle} — sign in to your EduPrimeX ${role.replace("_", " ")} account.`}
+        canonical={`https://eduprimex.lovable.app/login${role ? `?role=${role}` : ""}`}
+      />
       <div className="animated-bg" />
       {role !== "student" && role !== "teacher" && (
         <div className="absolute top-4 left-4">

@@ -1,0 +1,25 @@
+# EduPrimeX
+
+> Multi-tenant school management ERP for schools, colleges, and coaching institutes — manage students, staff, attendance, fees, exams, timetables, and analytics from a single dashboard.
+
+EduPrimeX is a SaaS platform built for Indian schools. It supports multiple schools on one dashboard, role-based portals for admins, teachers, and students, AI-powered report cards and analytics, WhatsApp/SMS automation, online and offline exams, fee collection with receipts, face-recognition attendance, and a 30-day free trial.
+
+## Pages
+
+- [Home](/): Product overview, features, and benefits of the EduPrimeX school management platform.
+- [Pricing](/pricing): Subscription plans (Free Trial, Starter, Professional, Ultimate) with student and teacher limits.
+- [About](/about): Company background, mission, and the team behind EduPrimeX.
+- [Contact](/contact): Sales and support contact details, demo request form.
+- [Blog](/blog): Articles on school management, ERP best practices, and education technology.
+
+## Blog
+
+- [What is a School Management System](/blog/what-is-school-management-system): Guide to school ERP modules, benefits, and how to choose one.
+- [Manage Multiple Schools with ERP](/blog/manage-multiple-schools-with-erp): Architecture, workflows, and KPIs for multi-school management at scale.
+
+## Optional
+
+- [Privacy Policy](/privacy): How EduPrimeX collects, stores, and protects school and student data.
+- [Terms & Conditions](/terms): Terms of service for using the EduPrimeX platform.
+- [Refund Policy](/refund-policy): Subscription cancellation and refund rules.
+- [Disclaimer](/disclaimer): Disclaimers about platform availability and AI-generated content.

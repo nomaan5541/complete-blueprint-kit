@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 
 interface PlanData {
   id: string;
@@ -69,6 +70,12 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Pricing Plans | EduPrimeX School ERP"
+        description="Compare EduPrimeX subscription plans — Free Trial, Starter, Professional, and Ultimate. Transparent pricing for single and multi-school setups."
+        canonical="https://eduprimex.lovable.app/pricing"
+        keywords="school ERP pricing, school management system price, EduPrimeX plans"
+      />
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground">

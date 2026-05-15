@@ -12,6 +12,23 @@ export default function ManageMultipleSchoolsWithERP() {
         title="How to Manage Multiple Schools with ERP Software | EduPrimeX"
         description="Step-by-step guide to managing multiple schools efficiently with multi-tenant ERP software. Architecture, workflows, dashboards, and best practices."
         keywords="multiple school management, multi-school ERP, school chain software, school group management"
+        canonical="https://eduprimex.lovable.app/blog/manage-multiple-schools-with-erp"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "How to Manage Multiple Schools Efficiently with ERP Software",
+          description:
+            "A practical playbook for running 2, 5, or 50+ schools from a single ERP — covering architecture, governance, KPIs, and tooling.",
+          author: { "@type": "Organization", name: "EduPrimeX" },
+          publisher: {
+            "@type": "Organization",
+            name: "EduPrimeX",
+            logo: { "@type": "ImageObject", url: "https://eduprimex.lovable.app/pwa-512x512.png" },
+          },
+          datePublished: "2025-01-20",
+          dateModified: "2025-01-20",
+          mainEntityOfPage: "https://eduprimex.lovable.app/blog/manage-multiple-schools-with-erp",
+        }}
       />
 
       <h2>The challenge of running multiple schools</h2>

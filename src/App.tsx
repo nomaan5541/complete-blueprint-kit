@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { useSchool } from "@/hooks/useSchool";
 import OfflineBanner from "@/components/OfflineBanner";
+import { RouteFallback } from "@/components/loaders/PremiumLoader";
+import { RouteProgress } from "@/components/loaders/RouteProgress";
 
 // Layouts - keep eager since they wrap routes
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -122,9 +124,7 @@ const StudentMore = lazy(() => import("./pages/student/StudentMore"));
 
 const queryClient = new QueryClient();
 
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>
-);
+const LoadingFallback = () => <RouteFallback />;
 
 function SuperAdminRoutes() {
   return (
@@ -359,6 +359,7 @@ const App = () => {
         <OfflineBanner />
         <BrowserRouter>
           <AuthProvider>
+            <RouteProgress />
             <AppRoutes />
           </AuthProvider>
         </BrowserRouter>

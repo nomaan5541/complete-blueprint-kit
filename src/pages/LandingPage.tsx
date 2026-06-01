@@ -22,6 +22,8 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
 import { PLAN_FEATURE_LABELS } from "@/hooks/useSubscriptionPlan";
+import { CinematicHero } from "@/components/landing/CinematicHero";
+import { ScrollStory } from "@/components/landing/ScrollStory";
 
 const features = [
   { icon: School, title: "Multi-School Management", desc: "Manage unlimited schools from a single dashboard with complete isolation." },
@@ -277,61 +279,29 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative py-20 sm:py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium animate-fade-in hover-scale cursor-default">
-            <Zap className="h-3.5 w-3.5 mr-1.5" /> #1 School Management Platform in India
-          </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground max-w-5xl mx-auto leading-[1.08]">
-            Complete School Management
-            <span className="block mt-2 h-[1.2em] relative overflow-hidden">
-              <span
-                key={heroTextIndex}
-                className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent shimmer-text animate-fade-in"
-                style={{ backgroundSize: "200% auto" }}
-              >
-                {heroTexts[heroTextIndex]}
-              </span>
-            </span>
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in">
-            Streamline admissions, attendance, fees, exams & more. One powerful platform for schools, teachers & students.
-            <span className="block mt-2 text-base font-medium text-foreground">Join 100+ schools already using EDUPRIMEX 🚀</span>
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
-            <Button size="lg" className="h-14 px-10 text-base shadow-xl glow-primary hover:scale-105 transition-all duration-300" onClick={() => { setSelectedPlan(null); setRequestOpen(true); }}>
-              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="h-14 px-10 text-base hover:scale-105 transition-all duration-300 group" asChild>
-              <a href="#features">
-                <Play className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
-                See How It Works
-              </a>
-            </Button>
-          </div>
+      {/* Cinematic Hero */}
+      <CinematicHero onPrimary={() => { setSelectedPlan(null); setRequestOpen(true); }} />
 
-          {/* Trust line */}
-          <div className="mt-8 flex items-center justify-center gap-4 text-sm text-muted-foreground animate-fade-in">
+      {/* Trust + animated stats strip */}
+      <section className="relative py-12 scroll-reveal">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground mb-8">
             <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-emerald-500" /> No credit card needed</span>
-            <span className="hidden sm:flex items-center gap-1"><CheckCircle className="h-4 w-4 text-emerald-500" /> Free setup & training</span>
+            <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-emerald-500" /> Free setup & training</span>
             <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-emerald-500" /> Cancel anytime</span>
           </div>
-
-          {/* Animated Stats */}
-          <div className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <AnimatedStat value={100} suffix="+" label="Schools Onboarded" icon={School} />
             <AnimatedStat value={50000} suffix="+" label="Students Managed" icon={Users} />
             <AnimatedStat value={5000} suffix="+" label="Active Teachers" icon={UserCheck} />
             <AnimatedStat value={99} suffix=".9%" label="Platform Uptime" icon={CheckCircle} />
           </div>
-
-          {/* Scroll hint */}
-          <div className="mt-12 animate-bounce">
-            <ChevronDown className="h-6 w-6 mx-auto text-muted-foreground" />
-          </div>
         </div>
       </section>
+
+      {/* Cinematic scroll story — Admin / Teacher / Student */}
+      <ScrollStory />
+
 
       {/* Data Security & Privacy Trust Section */}
       <section className="py-16 scroll-reveal border-y border-border/30 bg-muted/20">

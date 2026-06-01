@@ -49,11 +49,13 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-5 pb-6 pt-2">
-        <div className="h-28 rounded-3xl bg-[hsl(var(--student-surface)/0.65)] animate-pulse" />
-        <div className="h-36 rounded-3xl bg-[hsl(var(--student-surface)/0.65)] animate-pulse" />
-        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3">
-          {Array.from({ length: 15 }).map((_, i) => <div key={i} className="aspect-square rounded-3xl bg-[hsl(var(--student-surface)/0.65)] animate-pulse" />)}
+      <div className="space-y-5 pb-6 pt-2 lv-blur-in">
+        <div className="h-28 rounded-3xl lv-shimmer" />
+        <div className="h-36 rounded-3xl lv-shimmer" />
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3 lv-stagger">
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} className="aspect-square rounded-3xl lv-shimmer" />
+          ))}
         </div>
       </div>
     );

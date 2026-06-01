@@ -334,4 +334,90 @@
       animation: none !important;
     }
   }
+
+  /* ── Cinematic Landing — aurora, grid, parallax, scroll story ── */
+  @keyframes lv-aurora {
+    0%   { transform: translate3d(-8%, -6%, 0) rotate(0deg); }
+    50%  { transform: translate3d(6%, 4%, 0) rotate(180deg); }
+    100% { transform: translate3d(-8%, -6%, 0) rotate(360deg); }
+  }
+  @keyframes lv-grid-pan {
+    0%   { background-position: 0 0, 0 0; }
+    100% { background-position: 80px 80px, 80px 80px; }
+  }
+  @keyframes lv-orbit {
+    0%   { transform: rotate(0deg) translateX(140px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(140px) rotate(-360deg); }
+  }
+  @keyframes lv-tilt {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-10px) rotate(2deg); }
+  }
+  @keyframes lv-headline-rise {
+    0%   { opacity: 0; transform: translateY(28px); filter: blur(14px); letter-spacing: .04em; }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); letter-spacing: 0; }
+  }
+  @keyframes lv-cta-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 18px 60px -10px hsl(var(--primary) / 0.6); }
+    50%      { box-shadow: 0 0 0 18px hsl(var(--primary) / 0), 0 28px 80px -10px hsl(var(--primary) / 0.75); }
+  }
+
+  .cine-aurora {
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(40% 35% at 25% 30%, hsl(var(--primary) / 0.55), transparent 70%),
+      radial-gradient(35% 30% at 75% 35%, hsl(var(--accent) / 0.45), transparent 70%),
+      radial-gradient(45% 40% at 50% 80%, hsl(var(--secondary) / 0.45), transparent 70%);
+    filter: blur(60px);
+    animation: lv-aurora 22s ease-in-out infinite;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .cine-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    animation: lv-grid-pan 18s linear infinite;
+    pointer-events: none;
+  }
+  .cine-headline { animation: lv-headline-rise .9s cubic-bezier(.2,.8,.2,1) both; }
+  .cine-headline-2 { animation: lv-headline-rise .9s cubic-bezier(.2,.8,.2,1) .12s both; }
+  .cine-sub { animation: lv-headline-rise .9s cubic-bezier(.2,.8,.2,1) .24s both; }
+  .cine-cta { animation: lv-headline-rise .9s cubic-bezier(.2,.8,.2,1) .36s both; }
+  .cine-cta-glow { animation: lv-cta-pulse 2.6s ease-in-out infinite; }
+
+  .cine-orbit { animation: lv-orbit 18s linear infinite; transform-origin: center; }
+  .cine-orbit.slow { animation-duration: 28s; }
+  .cine-orbit.reverse { animation-direction: reverse; }
+  .cine-tilt { animation: lv-tilt 6s ease-in-out infinite; }
+
+  .cine-card {
+    background: linear-gradient(135deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.55));
+    backdrop-filter: blur(18px);
+    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: 0 30px 80px -20px hsl(var(--primary) / 0.25);
+  }
+
+  .cine-text-gradient {
+    background: linear-gradient(120deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--secondary)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% auto;
+    animation: lv-shimmer 6s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cine-aurora, .cine-grid, .cine-orbit, .cine-tilt,
+    .cine-headline, .cine-headline-2, .cine-sub, .cine-cta,
+    .cine-cta-glow, .cine-text-gradient {
+      animation: none !important;
+    }
+  }
 }

@@ -22,6 +22,8 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
 import { PLAN_FEATURE_LABELS } from "@/hooks/useSubscriptionPlan";
+import { CinematicHero } from "@/components/landing/CinematicHero";
+import { ScrollStory } from "@/components/landing/ScrollStory";
 
 const features = [
   { icon: School, title: "Multi-School Management", desc: "Manage unlimited schools from a single dashboard with complete isolation." },

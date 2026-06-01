@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SkeletonTableRows } from "@/components/loaders/PremiumLoader";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
@@ -324,7 +325,7 @@ export default function Students() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+              <SkeletonTableRows rows={6} colSpan={8} />
             ) : filteredStudents.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No students found</TableCell></TableRow>
             ) : (

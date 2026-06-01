@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SkeletonTableRows } from "@/components/loaders/PremiumLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
 import { Button } from "@/components/ui/button";
@@ -201,7 +202,7 @@ export default function Teachers() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+              <SkeletonTableRows rows={6} colSpan={8} />
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No teachers found</TableCell></TableRow>
             ) : (

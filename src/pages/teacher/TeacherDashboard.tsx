@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, BookOpen, ClipboardCheck, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { SkeletonDashboard } from "@/components/loaders/PremiumLoader";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export default function TeacherDashboard() {
     fetch();
   }, [user]);
 
-  if (loading) return <div className="p-10 text-center text-muted-foreground">Loading...</div>;
+  if (loading) return <SkeletonDashboard />;
   if (!teacher) return <div className="p-10 text-center text-muted-foreground">No teacher profile found for this account.</div>;
 
   const uniqueClasses = new Set(assignments.map(a => a.class_id)).size;

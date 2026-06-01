@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SkeletonTableRows } from "@/components/loaders/PremiumLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/hooks/useSchool";
 import { useAcademicYear } from "@/hooks/useAcademicYear";
@@ -169,7 +170,7 @@ export default function FeeManagement() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <SkeletonTableRows rows={6} colSpan={7} />
                 ) : payments.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No payments yet</TableCell></TableRow>
                 ) : (

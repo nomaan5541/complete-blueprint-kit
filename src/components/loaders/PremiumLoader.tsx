@@ -32,6 +32,55 @@ export function SkeletonCard({ className }: { className?: string }) {
   );
 }
 
+/** Shimmer rows for table loading states. Renders a single <tr> with a colSpan cell containing N shimmer bars. */
+export function SkeletonTableRows({ rows = 5, colSpan }: { rows?: number; colSpan: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <tr key={i} className="border-b border-border/40">
+          <td colSpan={colSpan} className="py-3 px-4">
+            <Skeleton className="h-4 w-full" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
+/** Generic stats grid skeleton (4 KPI cards). */
+export function SkeletonStats({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="rounded-xl border border-border/40 bg-card/40 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-8 w-8 rounded-lg" />
+          </div>
+          <Skeleton className="h-7 w-20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Dashboard skeleton: header + stats grid + 2 large panels. */
+export function SkeletonDashboard() {
+  return (
+    <div className="space-y-6 lv-blur-in">
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-3 w-40" />
+      </div>
+      <SkeletonStats count={4} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SkeletonCard className="h-64" />
+        <SkeletonCard className="h-64" />
+      </div>
+    </div>
+  );
+}
+
 /* --------------------------- TopProgressBar -------------------------- */
 /** Indeterminate easing bar shown during route/Suspense changes. */
 export function TopProgressBar({ active }: { active: boolean }) {

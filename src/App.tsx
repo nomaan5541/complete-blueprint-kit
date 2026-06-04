@@ -35,6 +35,20 @@ const ContactMessages = lazy(() => import("./pages/ContactMessages"));
 const Blog = lazy(() => import("./pages/blog/Blog"));
 const BlogWhatIsSMS = lazy(() => import("./pages/blog/WhatIsSchoolManagementSystem"));
 const BlogMultiSchoolERP = lazy(() => import("./pages/blog/ManageMultipleSchoolsWithERP"));
+const BlogBestIndia = lazy(() => import("./pages/blog/BestSchoolManagementSoftwareIndia"));
+const BlogFeesOnline = lazy(() => import("./pages/blog/HowToCollectSchoolFeesOnline"));
+const BlogAttendance = lazy(() => import("./pages/blog/SchoolAttendanceManagementSoftware"));
+const BlogOnlineExam = lazy(() => import("./pages/blog/OnlineExamSoftwareForSchools"));
+const BlogReportCard = lazy(() => import("./pages/blog/ReportCardSoftwareForSchools"));
+const BlogParentApp = lazy(() => import("./pages/blog/ParentTeacherCommunicationApp"));
+const BlogPricing = lazy(() => import("./pages/blog/SchoolErpPricingGuide"));
+const BlogCbseState = lazy(() => import("./pages/blog/CbseVsStateBoardSchoolSoftware"));
+const BlogChecklist = lazy(() => import("./pages/blog/SchoolManagementSoftwareFeaturesChecklist"));
+const BlogDigitize = lazy(() => import("./pages/blog/HowToDigitizeYourSchool"));
+const BlogTimetable = lazy(() => import("./pages/blog/TimetableManagementSoftware"));
+const BlogSisVsErp = lazy(() => import("./pages/blog/StudentInformationSystemVsSchoolErp"));
+const BlogWhatsapp = lazy(() => import("./pages/blog/WhatsappSmsNotificationsForSchools"));
+const BlogSecurity = lazy(() => import("./pages/blog/SchoolDataSecurityBestPractices"));
 
 // Super Admin pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -331,6 +345,20 @@ function AppRoutes() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/what-is-school-management-system" element={<BlogWhatIsSMS />} />
         <Route path="/blog/manage-multiple-schools-with-erp" element={<BlogMultiSchoolERP />} />
+        <Route path="/blog/best-school-management-software-india" element={<BlogBestIndia />} />
+        <Route path="/blog/how-to-collect-school-fees-online" element={<BlogFeesOnline />} />
+        <Route path="/blog/school-attendance-management-software" element={<BlogAttendance />} />
+        <Route path="/blog/online-exam-software-for-schools" element={<BlogOnlineExam />} />
+        <Route path="/blog/report-card-software-for-schools" element={<BlogReportCard />} />
+        <Route path="/blog/parent-teacher-communication-app" element={<BlogParentApp />} />
+        <Route path="/blog/school-erp-pricing-guide" element={<BlogPricing />} />
+        <Route path="/blog/cbse-vs-state-board-school-software" element={<BlogCbseState />} />
+        <Route path="/blog/school-management-software-features-checklist" element={<BlogChecklist />} />
+        <Route path="/blog/how-to-digitize-your-school" element={<BlogDigitize />} />
+        <Route path="/blog/timetable-management-software" element={<BlogTimetable />} />
+        <Route path="/blog/student-information-system-vs-school-erp" element={<BlogSisVsErp />} />
+        <Route path="/blog/whatsapp-sms-notifications-for-schools" element={<BlogWhatsapp />} />
+        <Route path="/blog/school-data-security-best-practices" element={<BlogSecurity />} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>
     </Suspense>

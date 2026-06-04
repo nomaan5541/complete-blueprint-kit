@@ -93,6 +93,19 @@ export default function PricingPage() {
           Flexible pricing designed for schools of all sizes. Start free and scale as you grow.
         </p>
 
+        <div className="mb-16">
+          <PlanCalculator
+            plans={plans}
+            onChoosePlan={() => navigate("/login?role=school_admin")}
+            onRequestCustom={() => setCustomOpen(true)}
+          />
+        </div>
+
+        <h2 className="text-3xl font-bold mb-3">All Plans</h2>
+        <p className="text-muted-foreground mb-10">Or pick a plan directly below.</p>
+
+
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const Icon = planIcons[plan.name] || Star;

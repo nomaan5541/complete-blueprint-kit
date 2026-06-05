@@ -2,7 +2,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar,
   Layers, Settings, LogOut, School, IndianRupee, ClipboardCheck,
   FileText, ArrowUpRight, Clock, Bell, BarChart3, FolderOpen,
-  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive, CreditCard,
+  CalendarDays, Shield, Lock, Crown, Video, HardDriveUpload, ScanFace, Sparkles, Archive, CreditCard, Cloud,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -47,6 +47,7 @@ const navItems = [
   { title: "Meetings", url: "/school/meetings", icon: Video },
   { title: "Audit Logs", url: "/school/audit-logs", icon: Shield },
   { title: "Restore Backup", url: "/school/backup-restore", icon: HardDriveUpload },
+  { title: "Google Workspace", url: "/school/workspace", icon: Cloud },
   { title: "Settings", url: "/school/settings", icon: Settings },
 ];
 

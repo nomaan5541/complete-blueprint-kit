@@ -97,6 +97,7 @@ const FaceAttendance = lazy(() => import("./pages/school/FaceAttendance"));
 const AIReportCard = lazy(() => import("./pages/school/AIReportCard"));
 const StudentArchive = lazy(() => import("./pages/school/StudentArchive"));
 const BulkIDCardGenerator = lazy(() => import("./pages/school/BulkIDCardGenerator"));
+const WorkspaceHub = lazy(() => import("./pages/school/WorkspaceHub"));
 
 // Teacher pages
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard"));
@@ -213,6 +214,7 @@ function SchoolAdminRoutesWrapper() {
           <Route path="/meetings" element={<Meetings />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
           <Route path="/backup-restore" element={<BackupRestore />} />
+          <Route path="/workspace" element={<WorkspaceHub />} />
           <Route path="/settings" element={<SchoolSettings />} />
           <Route path="/setup" element={<SetupWizard />} />
           <Route path="*" element={<NotFound />} />
